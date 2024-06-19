@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.todoc.web.dao.UntactDao">
+	<resultMap type="com.todoc.web.dto.Untact" id="untactResultMap">
+		<result column ="CLINIC_INSTINUM" property="clinicInstinum"/>
+        <result column="CLINIC_REGNUM" property="clinicRegnum"/>
+        <result column="CLINIC_PHONE" property="clinicPhone"/>
+        <result column="CLINIC_NAME" property="clinicName"/>
+        <result column="CLINIC_SUBJECT" property="clinicSubject"/>
+        <result column="CLINIC_SYMPTOM" property="clinicSymptom"/>
+        <result column="USER_EMAIL" property="userEmail"/>
+        <result column="USER_PWD" property="userPwd"/>
+        <result column="CLINIC_DAY" property="clinicDay"/>
+        <result column="CLINIC_TIME" property="clinicTime"/>
+        <result column="CLINIC_DAYOFF" property="clinicDayoff"/>
+        <result column="CLINIC_ZIPCODE" property="clinicZipcode"/>
+        <result column="CLINIC_ADDR" property="clinicAddr"/>
+        <result column="CLINIC_NON_BENEFIT" property="clinicNonBenefit"/>
+        <result column="CLINIC_CONTACT_FLAG" property="clinicContactFlag"/>
+        <result column="CLINIC_DETAIL" property="clinicDetail"/>
+        <result column="CLINIC_STATUS" property="clinicStatus"/>
+        <result column="CLINIC_DOCTOR" property="clinicDoctor"/>
+        <result column="CLINIC_CAREER" property="clinicCareer"/>
+        <result column="CLINIC_BREAK" property="clinicBreak"/>
+        <result column="CLINIC_NIGHT" property="clinicNight"/>
+		<!-- 첨부파일 -->
+        <result column="FILE_SEQ" property="fileSeq"/>
+        <result column="FILE_ORG_NAME" property="fileOrgName"/>
+        <result column="FILE_NAME" property="fileName"/>
+        <result column="FILE_EXT" property="fileExt"/>
+        <result column="FILE_SIZE" property="fileSize"/>
+        <result column="FILE_REGDATE" property="fileRegDate"/>
+        <!-- 리뷰 -->
+        <result column="REVIEW_SEQ" property="reviewSeq"/>
+        <result column="REVIEW_TITLE" property="reviewTitle"/>
+        <result column="REVIEW_CONTENT" property="reviewContent"/>
+        <result column="REVIEW_REGDATE" property="reviewRegdate"/>
+        <result column="REVIEW_GRADE" property="reviewGrade"/>
+        <result column="USER_NAME" property="userName"/>
+        <!-- 예약 -->
+        <result column="RESERVATION_SEQ" property="reservationSeq"/>
+        <result column="USER_IDENTITY" property="userIdentity"/>
+        <result column="RESERVATION_DATE" property="reservationDate"/>
+        
+	</resultMap>
+	
+	<resultMap type="com.todoc.web.dto.Reserve" id="reserveResultMap">
+        <result column="RESERVATION_SEQ" property="reservationSeq"/>
+        <result column="USER_EMAIL" property="userEmail"/>
+        <result column="CLINIC_INSTINUM" property="clinicInstinum"/>
+        <result column="RESERVATION_DATE" property="reservationDate"/>
+        <result column="RESERVATION_TIME" property="reservationTime"/>
+        <result column="RESERVATION_SYMPTOM" property="reservationSymptom"/>
+        <result column="RESERVATION_FLAG" property="reservationFlag"/>
+        <result column="REGDATE" property="regDate"/>
+        <result column="CLINIC_NAME" property="clinicName"/>
+        <result column="RESERVATION_STATUS" property="reservationStatus"/>
+	</resultMap>
+	
+	<resultMap type="com.todoc.web.dto.Presc" id="prescResultMap">
+        <result column="RESERVATION_SEQ" property="reservationSeq"/>
+        <result column="PRESCRIPTION_SEQ" property="prescriptionSeq"/>
+        <result column="PRESCRIPTION_DATE" property="prescriptionDate"/>
+        <result column="USER_EMAIL" property="userEmail"/>
+        <result column="CLINIC_INSTINUM" property="clinicInstinum"/>
+        <result column="MEDICINE_NAME" property="medi"/>
+        <result column="MEDICINE_DOSE" property="dose"/>
+        <result column="MEDICINE_ORDER" property="order"/>
+        <result column="USER_IDENTITY" property="userIdentity"/>
+        <result column="MEDICINE_SINGLEDOSE" property="medicineSingleDose"/>
+        <result column="MEDICINE_DAILYDOSE" property="medicineDailyDose"/>
+        <result column="CLINIC_NAME" property="clinicName"/>
+        <result column="CLINIC_PHONE" property="clinicPhone"/>
+        <result column="CLINIC_DOCTOR" property="clinicDoctor"/>
+	</resultMap>
+	<!-- 비대면 병원 리스트 -->
+	<select id="subjectList" parameterType="com.todoc.web.dto.Untact" resultMap="untactResultMap">
+		SELECT * FROM  (
+			SELECT 
+			<choose>
+        		<when test="sortType == 'grade'">
+           			ROW_NUMBER() OVER(ORDER BY CASE WHEN C.REVIEW_GRADE IS NULL THEN 1 ELSE 0 END, C.REVIEW_GRADE DESC) AS RNUM,	
+				</when>
+        		<when test="sortType == 'review'">
+           			ROW_NUMBER() OVER(ORDER BY CASE WHEN C.REVIEW_SEQ IS NULL THEN 1 ELSE 0 END, C.REVIEW_SEQ DESC) AS RNUM,
+				</when>
+				<otherwise>
+           			ROW_NUMBER() OVER(ORDER BY A.CLINIC_INSTINUM DESC) AS RNUM,
+				</otherwise>
+			</choose>
+			ROUND(C.REVIEW_GRADE,1) AS REVIEW_GRADE, C.REVIEW_SEQ, A.CLINIC_INSTINUM, A.CLINIC_DOCTOR, A.CLINIC_NAME, A.CLINIC_TIME, A.CLINIC_STATUS, A.CLINIC_NIGHT, B.FILE_ORG_NAME
+			FROM TD_CLINIC A
+			LEFT OUTER JOIN TD_CLINIC_FILE B ON A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+			LEFT OUTER JOIN (SELECT CLINIC_INSTINUM, AVG(REVIEW_GRADE) AS REVIEW_GRADE, COUNT(REVIEW_CONTENT) AS REVIEW_SEQ FROM TD_REVIEW GROUP BY CLINIC_INSTINUM) C ON A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+			WHERE 1=1
+			<if test="clinicSubject != null and clinicSubject != ''">     
+			AND A.CLINIC_SUBJECT LIKE '%' || #{clinicSubject} || '%'   
+			</if>
+			<if test="clinicSymptom != null and clinicSymptom != ''">     
+			AND A.CLINIC_SYMPTOM LIKE '%' || #{clinicSymptom} || '%'
+			</if>
+			<if test="searchWord != null and searchWord != ''">
+			AND (A.CLINIC_SUBJECT LIKE '%' || #{searchWord} ||'%' OR A.CLINIC_SYMPTOM LIKE '%' || #{searchWord} ||'%' OR A.CLINIC_NAME LIKE '%' || #{searchWord} ||'%')
+			</if>
+			<if test="location != null and location != ''">
+			AND CLINIC_ADDR LIKE '%' || #{location} || '%' 
+			</if>
+			AND CLINIC_CONTACT_FLAG = 'U'
+		) Z
+		WHERE RNUM <![CDATA[>=]]> #{startRow} 
+		  	AND RNUM <![CDATA[<=]]> #{endRow} 
+	</select>
+  
+	<!-- 비대면 병원 뷰 -->
+  	<select id="selectClinicDetail" parameterType="com.todoc.web.dto.Untact" resultMap="untactResultMap">
+        SELECT
+            A.CLINIC_INSTINUM AS CLINIC_INSTINUM,
+            NVL(A.CLINIC_DOCTOR, '') CLINIC_DOCTOR,
+            NVL(A.CLINIC_NAME, '') CLINIC_NAME,
+            NVL(A.CLINIC_SUBJECT, '') CLINIC_SUBJECT,
+            NVL(A.CLINIC_TIME, '') CLINIC_TIME,
+            NVL(A.CLINIC_DAYOFF, '') CLINIC_DAYOFF,
+            NVL(A.CLINIC_ZIPCODE, '') CLINIC_ZIPCODE,
+            NVL(A.CLINIC_ADDR, '') CLINIC_ADDR,
+            NVL(A.CLINIC_DETAIL, '') CLINIC_DETAIL,
+            NVL(A.CLINIC_CAREER, '') CLINIC_CAREER,
+            NVL(A.CLINIC_BREAK, '') CLINIC_BREAK,
+            NVL(B.FILE_ORG_NAME, '') FILE_ORG_NAME
+        FROM TD_CLINIC A
+		LEFT OUTER JOIN TD_CLINIC_FILE B ON A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+        WHERE A.CLINIC_INSTINUM = #{clinicInstinum}
+	</select>
+	
+	<!-- 비대면 병원 뷰 - 리뷰 -->
+	<select id="reviewList" parameterType="com.todoc.web.dto.Untact" resultMap="untactResultMap">
+        SELECT
+        	USER_EMAIL, REVIEW_TITLE, REVIEW_CONTENT, TO_CHAR(REVIEW_REGDATE, 'YYYY-MM-DD') AS REVIEW_REGDATE, REVIEW_GRADE, USER_NAME, CLINIC_INSTINUM   
+		FROM TD_REVIEW 
+		WHERE CLINIC_INSTINUM = #{clinicInstinum}
+		AND REVIEW_DEL_FLAG = 'N'
+		ORDER BY REVIEW_REGDATE DESC
+	</select>
+
+	<!-- 페이징 -->
+	<select id="subjectListCount" parameterType="com.todoc.web.dto.Untact" resultType="int">
+		SELECT COUNT(*) FROM  (
+				SELECT 
+				<choose>
+	        		<when test="sortType == 'grade'">
+	           			ROW_NUMBER() OVER(ORDER BY CASE WHEN C.REVIEW_GRADE IS NULL THEN 1 ELSE 0 END, C.REVIEW_GRADE DESC) AS RNUM,	
+					</when>
+	        		<when test="sortType == 'review'">
+	           			ROW_NUMBER() OVER(ORDER BY CASE WHEN C.REVIEW_SEQ IS NULL THEN 1 ELSE 0 END, C.REVIEW_SEQ DESC) AS RNUM,
+					</when>
+					<otherwise>
+				        <if test="sortType == null">
+		           			ROW_NUMBER() OVER(ORDER BY A.CLINIC_INSTINUM DESC) AS RNUM,
+				        </if>
+					</otherwise>
+				</choose>
+				ROUND(C.REVIEW_GRADE,1) AS REVIEW_GRADE, C.REVIEW_SEQ, A.CLINIC_INSTINUM, A.CLINIC_DOCTOR, A.CLINIC_NAME, A.CLINIC_TIME, A.CLINIC_STATUS, A.CLINIC_NIGHT, B.FILE_ORG_NAME
+			FROM TD_CLINIC A
+			LEFT OUTER JOIN TD_CLINIC_FILE B ON A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+			LEFT OUTER JOIN (SELECT CLINIC_INSTINUM, AVG(REVIEW_GRADE) AS REVIEW_GRADE, COUNT(review_content) AS REVIEW_SEQ FROM TD_REVIEW GROUP BY CLINIC_INSTINUM) C ON A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+			WHERE 1=1
+			<if test="clinicSubject != null and clinicSubject != ''">     
+			AND A.CLINIC_SUBJECT LIKE '%' || #{clinicSubject} || '%'   
+			</if>
+			<if test="clinicSymptom != null and clinicSymptom != ''">     
+			AND A.CLINIC_SYMPTOM LIKE '%' || #{clinicSymptom} || '%'
+			</if>
+			<if test="searchWord != null and searchWord != ''">
+			AND (A.CLINIC_SUBJECT LIKE '%' || #{searchWord} ||'%' OR A.CLINIC_SYMPTOM LIKE '%' || #{searchWord} ||'%' OR A.CLINIC_NAME LIKE '%' || #{searchWord} ||'%')
+			</if>
+			<if test="location != null and location != ''">
+			AND CLINIC_ADDR LIKE '%' || #{location} || '%' 
+			</if>
+			AND CLINIC_CONTACT_FLAG = 'U'
+		) Z
+	</select>
+	
+	<insert id="insertReservation" parameterType="com.todoc.web.dto.Reserve">
+		<selectKey resultType="long" keyProperty="reservationSeq" order="BEFORE" >
+         	SELECT SEQ_TD_RESERVATION.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO TD_RESERVATION (
+	    	RESERVATION_SEQ, USER_EMAIL, CLINIC_INSTINUM, RESERVATION_DATE, RESERVATION_TIME, RESERVATION_SYMPTOM, RESERVATION_FLAG, REGDATE, RESERVATION_STATUS
+		) VALUES (
+		    #{reservationSeq},
+		    #{userEmail},
+		    #{clinicInstinum},
+		    #{reservationDate},
+		    #{reservationTime},
+		    #{reservationSymptom},
+		    'U',
+		    SYSDATE,
+		    '예약확인'
+		)
+	</insert>
+	
+	<!-- 지울수도있음 -->
+	<select id="reserveCheck" parameterType="com.todoc.web.dto.Reserve" resultMap="reserveResultMap">
+		SELECT
+		    A.RESERVATION_SEQ,
+		    A.USER_EMAIL,
+		    A.CLINIC_INSTINUM,
+		    TO_CHAR(A.RESERVATION_DATE, 'YYYY-MM-DD') RESERVATION_DATE,
+		    A.RESERVATION_TIME,
+		    A.RESERVATION_SYMPTOM,
+		    A.RESERVATION_FLAG,
+		    A.RESERVATION_STATUS,
+		    B.CLINIC_NAME
+		FROM TD_RESERVATION A, TD_CLINIC B
+		WHERE A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+		AND A.USER_EMAIL = #{userEmail}
+		AND A.RESERVATION_DATE = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+		AND A.RESERVATION_STATUS = '예약확인'
+	</select>
+	
+	<select id="precriptionWrite" parameterType="com.todoc.web.dto.Untact" resultMap="untactResultMap">
+		SELECT
+		    A.CLINIC_INSTINUM,
+		    A.CLINIC_PHONE,
+		    A.CLINIC_NAME,
+		    A.CLINIC_DOCTOR,
+		    B.RESERVATION_SEQ,
+		    C.USER_NAME,
+		    C.USER_IDENTITY
+		FROM
+		    TD_CLINIC A, TD_RESERVATION B, TD_USER C
+		WHERE A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+		AND B.USER_EMAIL = C.USER_EMAIL
+		AND A.USER_EMAIL = #{userEmail}
+		AND B.RESERVATION_SEQ = #{reservationSeq}
+	</select>
+	
+	<insert id="prescriptionInsert" parameterType="com.todoc.web.dto.Presc">
+		INSERT INTO TD_PRESCRIPTION(
+	    	PRESCRIPTION_SEQ, PRESCRIPTION_DATE, CLINIC_INSTINUM, MEDICINE_NAME, RESERVATION_SEQ, MEDICINE_DOSE, MEDICINE_ORDER
+		) VALUES (
+		    #{prescriptionSeq},
+		    SYSDATE,
+		    #{clinicInstinum},
+		    #{medi},
+		    #{reservationSeq},
+		    #{dose},
+		    #{order}
+		)
+	</insert>
+	
+	<select id="getprescriptionSeq" resultType="int">
+		SELECT NVL(MAX(PRESCRIPTION_SEQ), 0) +1 FROM TD_PRESCRIPTION
+	</select>
+		
+	<update id="updatePrescriptionStatus" parameterType="int">
+		UPDATE TD_RESERVATION
+		SET
+		    RESERVATION_STATUS = '처방완료'
+		WHERE
+		   RESERVATION_SEQ = #{reservationSeq}
+	</update>
+	
+	<select id="prescriptionDetail" parameterType="com.todoc.web.dto.Presc" resultMap="prescResultMap">
+		SELECT 
+			A.PRESCRIPTION_SEQ,
+			TO_CHAR(A.PRESCRIPTION_DATE, 'YYYYMMDD') PRESCRIPTION_DATE,
+			A.CLINIC_INSTINUM,
+			A.MEDICINE_NAME,
+			A.RESERVATION_SEQ,
+			A.MEDICINE_DOSE,
+			A.MEDICINE_ORDER,
+			C.USER_NAME,
+			C.USER_IDENTITY,
+			D.MEDICINE_SINGLEDOSE,
+			D.MEDICINE_DAILYDOSE,
+			E.CLINIC_NAME,
+			E.CLINIC_PHONE,
+			E.CLINIC_DOCTOR
+		FROM TD_PRESCRIPTION A, TD_RESERVATION B, TD_USER C, TD_MEDICINE D, TD_CLINIC E
+		WHERE A.RESERVATION_SEQ = B.RESERVATION_SEQ
+		AND B.USER_EMAIL = C.USER_EMAIL
+		AND A.MEDICINE_NAME = D.MEDICINE_NAME
+		AND A.CLINIC_INSTINUM = E.CLINIC_INSTINUM
+		AND B.USER_EMAIL = #{userEmail}
+		AND A.RESERVATION_SEQ = #{reservationSeq}
+	</select>
+	
+	<update id="updateReserStatus" parameterType="int">
+		UPDATE TD_RESERVATION
+		SET
+		    RESERVATION_STATUS = '결제완료'
+		WHERE
+		   RESERVATION_SEQ = #{reservationSeq}
+	</update>
+	
+	<select id="getClinicInfo" parameterType="String" resultType="String">
+		SELECT CLINIC_NAME FROM TD_CLINIC WHERE CLINIC_INSTINUM = #{value}
+	</select>
+	
+	
+</mapper>

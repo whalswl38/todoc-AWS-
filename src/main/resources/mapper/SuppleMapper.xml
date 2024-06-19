@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "//mybatis.org/DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.todoc.web.dao.SuppleDao">
+
+	<resultMap id="suppleMap" type="Supple" >
+		<id column="SUPPLE_SEQ" property="suppleSeq" />
+		<result column="SUPPLE_NAME" property="suppleName" />
+		<result column="SUPPLE_RAW" property="suppleRaw" />
+		<result column="SUPPLE_CAUTION" property="suppleCaution" />
+		<result column="SUPPLE_FORMULA" property="suppleFormula" />
+		<result column="SUPPLE_COMPANY" property="suppleCompany" />
+		<result column="SUPPLE_FUNCTION" property="suppleFunction" />
+		<result column="SUPPLE_EFFICACY" property="suppleEfficacy" />
+		<result column="SUPPLE_DOSE" property="suppleDose" />
+		<result column="SUPPLE_REGDATE" property="suppleRegdate" />
+		<result column="SUPPLE_LINK" property="suppleLink" />
+		<result column="SUPPLE_STATUS" property="suppleStatus" />
+		<result column="SUPPLE_TITLE" property="suppleTitle" />
+	</resultMap>
+	
+	<resultMap id="suppleFileMap" type="SuppleFile" >
+		<id column="SUPPLE_SEQ" property="suppleSeq" />
+		<id column="FILE_SEQ" property="fileSeq" />
+		<result column="FILE_ORG_NAME" property="fileOrgName" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="FILE_REGDATE" property="fileRegdate" />
+	</resultMap>
+	
+	<!-- 영양제 리스트 -->
+    <select id="suppleList" parameterType="list" resultMap="suppleMap">
+        SELECT * FROM (
+            SELECT ROWNUM RNUM, SUPPLE_SEQ, SUPPLE_NAME, SUPPLE_RAW,
+                   SUPPLE_CAUTION, SUPPLE_FORMULA, SUPPLE_COMPANY,
+                   SUPPLE_FUNCTION, SUPPLE_DOSE, SUPPLE_REGDATE,
+                   SUPPLE_LINK, SUPPLE_STATUS, SUPPLE_TITLE, SUPPLE_EFFICACY
+            FROM (
+                SELECT SUPPLE_SEQ, NVL(SUPPLE_NAME, '') SUPPLE_NAME, NVL(SUPPLE_RAW, '') SUPPLE_RAW,
+                       NVL(SUPPLE_CAUTION, '') SUPPLE_CAUTION, NVL(SUPPLE_FORMULA, '') SUPPLE_FORMULA, NVL(SUPPLE_COMPANY, '') SUPPLE_COMPANY,
+                       NVL(SUPPLE_FUNCTION, '') SUPPLE_FUNCTION, NVL(SUPPLE_DOSE, '') SUPPLE_DOSE, NVL(SUPPLE_REGDATE, '') SUPPLE_REGDATE,
+                       NVL(SUPPLE_LINK, '') SUPPLE_LINK, NVL(SUPPLE_STATUS, 'N') SUPPLE_STATUS, NVL(SUPPLE_TITLE, '') SUPPLE_TITLE, NVL(SUPPLE_EFFICACY, '') SUPPLE_EFFICACY
+                FROM TD_SUPPLE
+                WHERE SUPPLE_STATUS = 'Y'
+                <if test="searchValue != null and searchValue != ''">
+                    AND (SUPPLE_NAME LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_RAW LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_CAUTION LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_FORMULA LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_COMPANY LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_FUNCTION LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_DOSE LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_REGDATE LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_LINK LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_STATUS LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_TITLE LIKE '%' || #{searchValue} || '%'
+                         OR SUPPLE_EFFICACY LIKE '%' || #{searchValue} || '%')
+                </if>
+                ORDER BY SUPPLE_SEQ DESC
+            )
+        )
+        WHERE RNUM BETWEEN #{start} AND #{end}
+    </select>
+
+	<!-- 영양제 하나 조회 -->
+	<select id="selectSupple" parameterType="long" resultMap="suppleMap" >
+		SELECT
+		    SUPPLE_SEQ, NVL(SUPPLE_NAME,'') SUPPLE_NAME, NVL(SUPPLE_RAW,'') SUPPLE_RAW,
+		    NVL(SUPPLE_CAUTION,'') SUPPLE_CAUTION, NVL(SUPPLE_FORMULA,'') SUPPLE_FORMULA, NVL(SUPPLE_COMPANY,'') SUPPLE_COMPANY,
+		    NVL(SUPPLE_FUNCTION,'') SUPPLE_FUNCTION, NVL(SUPPLE_DOSE,'') SUPPLE_DOSE, NVL(TO_CHAR(SUPPLE_REGDATE,'YY.MM.DD'),'') SUPPLE_REGDATE,
+		    NVL(SUPPLE_LINK,'') SUPPLE_LINK, NVL(SUPPLE_STATUS, 'N') SUPPLE_STATUS, NVL(SUPPLE_TITLE,'') SUPPLE_TITLE, NVL(SUPPLE_EFFICACY,'') SUPPLE_EFFICACY
+		FROM TD_SUPPLE
+		WHERE SUPPLE_SEQ = #{value}
+	</select>
+	
+	<!-- 영양제 글 첨부파일 조회 -->
+	<select id="selectSuppleFile" parameterType="long" resultMap="suppleFileMap" >
+		SELECT
+		    SUPPLE_SEQ,
+		    FILE_SEQ,
+		    NVL(FILE_ORG_NAME,'') FILE_ORG_NAME,
+		    NVL(FILE_NAME,'') FILE_NAME,
+		    NVL(FILE_EXT,'') FILE_EXT,
+		    NVL(FILE_SIZE,'') FILE_SIZE,
+		    NVL(FILE_REGDATE,'') FILE_REGDATE
+		FROM TD_SUPPLE_FILE
+		WHERE SUPPLE_SEQ = #{value}
+	</select>
+	
+	<!-- 영양제 글 입력 -->
+	<insert id="insertSupple" parameterType="com.todoc.web.dto.Supple" >
+	<selectKey resultType="long" keyProperty="suppleSeq" order="BEFORE" >
+		SELECT SEQ_TD_SUPPLE.NEXTVAL FROM DUAL
+	</selectKey>
+		INSERT INTO TD_SUPPLE 
+		(
+			SUPPLE_TITLE, 
+		    SUPPLE_SEQ, SUPPLE_NAME, SUPPLE_RAW,
+		    SUPPLE_CAUTION, SUPPLE_FORMULA, SUPPLE_COMPANY,
+		    SUPPLE_FUNCTION, SUPPLE_DOSE, SUPPLE_REGDATE,
+		    SUPPLE_LINK, SUPPLE_STATUS, SUPPLE_EFFICACY
+		)
+		VALUES (#{suppleTitle}, #{suppleSeq}, #{suppleName}, #{suppleRaw},
+		 		#{suppleCaution}, #{suppleFormula}, #{suppleCompany}, #{suppleFunction}, #{suppleDose}, SYSDATE, #{suppleLink}, 'Y', #{suppleEfficacy})
+	</insert>
+	
+	<!-- 영양제 파일 입력 -->
+	<insert id="insertSuppleFile" parameterType="com.todoc.web.dto.SuppleFile" >
+    INSERT INTO TD_SUPPLE_FILE
+    (
+    	SUPPLE_SEQ, FILE_SEQ, FILE_ORG_NAME, FILE_NAME, FILE_EXT, FILE_SIZE, FILE_REGDATE
+    )
+    VALUES (#{suppleSeq}, (SELECT NVL(MAX(FILE_SEQ),0)+1
+						 	 FROM TD_SUPPLE_FILE 
+						  	WHERE SUPPLE_SEQ = #{suppleSeq}) , 
+            #{fileOrgName},#{fileName}, #{fileExt}, #{fileSize}, SYSDATE)
+    </insert>
+	
+	<!-- 파일 삭제 -->
+	<delete id="deleteSuppleFile" parameterType="long" >
+		DELETE FROM TD_SUPPLE_FILE WHERE SUPPLE_SEQ = #{value}
+	</delete>
+	
+	<!-- 글 수정 -->
+	<update id="updateSupple" parameterType="com.todoc.web.dto.Supple" >
+		 UPDATE TD_SUPPLE
+			SET 
+			     SUPPLE_TITLE = #{suppleTitle},
+			     SUPPLE_NAME = #{suppleName},
+			     SUPPLE_RAW = #{suppleRaw},
+			     SUPPLE_CAUTION = #{suppleCaution},
+			     SUPPLE_FORMULA = #{suppleFormula},
+			     SUPPLE_COMPANY = #{suppleCompany},
+			     SUPPLE_FUNCTION = #{suppleFunction},
+			     SUPPLE_DOSE = #{suppleDose},
+			     SUPPLE_LINK = #{suppleLink}
+			WHERE SUPPLE_SEQ = #{suppleSeq}
+	</update>
+
+	<!-- 글 삭제 (N) -->
+	<update id="deleteSupple" parameterType="long" >
+		UPDATE TD_SUPPLE SET SUPPLE_STATUS = 'N' WHERE SUPPLE_SEQ = #{value}
+	</update>
+	
+	<!-- 글 갯수 조호l -->
+	<select id="countSupple" parameterType="com.todoc.web.dto.Supple"  resultType="long" >
+		SELECT COUNT(SUPPLE_SEQ) COUNT
+		   FROM TD_SUPPLE
+		 WHERE SUPPLE_STATUS = 'Y'
+		   <if test="searchValue != null and searchValue != ''">
+		   	      AND (SUPPLE_SEQ LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_NAME LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_RAW LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_CAUTION LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_FORMULA LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_COMPANY LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_FUNCTION LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_DOSE LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_REGDATE LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_LINK LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_STATUS LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_TITLE LIKE '%' || #{searchValue} || '%'
+	           OR SUPPLE_EFFICACY LIKE '%' || #{searchValue} || '%')
+		   </if>
+	</select>
+</mapper>
+

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http//www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+
+<head>
+    <title>처방전</title>
+    <style>
+        ul,
+        ol {
+            list-style: none;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+
+        .wrap {
+            width: 600px;
+            border: 2px solid #000;
+        }
+
+        .wrap h1 {
+            text-align: center;
+            letter-spacing: 10px;
+            font-size: 27px;
+        }
+
+        .wrap .title {
+            font-size: 14px;
+        }
+
+        .wrap .checkbox {
+            display: flex;
+        }
+
+        .wrap .checkbox .numbox {
+            display: flex;
+            margin-right: 10px;
+        }
+
+        .wrap .checkbox .num {
+            display: block;
+            width: 13px;
+            height: 16px;
+            margin-top: 2px;
+            font-size: 12px;
+            text-align: center;
+            border: 1px solid #000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .brnone {
+            border-right: 0px;
+        }
+
+        .blnone {
+            border-left: 0px;
+        }
+
+        .bbnone {
+            border-bottom: 0px;
+        }
+
+        .br1 {
+            border-right: 1px solid #000;
+        }
+        .select-subject-container {
+            max-width: 768px;
+            margin: auto;
+            width: 100%;
+        }
+
+        #lnb-container {
+            width: 120px;
+        }
+
+        #lnb-container a:not(.lnb-active) {
+            color: black;
+            font-size: 18px;
+        }
+
+        .lnb-active {
+            color: royalblue;
+            font-size: 18px;
+        }
+
+        .lnb-item {
+            padding: 8px;
+        }
+
+        .subject-box {
+            color: rgb(141, 146, 151);
+            background-color: rgb(247, 249, 250);
+            width: 100px;
+            height: 60px;
+            padding: 4px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+        }
+
+        .row {
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .filter-sort {
+	        background-color: rgb(247, 249, 250);
+	        border-radius: 20px;
+	        padding: 10px 20px 10px 20px ;
+	        font-size: 14px;
+	        color: rgb(141, 146, 151);
+	        font-weight: 500;
+	        width: 70px;
+	        text-align: center;
+	        align-content: center;
+	        cursor: pointer;
+	        margin: 0 auto;
+      }
+    </style>
+    <script>
+        $("#collaspe-btn").click;
+
+        $(document).ready(function() {
+
+        });
+    </script>
+</head>
+<body>
+    <div layout:fragment="content" class="select-subject-container">
+        <div class="spacing-height-16"></div>
+        <div class="d-flex" style="gap: 24px">
+            <div id="lnb-container">
+                <ul class="lnb flex-column">
+                    <li class="lnb-item">
+                        <a class="lnb-link lnb-active" aria-current="page" th:href="@{/select-subject-page}">병원찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link" th:href="@{/select-item-page}">증상찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link" th:href="@{/select-clinic-page}">병원 리스트</a>
+                    </li>
+                </ul>
+            </div>
+            <button>처방전 작성</button>
+            <button>처방전 보기</button>
+            </div>
+            <br/>
+            <div class="filter-sort" style="color: royalblue; background-color: #e0ecff; border: 1px solid royalblue; align-content: center; text-align: center; margin-left: 400px">
+		        <a href="/main-page" style="text-decoration: none; color: inherit; text-align: center; ">작성</a>
+	    	</div>
+            <div class="spacing-height-16"></div>
+            <div class="spacing-height-16"></div>
+            <br/>
+        </div>
+        <br/>
+</body>
+</html>

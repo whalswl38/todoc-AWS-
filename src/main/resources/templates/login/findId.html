@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>로그인</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+      }
+
+      .login-container {
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+        width: 500px;
+      }
+
+      h2 {
+        text-align: center;
+        color: #333;
+      }
+
+      .role-selection {
+        margin: 20px 0;
+        display: flex;
+        justify-content: space-between;
+
+        > div {
+          flex: 1;
+          text-align: center;
+          padding: 8px;
+        }
+      }
+
+      .role-selection button {
+        background:  #007bff;
+        border: 1px solid #ddd;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .role-selection button.active {
+        background: #0056b3;
+        color: white;
+        border-color: #0056b3;
+      }
+
+      .input-group {
+        margin-bottom: 10px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      .form-group {
+        text-align: center;
+      }
+
+      .login-btn {
+        width: 100%;
+        height: 40px;
+        background:  #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .register-link,
+      .oauth-login {
+        text-align: center;
+        margin-top: 20px;
+        cursor: pointer;
+      }
+
+      .oauth-login img {
+        width: 36px;
+        height: 36px;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+
+      .find-register {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      button:hover,
+      .login-btn:hover {
+        opacity: 0.8;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .toggle-switch {
+        display: flex;
+      }
+
+      .toggle-option {
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .selected {
+        border-bottom: 2px solid  #007bff;
+        color:  #007bff;
+        font-weight: 500;
+      }
+      #invalid-feedback{
+      	color:red;
+      	font-size:10px;
+      }
+    </style>
+    <script>
+     
+     function toggleSwitch(option) 
+     {
+        var leftOption = document.getElementById("normal-user");
+        var rightOption = document.getElementById("medical-user");
+
+        leftOption.classList.remove("selected");
+        rightOption.classList.remove("selected");
+
+        if (option === "left") 
+        {
+            leftOption.classList.add("selected");
+            document.getElementById("userType").value = "USER";
+        } 
+        else 
+        {
+            rightOption.classList.add("selected");
+            document.getElementById("userType").value = "MEDICAL";
+        }
+     }
+
+
+      function goToRegister() {
+        if ($("#normal-user").hasClass("selected")) {
+          window.location.href = "/register-page";
+        } else {
+          window.location.href = "/medical-register-page";
+        }
+      }
+      
+      function setDisplay(element)
+      {    	  
+    	  if(element.id == 'nameSearch')
+    	  {
+    		  $('#userPwd').attr('placeholder','생년월일 / 사업자번호');
+    		  document.getElementById('searchType').value = "NAME";
+    		  document.getElementById('findKind').value = "ID";
+    	  }
+    	  else
+          {
+    		  $('#userPwd').attr('placeholder','전화번호 (하이픈(-) 포함)');
+    		  document.getElementById('searchType').value = "PHONE";
+    		  document.getElementById('findKind').value = "ID";
+          }
+      }
+      
+      $(document).ready(function(){
+    	 
+    	  $("#search-btn").on("click", function(){
+    		  
+    		  $("#search-btn").prop("disabled", true);
+    		  
+    		  document.getElementById("invalid-feedback").innerHTML = "";
+    	        
+    		  if($.trim($("#userName").val()).length <= 0)
+    		  {
+    			  document.getElementById("invalid-feedback").innerHTML = "이름을 입력해주세요.";
+    			  $("#search-btn").prop("disabled", false);
+    			  return;
+    		  }
+    		  
+    		  if($.trim($("#userPwd").val()).length <= 0)
+    		  {
+    			  document.getElementById("invalid-feedback").innerHTML = "회원정보를 입력해주세요.";
+    			  $("#search-btn").prop("disabled", false);
+    			  return;
+    		  }
+    		  
+    		  var resultP = /^(01[016789]{1})-?[0-9]{3,4}-?[0-9]{4}$/;
+    		  var resultN = /^([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[1,2][0-9]|3[0,1]))$/;
+    		  
+    		  if($("#searchType") == "PHONE")
+    		  {
+    			  if(resultP.test($("#userPwd") == false))
+    			  {
+    				  document.getElementById("invalid-feedback").innerHTML = "전화번호 형식이 올바르지 않습니다.";
+    				  $("#search-btn").prop("disabled", false);
+    				  return;
+    			  }
+    		  }
+    		  
+    		  if($("#searchType") == "NAME")
+    		  {
+    			  if(resultN.test($("#userPwd") == false))
+    			  {
+    				  document.getElementById("invalid-feedback").innerHTML = "생년월일 형식이 올바르지 않습니다.";
+    				  $("#search-btn").prop("disabled", false);
+    				  return;
+    			  }
+    		  }
+    			  
+    		  var findDto = {
+   	        	   userType:$("#userType").val(),
+	        	   searchType: $("#searchType").val(),
+	        	   findKind: $("#findKind").val(),
+	        	   userName: $("#userName").val(),
+	        	   userPwd: $("#userPwd").val()
+    		  }
+    	     
+    		  if($("#userType").val() == "USER")
+    		  {
+        	      $.ajax({
+       	           type: "POST",
+       	           url: "/login/findId",
+       	           contentType: 'application/json',
+       	           data: JSON.stringify(findDto),
+       	           dataType: "json",
+   	               success: function(data) 
+   	               {   
+   	            	   if(data == 0)
+   	            	   {
+   	            		   document.getElementById("invalid-feedback").innerHTML = "존재하지 않는 회원이거나, 입력값이 올바르지 않습니다.";
+   	            		   $("#userName").focus();
+   	            		   $("#search-btn").prop("disabled", false);
+   	            	   }
+   	            	   else if(data instanceof Object)
+   	            	   {
+   	            		   document.getElementById('nameHowSearch').style.display = "none";
+   	            		   document.getElementById('search-btn').style.display = "none";
+   	            		   document.getElementById('div1').style.display = "none";
+   	            		   document.getElementById('div2').style.display = "none";
+   	            		   document.getElementById('showEmail').style.display = "block";
+   	            		   document.getElementById('userEmail').innerHTML = data.userEmail;
+						   
+						   pwd();
+   	            	   }
+   	            	   else if(data == 404)
+   	            	   {
+   	            		   document.getElementById("invalid-feedback").innerHTML = "해당하는 회원정보가 존재하지 않습니다.";
+   	            		   $("#userName").focus();
+   	            		   $("#search-btn").prop("disabled", false);
+   	            	   }
+   	            	   else if(data == 500)
+   	            	   {
+   	            		   document.getElementById("invalid-feedback").innerHTML = "탈퇴하거나 정지된 사용자입니다.";
+   	            		   $("#userName").focus();
+   	            		   $("#search-btn").prop("disabled", false);
+   	            	   }
+   	            	   
+   	    	       },
+   	    	       error: function(xhr,err)
+   	    	       {
+   	                  alert("관리자에게 문의하세요.");
+   	                  $("#userName").focus();
+              		   	  $("#search-btn").prop("disabled", false);
+   	    	       }
+   	    	    });
+    		  }
+			  
+			  //var tim = 			  setTimeout(function(){
+			  //  if(confirm("비밀번호 재발급 페이지로 이동하시겠습니까?") == true)
+			  //  {
+			  //	  location.href="/login/findPwd";
+			  //  }
+			  //}, 2000);
+			  
+    		  if($("#userType").val() == "MEDICAL")
+    		  {
+        	      $.ajax({
+       	           type: "POST",
+       	           url: "/login/findIdMedical",
+       	           contentType: 'application/json',
+       	           data: JSON.stringify(findDto),
+       	           dataType: "json",
+   	               success: function(data) 
+   	               {   
+   	            	   if(data == 0)
+   	            	   {
+   	            		   document.getElementById("invalid-feedback").innerHTML = "존재하지 않는 회원이거나, 입력값이 올바르지 않습니다.";
+   	            		   $("#userName").focus();
+   	            		   $("#search-btn").prop("disabled", false);
+   	            	   }
+   	            	   else if(data instanceof Object)
+   	            	   {
+   	            		   document.getElementById('nameHowSearch').style.display = "none";
+   	            		   document.getElementById('search-btn').style.display = "none";
+   	            		   document.getElementById('div1').style.display = "none";
+   	            		   document.getElementById('div2').style.display = "none";
+   	            		   document.getElementById('showEmail').style.display = "block";
+   	            		   document.getElementById('userEmail').innerHTML = data.userEmail;
+						   
+						   tim;
+   	            	   }
+   	            	   else if(data == 404)
+   	            	   {
+   	            		   document.getElementById("invalid-feedback").innerHTML = "해당하는 회원정보가 존재하지 않습니다.";
+   	            		   $("#userName").focus();
+   	            		   $("#search-btn").prop("disabled", false);
+   	            	   }
+   	            	   else if(data == 500)
+   	            	   {
+   	            		   document.getElementById("invalid-feedback").innerHTML = "탈퇴하거나 정지된 사용자입니다.";
+   	            		   $("#userName").focus();
+   	            		   $("#search-btn").prop("disabled", false);
+   	            	   }
+   	            	   
+   	    	       },
+   	    	       error: function(xhr,err)
+   	    	       {
+   	                  alert("관리자에게 문의하세요.");
+   	                  $("#userName").focus();
+              		   	  $("#search-btn").prop("disabled", false);
+   	    	       }
+   	    	    });
+    		  }
+    	  });
+      });
+
+    </script>
+  </head>
+
+  <body>
+    <div layout:fragment="content" class="login-container">
+      <div class="role-selection">
+        <div
+          id="normal-user"
+          class="toggle-option selected"
+          onclick="toggleSwitch('left')"
+        >
+          환자회원
+        </div>
+        <div
+          id="medical-user"
+          class="toggle-option"
+          onclick="toggleSwitch('right')"
+        >
+          병원/약국회원
+        </div>
+      </div>
+      
+      <div id="showEmail" 
+      style="display:none; float:center; margin:45px; ">
+      	<p style="float:center;"><br><br>조회하신 정보의 아이디는 <b><span id="userEmail" ></span></b> 입니다.</p>
+      </div>
+
+      <form id="loginForm" method="post">
+        <div style="padding:5px;">
+        <div style="display:block; padding:6px;" id="div1"><input type="radio" id="nameSearch" name="howSearch" onchange="setDisplay(this);" checked> 생년월일 / 사업자번호로 찾기</div>
+        <div style="display:block; padding:6px;" id="div2"><input type="radio" id="phoneSearch" name="howSearch" onchange="setDisplay(this);"> 내 명의로 가입된 휴대폰으로 찾기</div>
+        </div>
+        <div id="nameHowSearch" >
+        <div class="input-group">
+        <input type="text" id="userName" placeholder="이름" required />
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="userPwd"
+            placeholder="생년월일 / 사업자번호 "
+            required
+          />
+        </div>
+        </div>
+        <p id="invalid-feedback">개인회원은 생년월일 (000000),</br>병원/약국 회원은 사업자등록 번호 (하이픈(-) 제외) 를 작성해주세요.</p><br>
+        <div class="form-group">
+          <button type="button" class="login-btn" id="search-btn" >아이디 찾기</button>
+        </div>
+        
+        <input type="hidden" id="userType" value="USER" />
+        <input type="hidden" id="searchType" value="NAME" />
+        <input type="hidden" id="findKind" value="ID" />
+      </form>
+		
+	  <br><br>
+      <div class="find-register" style="float:left; font:12px; color:gray; display:block; padding:4px;">
+        <span class="register-link">
+			비밀번호를 찾으시나요? <a href="/login/findPwd" style="text-decoration: underline;">비밀번호 찾기</a>
+        </span>
+      </div>
+      <div class="find-register" style="float:left; font:12px;  display:block; padding:4px;">
+        <span class="register-link"> <a onClick="goToRegister()" style=" text-decoration: underline;"> 회원가입</a></span>
+      </div>
+      
+    </div>
+  </body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>대면 진료 예약 및 증상 입력</title>
+    <style>
+      .reserve-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      #lnb-container {
+        width: 140px;
+      }
+
+      .lnb-item a {
+        font-size: 18px;
+        padding: 8px;
+        display: block;
+      }
+
+      #lnb-container a:not(.lnb-active) {
+        color: black;
+        font-size: 18px;
+      }
+
+      .lnb-active {
+        color: royalblue;
+      }
+
+      label {
+        font-size: 20px;
+        font-weight: 600;
+        padding: 8px;
+      }
+
+      #comments {
+        width: 400px;
+        padding: 8px;
+        resize: none;
+      }
+
+      #comments::placeholder {
+        color: rgb(141, 146, 151);
+      }
+
+      #comments:hover {
+        color: rgb(141, 146, 151);
+        border: 1px solid #212529;
+      }
+
+      #timeSlots,
+      #dateSlots {
+        width: 400px;
+        background-color: rgb(247, 249, 250);
+        padding: 16px;
+        flex-wrap: wrap;
+      }
+
+      .dateBtn,
+      .timeBtn {
+        background-color: #fff;
+        font-weight: 600;
+        border-radius: 16px;
+        min-width: 90px;
+      }
+      
+    </style>
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+<script src='
+https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.11/index.global.min.js'
+></script>
+<script src="
+https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@6.1.11/index.global.min.js
+"></script>
+<script src='fullcalendar/core/locales/ko.js'></script>
+    <script th:inline="javascript">
+    var globalIsHoliday="Y";
+    
+    $(document).ready(function () {
+        $("#comments").on("input", function () {
+          let textInput = $(this).val();
+          let text_length = textInput.length;
+          if (text_length > 150) {
+            textInput = textInput.substring(0, 150);
+            $(this).val(textInput);
+          }
+          text_length = textInput.length;
+          $("#commentsHelp").text(text_length + "/150"); 
+        });
+
+        const dateSlots = ["오늘", "내일"];
+        var $dateSlotsDiv = $("#dateSlots");
+        $.each(dateSlots, function (index, time) {
+          var $button = $("<button>")
+            .addClass("dateBtn btn btn-outline-secondary m-1")
+            .text(time);
+          $button.on("click", function () {
+            $(".dateBtn.active").removeClass("active");
+            $(this).addClass("active");
+          });
+          $dateSlotsDiv.append($button);
+        });
+
+
+        
+        /*<![CDATA[*/
+        const timeSlots = /*[[${timeSlots}]]*/[];
+        var $timeSlotsDiv = $("#timeSlots");
+        $.each(timeSlots, function (index, time) {
+          var $button = $("<button>")
+            .addClass("timeBtn btn btn-outline-secondary m-1")
+            .text(time);
+          $button.on("click", function () {
+        	$("#selectedTime").val(time);
+            $(".timeBtn.active").removeClass("active");
+            $(this).addClass("active");
+          });
+          $timeSlotsDiv.append($button);
+        });
+        /*]]>*/
+        
+
+      });//ready
+      
+      
+      function updateAvailableTimeSlots(selectedDate,globalIsHoliday) {
+    	    $.ajax({
+    	        url: '/getAvailableTimeSlots', 
+    	        type: 'GET',
+    	        data: { 
+    	            selectedDate: selectedDate,
+    	            clinicInstinum: $('#clinicInstinum').val(),
+    	            _isHoliday: globalIsHoliday, // 공휴일 여부를 URL에 추가
+    	        },
+    	        success: function (response) {
+    	            // 받아온 시간대로 UI 업데이트
+    	            updateTimeSlotsUI(response);
+    	        },
+    	        error: function (xhr) {
+    	            alert('시간대를 가져오는데 실패했습니다');
+    	        }
+    	    });
+    	}
+
+      function updateTimeSlotsUI(timeSlots) {
+    	    // 시간대 UI 업데이트
+    	  $(".timeBtn").remove();
+          var $timeSlotsDiv = $("#timeSlots");
+          $.each(timeSlots, function (index, time) {
+            var $button = $("<button>")
+              .addClass("timeBtn btn btn-outline-secondary m-1")
+              .text(time);
+            $button.on("click", function () {
+          	$("#selectedTime").val(time);
+              $(".timeBtn.active").removeClass("active");
+              $(this).addClass("active");
+            });
+            $timeSlotsDiv.append($button);
+          });
+      }
+
+      //캘린더 시작
+	document.addEventListener('DOMContentLoaded', function() {
+	    var calendarEl = document.getElementById('calendar');
+	    var calendar = new FullCalendar.Calendar(calendarEl, {
+	        googleCalendarApiKey: 'AIzaSyBfIHHFK6ayX1Y_v4GSGOyYUarMGGy8O1w',        
+	        selectable: true,
+	        dateClick: function(info) {
+	            var today = new Date();
+	            var yesterday = new Date(today);
+	            yesterday.setDate(today.getDate() - 1);
+	            var selectedDate = new Date(info.dateStr);
+	            
+	            if (selectedDate < yesterday) {
+	                alert("오늘보다 이전 날짜는 예약이 불가합니다.");
+	                document.getElementById('date').innerHTML = "선택해주세요";
+	                document.getElementById('selectedDate').value = "";
+	                
+	            }else{
+	            
+	 	            var isHoliday = isHolidayDate(selectedDate);
+		            if (isHoliday) { 
+		            	if(document.getElementById('holidayFlag').value=="Y"){
+		            		globalIsHoliday = "Y";
+		            		alert(info.dateStr + "은 공휴일로 헤당병원은 휴무입니다.");
+		            	}else{
+		            		globalIsHoliday = "Y";
+		            		alert(info.dateStr + "은 공휴일로 해당병원은 영업합니다.");
+		            	}
+		               
+		            }else{
+		            	if(document.getElementById('holidayFlag').value=="Y"){
+		            		 globalIsHoliday = "N";
+			            		alert(info.dateStr + "을 선택하셨습니다.");
+		            	}else{
+		            		 globalIsHoliday = "N";
+			            		alert(info.dateStr + "을 선택하셨습니다.");
+		            	}
+		            }
+	            }
+	
+	            document.getElementById('selectedDate').value = info.dateStr;
+	            document.getElementById('date').innerHTML = info.dateStr;
+	            updateAvailableTimeSlots(info.dateStr, globalIsHoliday);
+	        },
+	    
+	        eventSources:[
+	            {
+	                googleCalendarId : 'ko.south_korea.official#holiday@group.v.calendar.google.com',
+	                color: 'white',   
+	                textColor: 'red',
+	                id: 'holidaySource'
+	            }
+	        ],
+	        eventClick: function(info){
+	            // 클릭시 구글캘린더 url로 가는 것을 막는다.
+	            info.jsEvent.stopPropagation();
+	            info.jsEvent.preventDefault();
+	        },
+	        locale: 'ko'
+	    });
+	
+	    calendar.render();
+
+	    // 공휴일 여부를 확인하는 함수
+	    function isHolidayDate(date) {
+	        // 공휴일 이벤트 배열 가져오기
+	        var holidayEvents = calendar.getEvents();
+	        // 선택한 날짜와 공휴일 이벤트의 날짜를 비교하여 공휴일 여부 확인
+	        for (var i = 0; i < holidayEvents.length; i++) {
+	            var holidayDate = new Date(holidayEvents[i].start);
+	            if (date.getDate() === holidayDate.getDate() &&
+	                date.getMonth() === holidayDate.getMonth() ) {
+	                return true; // 공휴일이면 true 반환
+	            }
+	        }
+	        return false; // 공휴일이 아니면 false 반환
+	    }
+	});
+	      
+      //캘린더 끝 
+	      
+	function submit(){
+
+		if($.trim($("#selectedDate").val()).length <= 0){
+			alert("날짜를 선택하세요.");
+			return;
+		}
+		
+	    var today  = new Date();
+        var yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+
+	    var selectedDate = new Date($("#selectedDate").val());
+	    
+	    if (selectedDate < yesterday) {
+	        alert("현재날짜 이전은 선택불가합니다.");
+	        return;
+	    }
+	    
+		if($.trim($("#selectedTime").val()).length <= 0){
+			alert("시간을 선택하세요.");
+			return;
+		}
+		if($.trim($("#comments").val()).length <= 0){
+			alert("증상을 입력하세요.");
+			return;
+		}
+		if($("#selectedTime").val()=="휴무입니다. 다른 날짜를 선택하세요."){
+			alert("선택한 날짜는 휴무입니다. 다른 날짜를 선택하세요.");
+			return;
+		}
+		if($("#selectedTime").val()=="예약가능한 시간이 없습니다."){
+			alert("다른 날짜를 선택하세요.");
+			return;
+		}
+		
+		
+
+        // Ajax 요청
+        $.ajax({
+      	  url: '/reservationPost', 
+            type: 'POST',              
+            data: {
+          	comments: $('#comments').val(),
+           	selectedDate: $('#selectedDate').val(),
+           	selectedTime: $('#selectedTime').val(),
+           	clinicInstinum: $('#clinicInstinum').val()
+            },
+            success: function(response) {
+          	  if(response == 0)
+                {
+          		  alert('예약이 성공적으로 완료되었습니다.');
+          		  location.href = "/contactHistory-page";	
+                }
+                else if(response == 404)
+                {
+              	  alert('예약에 실패했습니다. 다시 시도해주세요.');
+                }
+                else if(response == 202)
+                {
+              	  alert('예약등록중 서버에서 문제가 발생했습니다.');
+                }
+                else if(response == 101)
+                {
+              	  alert('로그인이 필요합니다.');
+              	  location.href="/login-page";
+                }
+              
+            },
+            error: function(xhr) {
+          	  alert('예약에 실패했습니다. 다시 시도해주세요.');
+            }
+        });	
+
+	}
+
+    </script>
+  </head>
+  <div layout:fragment="content" class="reserve-container">
+   <!--  <form id="postForm">-->
+    <div class="spacing-height-16"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px">
+      <div id="lnb-container">
+        <ul class="lnb flex-column">
+          <li class="lnb-item">
+            <a
+              class="lnb-link"
+              aria-current="page"
+              th:href="@{/select-subject-page}"
+              >병원찾기</a
+            >
+          </li>
+          <li class="lnb-item">
+            <a class="lnb-link" th:href="@{/select-item-page}">증상찾기</a>
+          </li>
+          <li class="lnb-item">
+            <a class="lnb-link lnb-active" th:href="@{/clinic-contact-category-list}"
+              >병원 리스트</a
+            >
+          </li>
+        </ul>
+      </div>
+      <div style="padding: 8px; width: 80%">
+        <div class="row">
+          <div class="col">
+            <div class="form-group">
+              <label for="date" style="margin-left: 2px"
+                ><i class="fa-regular fa-calendar"></i>&nbsp;날짜</label
+              >
+            </div>
+            <div id='calendar' class="d-flex"></div>
+            <!--  <div id="dateSlots" class="d-flex">
+              <div id='calendar'></div>
+            </div>-->
+            <label for="date" style="margin-left: 2px"
+                >&nbsp;예약일 : </label>  
+            <label id="date" for="date" style="margin-left: 2px"
+                >&nbsp;선택해주세요</label>
+            <div class="form-group">
+              <label for="time"
+                ><i class="fa-regular fa-clock"></i>&nbsp;시간</label
+              >
+              <div id="timeSlots" class="d-flex">
+              </div>
+  
+              
+            </div>
+            <div class="form-group">
+              <div class="spacing-height-16"></div>
+              <label class="p-2">증상에 대해 알려주세요</label>
+              <textarea
+                id="comments"
+                name="comments"
+                class="form-control"
+                rows="4"
+                maxlength="150"
+                placeholder="예: 열이 나고 머리가 아파요."
+                required
+              ></textarea>
+              <div
+                class="d-flex"
+                style="justify-content: flex-end; padding-right: 28px"
+              >
+                <small id="commentsHelp" class="form-text text-muted"
+                  >0/150</small
+                >
+              </div>
+            </div>
+
+            <div class="spacing-height-16"></div>
+            <div class="form-group d-flex justify-content-center">
+              <div>
+                <button
+                  id="reserveBtn"
+                  class="btn btn-primary p-2"
+                  style="width: 160px"
+                  onclick="submit()"
+                >
+                  예약하기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+        <input type="hidden" id="selectedDate" name="selectedDate" value="" />
+        <input type="hidden" id="selectedTime" name="selectedTime" value=""/>
+        <input type="hidden" id="clinicInstinum" name="clinicInstinum" th:value="${clinicInstinum}" />
+        <input type="hidden" id="holidayFlag" name="holidayFlag" th:value="${holidayFlag}" />
+        <input type="hidden" id="_isHoliday" name="_isHoliday" value="" />
+        
+        
+        
+      </div>
+    </div>
+   <!--  </form>-->
+  </div>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>챗봇</title>
+    <style>
+      .chat-container {
+        max-width: 768px;
+        margin: auto;
+        border-radius: 16px;
+        border: 1px solid rgb(247, 249, 250);
+        box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px 16px;
+        background-color: #fff;
+        margin-bottom: 16px;
+      }
+
+      .chat-details {
+        padding: 16px;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      h2 {
+        margin-bottom: 0;
+      }
+
+      p {
+        font-weight: 500;
+        padding: 4px 0px;
+      }
+
+      .message-logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 12px;
+      }
+
+      h4 {
+        margin: 0;
+      }
+
+      .message-box {
+        width: 100%;
+        border-radius: 16px;
+        background-color: #fff;
+        flex-direction: column;
+        padding: 8px 0px;
+        min-height: 400px;
+      }
+
+      .message {
+        position: relative;
+        padding: 8px 24px;
+        cursor: pointer;
+      }
+
+      .message-text {
+        overflow: hidden;
+        white-space: normal;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+
+      input::placeholder {
+        color: rgb(141, 146, 151);
+      }
+
+      input:hover {
+        outline: none;
+      }
+
+      .qna-btn {
+        border-radius: 16px;
+        padding: 8px 16px;
+        width: 150px;
+        background-color: rgb(255, 141, 0);
+        color: rgb(247, 249, 250);
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .bottom-menu {
+        flex: 1;
+        color: rgb(141, 146, 151);
+        opacity: 0.6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        cursor: pointer;
+      }
+
+      .bottom-menu i {
+        font-size: 18px;
+      }
+
+      .bottom-menu-active {
+        color: rgb(247, 103, 7);
+      }
+
+      .bottom-box {
+        background-color: rgb(247, 249, 250);
+        padding: 8px 0px;
+        border-radius: 0px 0px 16px 16px;
+      }
+
+      .unread-message {
+        position: absolute;
+        top: 12px;
+        right: 0;
+        color: red;
+        font-size: 8px;
+      }
+    </style>
+    <script>
+      $(document).ready(function () {});
+    </script>
+  </head>
+  <div layout:fragment="content" class="chat-container">
+    <div class="d-flex justify-content-between" style="gap: 32px">
+      <div style="width: 450px">
+        <div class="chat-details">
+          <div class="d-flex align-items-center" style="padding: 8px">
+            <h3>대화</h3>
+          </div>
+          <div
+            class="d-flex justify-content-between"
+            style="
+              background-color: rgb(247, 249, 250);
+              height: 28px;
+              border: 0px;
+              border-radius: 16px;
+              padding: 8px 16px;
+              width: calc(100% - 32px);
+            "
+          >
+            <div
+              style="width: calc(100% - 90px)"
+              class="d-flex align-items-center"
+            >
+              <input
+                tabindex="0"
+                placeholder="1개의 안 읽은 알림이 있어요"
+                readonly
+                style="
+                  border: none;
+                  background-color: transparent;
+                  width: calc(100% - 90px);
+                "
+              />
+            </div>
+
+            <div
+              class="d-flex align-items-center"
+              style="
+                padding: 4px;
+                border: 0;
+                background-color: transparent;
+                color: rgb(141, 146, 151);
+              "
+            >
+              <div style="font-weight: 600; cursor: pointer">모두 읽기</div>
+            </div>
+          </div>
+          <div class="message-box d-flex align-items-center">
+            <div
+              class="d-flex message"
+              style="gap: 16px"
+              onclick="window.location.href='http://localhost:8099/chat-detail-page'"
+            >
+              <div class="message-logo">
+                <img
+                  src="https://doctornow.co.kr/favicon.png"
+                  class="message-logo"
+                />
+              </div>
+              <div class="message-text">
+                <div style="font-size: 14px; font-weight: 600">
+                  닥터나우<span
+                    style="
+                      color: rgb(141, 146, 151);
+                      font-size: 12px;
+                      margin-left: 8px;
+                    "
+                    >방금</span
+                  >
+                </div>
+                <div style="color: rgb(141, 146, 151)">
+                  궁금하신 내용은 아래 카테고리에서 선택해서 문의해주시면
+                  감사하겠습니다. 담당자: 고조선, 연락처 010-1111-2222
+                </div>
+              </div>
+              <div class="unread-message">
+                <i class="fa-solid fa-circle"></i>
+              </div>
+            </div>
+          </div>
+          <div class="spacing-height-16"></div>
+          <div
+            class="qna-btn d-flex justify-content-center align-items-center"
+            style="margin: 0 auto"
+          >
+            새 문의하기 &nbsp;<i class="fa-regular fa-paper-plane"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex bottom-box">
+      <div
+        class="bottom-menu"
+        onclick="window.location.href='http://localhost:8099/chat-home-page'"
+      >
+        <div><i class="fa-solid fa-house"></i></div>
+        <div>홈</div>
+      </div>
+      <div
+        class="bottom-menu bottom-menu-active"
+        onclick="window.location.href='http://localhost:8099/chat-message-page'"
+      >
+        <div><i class="fa-regular fa-comment-dots fa-flip-horizontal"></i></div>
+        <div>대화</div>
+      </div>
+      <div class="bottom-menu">
+        <div><i class="fa-solid fa-gear"></i></div>
+        <div>설정</div>
+      </div>
+    </div>
+  </div>
+</html>

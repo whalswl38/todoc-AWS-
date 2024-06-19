@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.todoc.web.dao.ReviewDao">
+	<resultMap type="Review" id="reviewResultMap" >
+		<id column="REVIEW_SEQ" property="reviewSeq" />
+		<result column="USER_EMAIL" property="userEmail" />
+		<result column="REVIEW_TITLE" property="reviewTitle" />
+		<result column="REVIEW_CONTENT" property="reviewContent" />
+		<result column="REVIEW_REGDATE" property="reviewRegdate" />
+		<result column="REVIEW_GRADE" property="reviewGrade" />
+		<result column="USER_NAME" property="userName" />
+		<result column="CLINIC_INSTINUM" property="clinicInstinum" />
+		<result column="UNTACT_SEQ" property="contactSeq" />
+		<result column="REVIEW_DEL_FLAG" property="reviewDelFlag" />
+	</resultMap>
+	
+	<!-- 리뷰리스트 -->
+	<select id="reviewList" parameterType="String" resultMap="reviewResultMap">
+			           SELECT A.REVIEW_SEQ,
+			                    NVL(B.USER_EMAIL, '') USER_EMAIL,
+			                    NVL(A.REVIEW_TITLE, '') REVIEW_TITLE,
+			                    NVL(A.REVIEW_CONTENT, '') REVIEW_CONTENT,
+			                    NVL(TO_CHAR(A.REVIEW_REGDATE, 'YYYY.MM.DD'), '') REVIEW_REGDATE,
+			                    NVL(A.REVIEW_GRADE, '') REVIEW_GRADE,
+			                    NVL(B.USER_NAME, '') USER_NAME,
+                                NVL(C.CLINIC_NAME, '') CLINIC_NAME,
+                                NVL(C.CLINIC_DOCTOR, '') CLINIC_DOCTOR
+			               FROM TD_REVIEW A, TD_USER B, TD_CLINIC C
+			              WHERE A.USER_EMAIL = B.USER_EMAIL
+			                AND A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+			                AND B.USER_EMAIL = #{value}
+			              ORDER BY A.REVIEW_SEQ DESC
+	</select>
+	
+	<!-- 리뷰리스트 페이징처리 -->
+	<select id="reviewListPlus" parameterType="com.todoc.web.dto.Review" resultMap="reviewResultMap">
+		      SELECT REVIEW_SEQ,
+			       USER_EMAIL,
+			       REVIEW_TITLE,
+			       REVIEW_CONTENT,
+			       REVIEW_REGDATE,
+			       REVIEW_GRADE,
+			       USER_NAME,
+			       CLINIC_NAME,
+			       CLINIC_DOCTOR,
+			       CONTACT_SEQ,
+			       REVIEW_DEL_FLAG
+			  FROM(SELECT ROWNUM RNUM,
+			               REVIEW_SEQ,
+			               USER_EMAIL,
+			               REVIEW_TITLE,
+			               REVIEW_CONTENT,
+			               REVIEW_REGDATE,
+			               REVIEW_GRADE,
+			               USER_NAME,
+			               CLINIC_NAME,
+			               CLINIC_DOCTOR,
+			               CONTACT_SEQ,
+			               REVIEW_DEL_FLAG
+			          FROM (SELECT A.REVIEW_SEQ,
+			                       NVL(B.USER_EMAIL, '') USER_EMAIL,
+			                       NVL(A.REVIEW_TITLE, '') REVIEW_TITLE,
+			                       NVL(A.REVIEW_CONTENT, '') REVIEW_CONTENT,
+			                       NVL(TO_CHAR(A.REVIEW_REGDATE, 'YYYY.MM.DD'), '') REVIEW_REGDATE,
+			                       NVL(A.REVIEW_GRADE, '') REVIEW_GRADE,
+			                       NVL(B.USER_NAME, '') USER_NAME,
+			                       NVL(C.CLINIC_NAME, '') CLINIC_NAME,
+			                       NVL(C.CLINIC_DOCTOR, '') CLINIC_DOCTOR,
+			                       NVL(A.UNTACT_SEQ, '') CONTACT_SEQ,
+			                       NVL(A.REVIEW_DEL_FLAG, '') REVIEW_DEL_FLAG
+			                  FROM TD_REVIEW A, TD_USER B, TD_CLINIC C
+			                 WHERE A.USER_EMAIL = B.USER_EMAIL
+			                   AND A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+			                   AND A.REVIEW_DEL_FLAG = 'N'
+			                   
+			             <if test='userEmail != null'>
+			                   AND B.USER_EMAIL = #{userEmail}
+			             </if>
+			                 ORDER BY A.REVIEW_SEQ DESC))
+			 WHERE RNUM <![CDATA[>=]]> #{startRow}
+			   AND RNUM <![CDATA[<=]]> #{endRow}
+	</select>
+	
+	
+	<!-- 리뷰내역 토탈카운트 -->
+	<select id="reviewTotal" parameterType="String" resultType="int">
+		SELECT COUNT(USER_EMAIL)
+		  FROM TD_REVIEW
+		 WHERE USER_EMAIL = #{value}
+		   AND REVIEW_DEL_FLAG = 'N'
+	</select>	
+	
+	<!-- 리뷰작성 -->
+	<insert id="reviewInsert" parameterType="com.todoc.web.dto.Review">
+		<selectKey resultType="long" keyProperty="reviewSeq" order="BEFORE" >
+	  		SELECT SEQ_TD_REVIEW.NEXTVAL FROM DUAL
+	  	</selectKey>
+	  	
+	INSERT INTO td_review (
+		    USER_EMAIL,
+		    REVIEW_SEQ,
+		    REVIEW_TITLE,
+		    REVIEW_CONTENT,
+		    REVIEW_REGDATE,
+		    REVIEW_GRADE,
+		    USER_NAME,
+		    CLINIC_INSTINUM,
+		    UNTACT_SEQ,
+		    REVIEW_DEL_FLAG
+		) VALUES (
+		    #{userEmail},
+		    #{reviewSeq},
+		    #{reviewTitle},
+		    #{reviewContent},
+		    SYSDATE,
+		    #{reviewGrade},
+		    #{userName},
+		    #{clinicInstinum},
+		    #{contactSeq},
+		    'N'
+		)
+	
+	</insert>
+	
+	
+	
+	<!-- 리뷰번호로 리스트조회 -->
+	<select id="reviewSeqList" parameterType="long" resultMap="reviewResultMap">
+		SELECT *
+		   FROM TD_REVIEW
+		 WHERE REVIEW_SEQ = #{value}
+	
+	</select>
+	
+	
+	<!-- 리뷰 수정-->
+	<update id="reviewUpdate" parameterType="com.todoc.web.dto.Review">
+		UPDATE TD_REVIEW
+		    SET REVIEW_TITLE = #{reviewTitle},
+		        REVIEW_CONTENT = #{reviewContent},
+		        REVIEW_GRADE = #{reviewGrade}
+		 WHERE REVIEW_SEQ = #{reviewSeq}
+			
+	</update>
+	
+	<!-- 리뷰 삭제-->
+	<update id="reviewDelete" parameterType="com.todoc.web.dto.Review">
+		UPDATE TD_REVIEW
+		    SET REVIEW_DEL_FLAG = 'Y'
+		 WHERE REVIEW_SEQ = #{reviewSeq}
+			
+	</update>
+ 
+</mapper>

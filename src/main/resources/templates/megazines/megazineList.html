@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>건강매거진 리스트 페이지</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swiper/swiper-bundle.min.css"
+    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <style>
+      .megazine-list-container {
+        max-width: 768px;
+        margin: auto;
+      }
+      .tab-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: rgb(141, 146, 151);
+      }
+      .search-container {
+        display: flex;
+        background:white;
+        box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px 0px;
+        -webkit-box-align: center;
+        align-items: center;
+        justify-content: space-between;
+        width: 270px;
+        border-radius: 8px;
+        border: 1px solid #212529;
+      }
+
+      input::placeholder {
+        font-size: 13px;
+      }
+
+      #megazine-category-box {
+        min-height: 92px;
+        background: #fff;
+      }
+
+      #megazine-list-box {
+        width: 100%;
+        background: #fff;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      .tab {
+        
+        font-weight: 500;
+        color: #212529;
+        flex: 1;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid transparent;
+       
+      }
+
+      .tab-active {
+        color:#0d6efd;
+      }
+
+      .megazine {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 10px;
+        padding: 12px 0px 12px 12px;
+        max-height: 100px;
+        height: 80px;
+        cursor: pointer;
+      }
+      .megazine:hover {
+        background: #f3f3f3;
+      }
+      .megazine-content {
+        display: flex;
+        flex-direction: column;
+        width: 70%;
+      }
+      .megazine-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+        overflow: hidden;
+        white-space: normal;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        margin-bottom: 4px;
+      }
+      .megazine-text {
+        font-size: 14px;
+        font-weight: bold;
+        color: rgb(169, 174, 177);
+        margin: 0;
+        overflow: hidden;
+        white-space: normal;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+      .megazine-date {
+        font-size: 0.9rem;
+        margin-top: 8px;
+        color: rgb(169, 174, 177);
+      }
+      .megazine-box {
+        width: 120px;
+        height: 80px;
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .megazine-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      #recommendVideos p {
+        overflow: hidden;
+        white-space: normal;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+
+      .video-box {
+        flex: 1;
+        padding: 4px;
+      }
+
+      #pagingBox {
+        width: 100%;
+        font-size: 18px;
+        gap: 20px;
+        font-weight: 500;
+      }
+
+      #pagingBox div {
+        cursor: pointer;
+      }
+
+      .paging-active {
+        color: green;
+        opacity: 0.8;
+        font-weight: 700;
+      }
+
+      .swiper-container {
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .swiper-slide {
+        font-size: 18px;
+        background: #ddd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 292px;
+      }
+
+      .swiper-pagination,
+      .swiper-pagination-fraction {
+        width: 40px;
+        position: absolute;
+        bottom: 8px;
+        right: 16px;
+        text-align: center;
+        margin: 0 auto;
+        font-size: 14px;
+        /* margin-left: 820px; */
+      }
+
+      .swiper-button-prev,
+      .swiper-button-next {
+        background-image: none;
+        color: #212529;
+      }
+
+      .swiper-button-prev {
+        content: "\f060";
+        left: 64px;
+        top: calc(100% + 8px);
+        transform: translate(0, -50%);
+      }
+
+      .swiper-button-next {
+        content: "\f061";
+        right: 84px;
+        top: calc(100% + 8px);
+        transform: translate(0, -50%);
+      }
+
+      .swiper-button-next::after,
+      .swiper-button-prev::after {
+        font-size: 12px;
+      }
+
+      .swiper-bottom-box {
+        text-align: center;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+      }
+
+      .swiper-container img {
+        height: 150px;
+        width: 150px;
+      }
+
+      .most-article-title {
+        color: #212529;
+        font-size: 16px;
+        font-weight: 600;
+        overflow: hidden;
+        white-space: normal;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        cursor: pointer;
+      }
+
+      .most-article-text {
+        color: rgb(169, 174, 177);
+        font-size: 12px;
+        overflow: hidden;
+        white-space: normal;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+      .page_wrap {
+		   text-align:center;
+		   font-size:0;  
+		 }
+		.page_nation {
+		   display:inline-block;
+		}
+		.page_nation .none {
+		   display:none;
+		}
+		.page_nation a {
+		   display:block;
+		   margin:0 3px;
+		   float:left;
+		   border:1px solid #e6e6e6;
+		   width:20px;
+		   height:20px;
+		   line-height:20px;
+		   text-align:center;
+		   background-color:#fff;
+		   font-size:10px;
+		   color:#999999;
+		   text-decoration:none;
+		    
+		}
+		.page_nation .arrow {
+		   border:1px solid #ccc;
+		   
+		}
+		.page_nation .pprev {
+		   margin-left:0;
+		}
+		.page_nation .prev {
+		   margin-right:7px;
+		}
+		.page_nation .next {
+		   margin-left:7px;
+		}
+		.page_nation .nnext {
+		   margin-right:0;
+		}
+		.page_nation a.active {
+		   background-color:#42454c;
+		   color:#fff;
+		   border:1px solid #42454c;
+		}
+      
+      
+    </style>
+    <script>
+    
+      $(document).ready(function () {
+	    
+        $(".tab").click(function () {
+          $(".tab-active").removeClass("tab-active");
+          $(this).addClass("tab-active");
+        });
+
+        $(".paging").click(function () {
+          $(".paging-active").removeClass("paging-active");
+          $(this).addClass("paging-active");
+        });
+        
+        $("#btnWrite").on("click", function() {
+            document.bbsForm.action="/megazine-write-page";
+            document.bbsForm.submit();
+         });
+      });
+      
+      function filter(newsFilter){
+    	  document.bbsForm.searchValue.value = document.getElementById('searchInput').value;
+    	  document.bbsForm.newsFilter.value = newsFilter;
+    	  document.bbsForm.action="/megazine-list-page";
+    	  document.bbsForm.submit();
+      }
+      
+      function search(){
+    	  document.bbsForm.searchValue.value = document.getElementById('searchInput').value;
+    	  document.bbsForm.action="/megazine-list-page";
+    	  document.bbsForm.submit();
+      }
+      
+      function goToDetail(newsSeq){
+    	  window.location.href = "/megazine-detail-page?newsSeq=" + newsSeq;
+      }
+      
+      function fn_list(num){
+    	  document.bbsForm.curPage.value= num;
+    	  document.bbsForm.action="/megazine-list-page";
+    	  document.bbsForm.submit();
+      }
+      
+
+    </script>
+  </head>
+  <div layout:fragment="content" class="megazine-list-container">
+    <div style="padding: 8px; width: 768px">
+      <div style="width: 100%">
+        <div class="">
+          <div class="d-flex justify-content-center" style="width: 100%">
+            <h3>건강매거진</h3>                
+          </div>
+
+          <div class="d-flex" style="width: 100%; justify-content: flex-end">
+            <!-- 검색 -->
+             <div class="col tab-container" style="width: 100%; justify-content: flex-end">
+	         	<div class="search-container">
+	              <input
+	                class="form-control mr-sm-2"
+	                style="border: none"
+	                placeholder="제목,내용,관련증상,진료과를 검색하세요"
+	                th:value="${searchValue}"
+	                id="searchInput"
+	                name="searchInput"
+	              />
+	               
+	              <div id="search-icon" style="padding: 0px 8px" onclick="search()">
+	                <svg
+	                  width="16"
+	                  height="16"
+	                  viewBox="0 0 20 20"
+	                  fill="none"
+	                  xmlns="http://www.w3.org/2000/svg"
+	                >
+	                  <g clip-path="url(#clip0_2367_13371)">
+	                    <path
+	                      fill-rule="evenodd"
+	                      clip-rule="evenodd"
+	                      d="M8.14439 0.00740448C6.96401 0.0621085 5.82582 0.358628 4.75176 0.89126C3.71218 1.40678 2.80897 2.1128 2.03838 3.0122C1.20773 3.98172 0.584464 5.18337 0.265416 6.43052C-0.088472 7.81385 -0.088472 9.30318 0.265416 10.6865C0.516512 11.668 0.962352 12.6367 1.54676 13.4705C1.95391 14.0514 2.45622 14.6026 3.01408 15.0805C3.9275 15.8631 5.04158 16.4594 6.21639 16.7946C7.37532 17.1252 8.62415 17.2049 9.83639 17.0255C11.0486 16.8462 12.2452 16.3869 13.2724 15.7065C13.367 15.6439 13.4775 15.5687 13.518 15.5396C13.5585 15.5104 13.5945 15.4865 13.598 15.4865C13.6015 15.4865 14.5458 16.4281 15.6964 17.5789C17.8031 19.686 17.8553 19.737 17.9884 19.8162C18.3586 20.0365 18.8396 20.0595 19.2351 19.8757C19.4965 19.7543 19.7562 19.4946 19.8776 19.2332C20.061 18.8385 20.0379 18.356 19.818 17.9865C19.7389 17.8535 19.6879 17.8013 17.5808 15.6945C16.43 14.5439 15.4884 13.5997 15.4884 13.5961C15.4884 13.5926 15.5123 13.5566 15.5414 13.5161C15.7821 13.1822 16.0292 12.7679 16.2319 12.3584C16.8245 11.1613 17.1203 9.89597 17.1203 8.55852C17.1203 7.21796 16.8232 5.95008 16.2279 4.75052C15.8091 3.90663 15.2849 3.17815 14.6128 2.50606C13.9404 1.8336 13.2115 1.30903 12.369 0.89126C11.2832 0.352788 10.1598 0.0622765 8.94839 0.00670048C8.74754 -0.00251552 8.35098 -0.00217152 8.14439 0.00740448ZM8.35239 2.67116C7.20874 2.70679 6.09237 3.08442 5.14757 3.75524C4.62973 4.12292 4.1248 4.62785 3.75712 5.14569C3.084 6.09372 2.70746 7.20968 2.67351 8.35725C2.64307 9.38588 2.84598 10.307 3.30485 11.2234C3.67525 11.9631 4.25066 12.6635 4.92324 13.1933C5.78954 13.8756 6.84643 14.3052 7.93639 14.418C8.32628 14.4584 8.79755 14.4583 9.18439 14.4179C10.2789 14.3035 11.3307 13.8761 12.1975 13.1933C12.5489 12.9166 12.9184 12.547 13.1952 12.1957C13.878 11.3288 14.3054 10.2771 14.4198 9.18252C14.4603 8.79528 14.4603 8.32176 14.4198 7.93452C14.3457 7.22517 14.1479 6.55594 13.8174 5.89668C13.3628 4.98968 12.6322 4.1777 11.7602 3.61041C10.8925 3.04588 9.81502 2.70236 8.82439 2.67441C8.74299 2.67212 8.64579 2.66913 8.60839 2.66777C8.57099 2.66642 8.45579 2.66795 8.35239 2.67116Z"
+	                      fill="#3D4551"
+	                    ></path>
+	                  </g>
+	                  <defs>
+	                    <clipPath id="clip0_2367_13371">
+	                      <rect width="20" height="20" fill="white"></rect>
+	                    </clipPath>
+	                  </defs>
+	                </svg>
+	              </div>
+	            </div>
+            </div>
+          </div>
+        <!-- 검색 -->
+        
+          <div
+            class="col tab-container"
+            `
+            style="background-color: #fff; height: 48px"
+          >
+            <div class="d-flex align-items-center" style="width: 200px">
+              <div class="tab" th:classappend="${newsFilter == '1'} ? ' tab-active'" onclick="filter(1)" id="_newsFilter" name="_newsFilter" >최신순</div>
+              <div style="width: 1px; height: 16px; background-color: #fff"></div>
+              <div  class="tab" th:classappend="${newsFilter == '2'} ? ' tab-active'" onclick="filter(2)" id="_newsFilter" name="_newsFilter" >조회순</div>
+              <div style="width: 1px; height: 16px; background-color: #fff"></div>
+              <div  class="tab" th:classappend="${newsFilter == '3'} ? ' tab-active'" onclick="filter(3)" id="_newsFilter" name="_newsFilter" >추천순</div>
+            </div>
+          </div>
+          <div class="spacing-height-16"></div>
+          
+          <div>
+            <div
+              style="
+                display: flex;
+                gap: 16px;
+                flex-direction: column;
+                width: 80%;
+                margin: 0 auto;
+              "
+            >
+
+        <div th:each="megazine: ${list}">
+            <div class="megazine"  th:onclick="goToDetail([[${megazine.newsSeq}]])">
+                <div class="megazine-content">
+                  <p class="megazine-title" th:text="${megazine.newsTitle}"></p>
+                  <p class="megazine-text" th:text="${megazine.newsSubtitle}"></p>
+                  <p class="megazine-date">[[${megazine.newsUpdateDate}]] &nbsp;&nbsp;
+                  <img src="/image/megazineReadCnt.png" style="width:15px"/> [[${megazine.newsReadCnt}]] &nbsp;
+                  <img src="/image/megazineLikeCnt.png" style="width:15px"/> [[${megazine.newsLikeCnt}]]</p>
+				<div align="left" style="font-size: 16px">
+				</div>
+                </div>
+                <div th:if="${megazine.megazinesFile?.fileName != null}" class="megazine-box" style="background: #bdbdbd">
+                  <img
+                    class="megazine-image"
+                    th:src="@{/upload/megazinesFolder/__${megazine.megazinesFile.fileName}__}"  
+                  />
+                </div>
+             </div> 
+        </div>
+       </div>
+       <!-- 페이징 시작 -->
+       <div th:if="${paging != null}">
+	 		<div class="page_wrap">
+	            <div class="page_nation">
+	            
+	            <a class="arrow prev" th:if="${paging.prevBlockPage > 0}" href="javascript:void(0)" th:onclick="'fn_list(' + ${paging.prevBlockPage} + ')'">
+	            <span class="material-symbols-outlined">chevron_left</span></a>
+	            
+	    	<th:block th:each="i : ${#numbers.sequence(paging.startPage, paging.endPage)}">
+	            <a th:if="${i != curPage}" href="javascript:void(0)" th:onclick="'fn_list(' + ${i} + ')'">[[${i}]]</a>
+	            <a th:if="${i == curPage}" href="javascript:void(0)" th:classappend="'active'">[[${i}]]</a>
+	    	</th:block>
+	    	
+	            <a class="arrow next" th:if="${paging.nextBlockPage > 0}" href="javascript:void(0)" th:onclick="'fn_list(' + ${paging.nextBlockPage} + ')'">
+	            <span class="material-symbols-outlined">chevron_right</span></a>
+	            
+				</div>
+			</div>
+		</div>
+		<!-- 페이징 끝 -->
+	           	<!-- 글쓰기 버튼 --> 
+		        <li sec:authorize="hasAuthority('ROLE_ADMIN')">
+				<div class="spacing-height-16"></div> 
+				<div class="d-flex justify-content-end" style="width: 100%">
+				    <button id="btnWrite" class="btn btn-primary d-flex justify-content-center" 
+				            style="border: none; width: 100px; background-color: rgb(169, 174, 177);" 
+				            onclick="">
+				        글쓰기
+				    </button>
+				</div>
+				</li>
+	           <!-- 글쓰기 버튼 --> 
+             <div class="spacing-height-16"></div> 
+          </div>
+        </div>
+        <div class="silver-hr"></div>
+
+		<!-- 영상 원래 있던 위치 -->
+		            <div id="recommendVideos">
+          <h5>토닥 추천 영상</h5>
+          <div
+            class="d-flex"
+            style="width: 100%; justify-content: space-evenly"
+          >
+            <div class="video-box">
+              <iframe
+                width="172"
+                height="120"
+                src="https://www.youtube.com/embed/LzHMy2ScdhA"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+              <p>고혈압 낮추는 효과적 방법</p>
+            </div>
+            
+            <div class="video-box">
+              <iframe
+                width="172"
+                height="120"
+                src="https://www.youtube.com/embed/QhRcs9d2Y9E"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+              <p>허리통증 스트레칭</p>
+            </div>
+            <div class="video-box">
+              <iframe
+                width="172"
+                height="120"
+                src="https://www.youtube.com/embed/CD-V4qjCzNc"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+              <p>당뇨 혈당관리 주의 음식</p>
+            </div>
+            <div class="video-box">
+              <iframe
+                width="172"
+                height="120"
+                src="https://www.youtube.com/embed/PsjBjPthxcA"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+              <p>소식, 한끼가 답인가?</p>
+            </div>
+          </div>
+        </div>
+		
+		<form id="bbsForm" name="bbsForm" method="get">
+			<input type="hidden" id="curPage" name="curPage" th:value="${curPage}">
+			<input type="hidden" id="searchValue" name="searchValue" th:value="${searchValue}">
+			<input type="hidden" id="newsFilter" name="newsFilter" th:value="${newsFilter}">
+		</form>
+		
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+      </div>
+    </div>
+  </div>
+  
+  
+</html>

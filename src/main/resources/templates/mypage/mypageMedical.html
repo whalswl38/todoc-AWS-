@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>마이페이지</title>
+    <style>
+      .mypage-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      h2 {
+        margin-bottom: 0;
+      }
+
+      p {
+        font-weight: 500;
+        padding: 4px 0px;
+      }
+
+      .status-icon {
+        border-radius: 50%;
+        margin-bottom: 8px;
+        background-color: rgb(247, 249, 250);
+        font-size: 14px;
+      }
+
+      .status-process {
+        width: 54px;
+        height: 2px;
+        margin-top: 8px;
+        background-color: #a9aeb1;
+        position: absolute;
+        right: -51px;
+      }
+
+      .status {
+        display: flex;
+        align-items: center;
+        color: rgb(141, 146, 151);
+        font-weight: 500;
+        position: relative;
+      }
+
+      .status-icon-active {
+        color: royalblue;
+        border: 1px solid transparent;
+        background-color: lightblue;
+        padding: 2px 4px;
+        margin-bottom: 4px;
+      }
+
+      .status-active {
+        color: royalblue;
+      }
+    </style>
+    <script>
+      $(document).ready(function () {
+        $(".tab").click(function () {
+          $(".clicked-background").removeClass("clicked-background");
+          $(this).addClass("clicked-background");
+        });
+        
+        $("#medicalBtn").click(function (){
+        	window.location.href = "http://localhost:8099/room-page";
+        });
+      });
+    </script>
+  </head>
+  <div layout:fragment="content" class="mypage-container">
+    <div class="spacing-height-16"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px">
+      <div style="padding: 8px; width: 800px">
+        <div class="mypage-details">
+          <div
+            style="
+              text-align: center;
+              padding: 8px;
+            "
+          >
+            <h2>마이페이지</h2>
+          </div>
+           <div class="silver-hr"></div>
+           
+           
+         <div style="width:750px; height:80px; background-color:royalblue;"> 
+          <div class="d-flex justify-content-between p-3">
+            <div
+              class="d-flex justify-content-center align-items-center"
+              style="flex: 1; flex-direction: column"
+            >
+              <div style="color: white; font-weight: 500">5500P</div>
+              <div style="color: white;">나의 포인트</div>
+            </div>
+            <div
+              class="d-flex justify-content-center align-items-center"
+              style="flex: 1; flex-direction: column"
+            >
+              <div style="color: white; font-weight: 500" th:text="${listCount}" ></div>
+              <div style="cursor: pointer; color:white;" th:onclick="|location.href='@{reservationStatus-page}'|">예약 승인/취소</div>
+            </div>
+            <div
+              class="d-flex justify-content-center align-items-center"
+              style="flex: 1; flex-direction: column"
+            >
+              <div style="color: white; font-weight: 500" th:text="${contactCount}"></div>
+              <div style="cursor: pointer; color:white;" th:onclick="|location.href='@{reservationList-page}'|">진료대기</div>
+            </div>
+          </div>
+         </div>
+			
+			
+			<!-- 
+			<div style="width:700px; height:150px;     border-radius: 8px; bold_
+				    padding: 16px; display: inline;
+				    text-align: center;">
+    		<h2>진료신청중이 아닙니다.</h2>
+    		</div>
+    		-->
+		
+          
+          <div class="silver-hr"></div>
+
+          <div class="p-2 d-flex align-items-center justify-content-between">
+            <div>
+              <p>회원정보수정</p>
+            </div>
+            <div style="cursor: pointer" th:onclick="|location.href='@{medicalUpdate-page}'|">
+              <i 
+                class="fa-solid fa-chevron-right"
+                style="color: rgb(141, 146, 151)"
+              ></i>
+            </div>
+          </div>
+          <div class="p-2 d-flex align-items-center justify-content-between" th:onclick="|location.href='@{reservationStatus-page}'|">
+            <div style="cursor: pointer" >
+              <p>예약 승인/취소</p>
+            </div>
+            <div style="cursor: pointer">
+              <i
+                class="fa-solid fa-chevron-right"
+                style="color: rgb(141, 146, 151)"
+              ></i>
+            </div>
+          </div>
+          <div class="p-2 d-flex align-items-center justify-content-between" th:onclick="|location.href='@{reservationList-page}'|">
+            <div style="cursor: pointer" >
+              <p>진료대기</p>
+            </div>
+            <div style="cursor: pointer">
+              <i
+                class="fa-solid fa-chevron-right"
+                style="color: rgb(141, 146, 151)"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+      </div>
+    </div>
+  </div>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+<head>
+    <title>Main Page</title>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+	
+    <script>
+        (function() {
+            var w = window;
+            if (w.ChannelIO) {
+                return w.console.error("ChannelIO script included twice.");
+            }
+            var ch = function() {
+                ch.c(arguments);
+            };
+            ch.q = [];
+            ch.c = function(args) {
+                ch.q.push(args);
+            };
+            w.ChannelIO = ch;
+
+            function l() {
+                if (w.ChannelIOInitialized) {
+                    return;
+                }
+                w.ChannelIOInitialized = true;
+                var s = document.createElement("script");
+                s.type = "text/javascript";
+                s.async = true;
+                s.src = "https://cdn.channel.io/plugin/ch-plugin-web.js";
+                var x = document.getElementsByTagName("script")[0];
+                if (x.parentNode) {
+                    x.parentNode.insertBefore(s, x);
+                }
+            }
+            if (document.readyState === "complete") {
+                l();
+            } else {
+                w.addEventListener("DOMContentLoaded", l);
+                w.addEventListener("load", l);
+            }
+        })();
+
+        ChannelIO('boot', {
+            "pluginKey": "c83bd05f-b9cf-4240-8b27-0275570cde22"
+        });
+    </script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <style>
+        .main-container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            height: 100%;
+            position: relative;
+        }
+
+        .swiper-container {
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .swiper-slide {
+            font-size: 18px;
+            background: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            background-color: #99CCFF;
+        }
+
+        .circle-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 70%;
+            overflow: hidden;
+            margin: 8px;
+        }
+
+        .profile {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nutrient {
+            width: 80px;
+            word-wrap: break-word;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .nutrient-text {
+            color: rgb(141, 146, 151);
+            font-size: 14px;
+        }
+
+        .megazine {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 10px;
+            padding: 12px 0px 12px 12px;
+            max-height: 100px;
+            height: 80px;
+            cursor: pointer;
+        }
+
+        .megazine:hover {
+            background: #f3f3f3;
+        }
+
+        .megazine-content {
+            display: flex;
+            flex-direction: column;
+            width: 70%;
+        }
+
+        .megazine-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+            overflow: hidden;
+            white-space: normal;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .megazine-date {
+            font-size: 0.9rem;
+            margin-top: 8px;
+            color: rgb(169, 174, 177);
+        }
+
+        .megazine-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .megazine-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .feature {
+            flex: 1;
+            border-radius: 16px;
+            height: 88px;
+            border: 1px solid rgb(223, 225, 226);
+            background-size: 100% 100%;
+            cursor: pointer;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-1 {
+            background-image: url("image/feature1.png");
+        }
+
+        .feature-2 {
+            background-image: url("image/feature2.jpg");
+        }
+
+        .feature-3 {
+            background-image: url("image/feature3.jpg");
+        }
+
+        .search-container {
+            position: absolute;
+            display: flex;
+            height: 64px;
+            background: rgb(255, 255, 255);
+            box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px 0px;
+            top: 260px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 99;
+            width: 100%;
+            max-width: 640px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .search-input {
+            border: 0;
+            height: 48px;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .swiper-pagination {
+            width: 40px;
+            position: absolute;
+            bottom: 50px;
+            right: 16px;
+            background-color: rgba(0,
+                    0,
+                    0,
+                    0.5);
+            /* Example: semi-transparent black */
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 1030px;
+        }
+
+
+        .swiper-slide-detail {
+            display: flex;
+            flex-direction: column;
+            -webkit-box-pack: center;
+            justify-content: center;
+            max-width: 768px;
+            width: 100%;
+            height: 100%;
+            background-size: 100% 100%;
+            color: rgb(255, 255, 255);
+            position: relative;
+        }
+		
+		.dongle-regular {
+		  font-family: "Dongle", sans-serif;
+		  font-weight: 400;
+		  font-style: normal;
+		}
+
+    </style>
+    <script>
+       function fnSearch() {
+           var searchWord = $("#searchWord").val();
+           window.location.href = "/select-clinic-page?searchWord=" + encodeURIComponent(searchWord);
+       }
+    </script>
+</head>
+<body>
+<div layout:fragment="content" class="main-container">
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide">
+                <div class="swiper-slide-detail" th:style="'background-image:url('+ @{/image/banner1.png} +');'">
+                    <p style="text-align:left; font-size:32px; color:black; height:50px; white-space: pre;">비대면 진료가 한시적으로<br />365일 24시간 가능해요</p><br /><br />
+                    <p>자세히 알아보기</p>
+                </div>
+            </div>
+
+            <div class="swiper-slide" th:style="'background-color:#FFDEAD'">
+                <div class="swiper-slide-detail" th:style="'background-image:url('+ @{/image/banner2.png} +');'">
+                    <p style="text-align:left; font-size:32px; color:black; height:50px; white-space: pre;">비대면 진료가 처음이세요?</p><br />
+                    <p>자세히 알아보기</p>
+                </div>
+            </div>
+
+            <div class="swiper-slide" th:style="'background-color:#CDE6C7;'">
+                <div class="swiper-slide-detail" th:style="'background-image:url('+ @{/image/banner3.png} +');'">
+                    <p style="text-align:left; font-size:32px; color:black; height:50px; white-space: pre;">비대면 진료 안써본 사람 찾습니다.</p><br />
+                    <p>자세히 알아보기</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="swiper-button-prev" style="color: white"></div>
+        <div class="swiper-button-next" style="color: white"></div>
+        <div>
+            <div class="swiper-pagination d-flex" style="justify-content: center"></div>
+        </div>
+    </div>
+    <script>
+      var swiper = new Swiper(".swiper-container", {
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev",
+        },
+        pagination: {
+          el: ".swiper-pagination",
+          type: "fraction",
+        },
+		autoplay: {
+		            delay: 0.005, 
+		            // 슬라이드가 자동으로 전환되기까지의 시간 간격
+		            desableOnInteraction: false, 
+		            // arrow나 pagination이용 후 자동 재생을 비활성화 할지의 여부
+		      },
+		      speed: 5e3,
+		      // 슬라이드가 자동으로 전환되는 속도를 설정
+		      loop: true,
+		      // 슬라이드가 무한 순환
+		      slidesPerView: "auto",
+		      // 슬라이드가 표시되는 갯수를 설정
+		      freemode: true
+		      // 슬라이드가 자유롭게 스와이프 되도록 설정
+      });
+	  function goToDetail(newsSeq){
+	    window.location.href = "/megazine-detail-page?newsSeq=" + newsSeq;
+	  }
+    </script>
+    <div class="search-container">
+        <div class="" style="padding-left: 28px">
+            <img src="image/icon.png" style="width: 28px"></img>
+        </div>
+        <div style="width: 100%; padding: 0px 16px">
+            <input class="search-input" id="searchWord" type="text" placeholder="머리가 아파요, 목이 따가워요" />
+        </div>
+        <div role="presentation" style="padding-right: 28px" onclick="fnSearch($('#searchWord').val())">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g clip-path="url(#clip0_2367_13371)">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.14439 0.00740448C6.96401 0.0621085 5.82582 0.358628 4.75176 0.89126C3.71218 1.40678 2.80897 2.1128 2.03838 3.0122C1.20773 3.98172 0.584464 5.18337 0.265416 6.43052C-0.088472 7.81385 -0.088472 9.30318 0.265416 10.6865C0.516512 11.668 0.962352 12.6367 1.54676 13.4705C1.95391 14.0514 2.45622 14.6026 3.01408 15.0805C3.9275 15.8631 5.04158 16.4594 6.21639 16.7946C7.37532 17.1252 8.62415 17.2049 9.83639 17.0255C11.0486 16.8462 12.2452 16.3869 13.2724 15.7065C13.367 15.6439 13.4775 15.5687 13.518 15.5396C13.5585 15.5104 13.5945 15.4865 13.598 15.4865C13.6015 15.4865 14.5458 16.4281 15.6964 17.5789C17.8031 19.686 17.8553 19.737 17.9884 19.8162C18.3586 20.0365 18.8396 20.0595 19.2351 19.8757C19.4965 19.7543 19.7562 19.4946 19.8776 19.2332C20.061 18.8385 20.0379 18.356 19.818 17.9865C19.7389 17.8535 19.6879 17.8013 17.5808 15.6945C16.43 14.5439 15.4884 13.5997 15.4884 13.5961C15.4884 13.5926 15.5123 13.5566 15.5414 13.5161C15.7821 13.1822 16.0292 12.7679 16.2319 12.3584C16.8245 11.1613 17.1203 9.89597 17.1203 8.55852C17.1203 7.21796 16.8232 5.95008 16.2279 4.75052C15.8091 3.90663 15.2849 3.17815 14.6128 2.50606C13.9404 1.8336 13.2115 1.30903 12.369 0.89126C11.2832 0.352788 10.1598 0.0622765 8.94839 0.00670048C8.74754 -0.00251552 8.35098 -0.00217152 8.14439 0.00740448ZM8.35239 2.67116C7.20874 2.70679 6.09237 3.08442 5.14757 3.75524C4.62973 4.12292 4.1248 4.62785 3.75712 5.14569C3.084 6.09372 2.70746 7.20968 2.67351 8.35725C2.64307 9.38588 2.84598 10.307 3.30485 11.2234C3.67525 11.9631 4.25066 12.6635 4.92324 13.1933C5.78954 13.8756 6.84643 14.3052 7.93639 14.418C8.32628 14.4584 8.79755 14.4583 9.18439 14.4179C10.2789 14.3035 11.3307 13.8761 12.1975 13.1933C12.5489 12.9166 12.9184 12.547 13.1952 12.1957C13.878 11.3288 14.3054 10.2771 14.4198 9.18252C14.4603 8.79528 14.4603 8.32176 14.4198 7.93452C14.3457 7.22517 14.1479 6.55594 13.8174 5.89668C13.3628 4.98968 12.6322 4.1777 11.7602 3.61041C10.8925 3.04588 9.81502 2.70236 8.82439 2.67441C8.74299 2.67212 8.64579 2.66913 8.60839 2.66777C8.57099 2.66642 8.45579 2.66795 8.35239 2.67116Z" fill="#3D4551"></path>
+                </g>
+                <defs>
+                    <clipPath id="clip0_2367_13371">
+                        <rect width="20" height="20" fill="white"></rect>
+                    </clipPath>
+                </defs>
+            </svg>
+        </div>
+    </div>
+    <div style="width: 640px; margin: 0 auto">
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+        <div style="width: 100%; display: flex; gap: 8px">
+            <div class="feature feature-1">
+                <a th:href="@{/clinic-contact-subject-page}" style="height: 100%">
+                    <p>대면 진료</p>
+                    <p>바로 예약하기</p>
+                </a>
+            </div>
+            <div class="feature feature-2" onclick="">
+                <a th:href="@{/select-subject-page}" style="height: 100%">
+                    <p>내가 원하는 정보로</p>
+                    <p>병원 찾기</p>
+                </a>
+            </div>
+            <div class="feature feature-3">
+                <a th:href="@{/select-item-page}" style="height: 100%">
+                    <p>몸에 이상이 있을 땐</p>
+                    <p>증상 검색</p>
+                </a>
+            </div>
+        </div>
+        <div class="spacing-height-16"></div>
+        <div style="width: 100%">
+            <h2 style="font-size: 20px">영양제</h2>
+            <div style="display: flex; justify-content: space-evenly">
+                <div class="nutrient">
+                    <a onclick="supple('glu')" id="glu">
+                        <div class="circle-box" style="background: #bdbdbd">
+                            <img class="profile" src="image/medical-icon/glu.png" />
+                        </div>
+                        <div class="nutrient-text">글루타치온</div>
+                    </a>
+                </div>
+                <div class="nutrient">
+                    <a onclick="supple('yu')" id="yu">
+                        <div class="circle-box" style="background: #bdbdbd">
+                            <img class="profile" src="image/medical-icon/probio.png" />
+                        </div>
+                        <div class="nutrient-text">유산균</div>
+                    </a>
+                </div>
+                <div class="nutrient">
+                    <a onclick="supple('vitaB')" id="vitaB">
+                        <div class="circle-box" style="background: #bdbdbd">
+                            <img class="profile" src="image/medical-icon/vita.png" />
+                        </div>
+                        <div class="nutrient-text">비타민B</div>
+                    </a>
+                </div>
+                <div class="nutrient">
+                    <a onclick="supple('hyomo')" id="hyomo">
+                        <div class="circle-box" style="background: #bdbdbd">
+                            <img class="profile" src="image/medical-icon/inner.png" />
+                        </div>
+                        <div class="nutrient-text">효모</div>
+                    </a>
+                </div>
+                <div class="nutrient">
+                    <a onclick="supple('banaba')" id="banaba">
+                        <div class="circle-box" style="background: #bdbdbd">
+                            <img class="profile" src="image/medical-icon/nutri.png" />
+                        </div>
+                        <div class="nutrient-text">바나바</div>
+                    </a>
+                </div>
+                <div class="nutrient">
+                    <a onclick="supple('cal')" id="cal">
+                        <div class="circle-box" style="background: #bdbdbd">
+                            <img class="profile" src="image/medical-icon/diet.png" />
+                        </div>
+                        <div class="nutrient-text">칼슘</div>
+                    </a>
+                </div>
+                <div class="nutrient">
+                    <a onclick="supple('rutain')" id="rutain">
+                        <div class="circle-box" style="background: #bdbdbd">
+                            <img class="profile" src="image/medical-icon/rutain.png" />
+                        </div>
+                        <div class="nutrient-text">루테인</div>
+                    </a>
+                </div>
+                <div class="nutrient">
+                    <a onclick="supple('milk')" id="milk">
+                        <div class="circle-box" style="background: #bdbdbd">
+                            <img class="profile" src="image/medical-icon/milk.png" />
+                        </div>
+                        <div class="nutrient-text">밀크씨슬</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <script>
+            function supple(param) {
+                let searchValue = "";
+                switch (param) {
+                    case "glu":
+                        searchValue = "글루타치온";
+                        break;
+                    case "yu":
+                        searchValue = "유산균";
+                        break;
+                    case "vitaB":
+                        searchValue = "비타민B";
+                        break;
+                    case "hyomo":
+                        searchValue = "효모";
+                        break;
+                    case "banaba":
+                        searchValue = "바나바";
+                        break;
+                    case "cal":
+                        searchValue = "칼슘";
+                        break;
+                    case "rutain":
+                        searchValue = "루테인";
+                        break;
+                    case "milk":
+                        searchValue = "밀크씨슬";
+                        break;
+                    default:
+                        searchValue = "";
+                        break;
+                }
+                window.location.href = `/nutrients-list-page?searchValue=${searchValue}&curPage=1`;
+            }
+        </script>
+        <div class="spacing-height-16"></div>
+        <div style="width: 100%">
+            <div style="
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+          ">
+                <div>
+                    <h2 style="font-size: 20px">건강 매거진</h2>
+                </div>
+                <div>
+                    <a th:href="@{/megazine-list-page}" style="color: rgb(169, 174, 177)">더보기</a>
+                </div>
+            </div>
+            <div style="display: flex; gap: 32px">
+                <div class="megazine" th:each="megazine: ${list}" th:onclick="goToDetail([[${megazine.newsSeq}]])">
+                    <div class="megazine-content">
+                        <p class="megazine-title" th:text="${megazine.newsTitle}"> </p>
+                        <p class="megazine-date" th:text="${megazine.newsUpdateDate}"></p>
+                    </div>
+					<div th:if="${megazine.megazinesFile?.fileName != null}" class="megazine-box" style="background: #bdbdbd">
+					    <img class="megazine-image" th:src="@{/upload/megazinesFolder/__${megazine.megazinesFile.fileName}__}" />
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="spacing-height-16"></div>
+</div>
+</body>
+</html>

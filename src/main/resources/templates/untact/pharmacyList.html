@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html xmlns:th="http//www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+
+<head>
+    <title>약국리스트</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        .clinic-list-container {
+            max-width: 1050px;
+            margin: auto;
+            width: 100%;
+            height: calc(70vh);
+        }
+
+        #lnb-container {
+            width: 350px;
+            overflow-y: auto;
+        }
+
+        .lnb-item {
+            padding: 8px;
+        }
+
+        #map-container {
+            border: 0.4px solid rgb(141, 146, 151);
+            width: calc(100% - 300px);
+            height: calc(70vh);
+        }
+
+        .silver-hr {
+            width: 100%;
+            height: 1px;
+            background: #a9aeb1;
+            margin: 12px 0;
+            opacity: 0.4;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        input::placeholder {
+            font-size: 14px;
+        }
+
+        .row {
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 0px 8px;
+        }
+
+        .filter-sort {
+            background-color: rgb(247, 249, 250);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: rgb(141, 146, 151);
+            font-weight: 500;
+            min-width: 40px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        ._filter-sort {
+            background-color: rgb(247, 249, 250);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: rgb(141, 146, 151);
+            font-weight: 500;
+            min-width: 40px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+
+        .clinic-id {
+            background-color: rgb(247, 249, 250);
+            border-radius: 8px;
+            padding: 2px;
+            font-size: 10px;
+            color: rgb(141, 146, 151);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .clicked-background {
+            color: royalblue;
+            background-color: #e0ecff;
+            border: 1px solid royalblue;
+        }
+
+        .card-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #ffffff;
+            padding: 8px 8px 8px 12px;
+            border-top: 0.2px solid rgb(141, 146, 151);
+            cursor: pointer;
+
+        }
+
+        .card-image-box {
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .card-image {
+            width: 64px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .clinicItem {
+            padding: 3px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .selected {
+            color: royalblue;
+            background-color: #e0ecff;
+            border: 1px solid royalblue;
+        }
+
+        .d-flex+.d-flex {
+            margin-top: 8px;
+            /* 간격 조정 */
+        }
+
+        /*모달*/
+        /* 아래에서 위로 애니메이션 */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, 100%, 0);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateZ(0);
+            }
+        }
+
+        .fade-up {
+            /* 속도 조절 */
+            animation: fadeInUp 0.3s;
+        }
+
+        .sort-box {
+            font-size: 18px;
+            font-weight: 500;
+            padding: 16px;
+            cursor: pointer;
+        }
+
+        .modal-dialog {
+            width: 100%;
+            height: 90%;
+            overflow: hidden;
+        }
+
+        .modal-content {
+            width: 100%;
+            height: 90%;
+            overflow-y: scroll;
+            padding-right: 17px;
+            box-sizing: content-box;
+        }
+
+        .page_wrap {
+            text-align: center;
+            font-size: 0;
+        }
+
+        .page_nation {
+            display: inline-block;
+        }
+
+        .page_nation .none {
+            display: none;
+        }
+
+        .page_nation a {
+            display: block;
+            margin: 0 3px;
+            float: left;
+            border: 1px solid #e6e6e6;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            background-color: #fff;
+            font-size: 10px;
+            color: #999999;
+            text-decoration: none;
+
+        }
+
+        .page_nation .arrow {
+            border: 1px solid #ccc;
+
+        }
+
+        .page_nation .pprev {
+            margin-left: 0;
+        }
+
+        .page_nation .prev {
+            margin-right: 7px;
+        }
+
+        .page_nation .next {
+            margin-left: 7px;
+        }
+
+        .page_nation .nnext {
+            margin-right: 0;
+        }
+
+        .page_nation a.active {
+            background-color: #42454c;
+            color: #fff;
+            border: 1px solid #42454c;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function() {
+            $(".filter-sort").click(function() {
+                $(this).toggleClass("clicked-background");
+            });
+
+        });
+
+        function goToDetail(clinicInstinum) {
+            window.location.href = "/clinic-contact-detail-page?clinicInstinum=" + clinicInstinum;
+        }
+
+
+        function nightList() {
+            var element = document.getElementById('nightFilter');
+            var clinicWeekend = document.getElementById('clinicWeekend').value;
+            var category = document.getElementById('category').value;
+            var searchValue = document.getElementById('searchValue').value;
+            var textSearch = document.getElementById('textSearch').value;
+            var guValue = document.getElementById('guValue').value;
+            var isOpening = document.getElementById('isOpening').value;
+            var clinicNight;
+
+            if (document.getElementById('clinicNight').value == "Y") {
+                element.classList.remove('selected');
+                clinicNight = "";
+
+            } else {
+                element.classList.add('selected');
+                clinicNight = "Y";
+            }
+
+            window.location.href = "/clinic-contact-category-list?category=" + category + "&searchValue=" + searchValue + "&clinicNight=" + clinicNight + "&clinicWeekend=" + clinicWeekend + "&textSearch=" + textSearch + "&guValue=" + guValue + "&isOpening=" + isOpening;
+
+        }
+
+        function weekendList() {
+            var element = document.getElementById('weekendFilter');
+            var clinicNight = document.getElementById('clinicNight').value;
+            var category = document.getElementById('category').value;
+            var searchValue = document.getElementById('searchValue').value;
+            var textSearch = document.getElementById('textSearch').value;
+            var guValue = document.getElementById('guValue').value;
+            var isOpening = document.getElementById('isOpening').value;
+            var clinicWeekend;
+
+            if (document.getElementById('clinicWeekend').value == "Y") {
+
+                element.classList.remove('selected');
+
+                clinicWeekend = "";
+
+            } else {
+                element.classList.add('selected');
+                clinicWeekend = "Y"
+            }
+
+            window.location.href = "/clinic-contact-category-list?category=" + category + "&searchValue=" + searchValue + "&clinicNight=" + clinicNight + "&clinicWeekend=" + clinicWeekend + "&textSearch=" + textSearch + "&guValue=" + guValue + "&isOpening=" + isOpening;
+
+        }
+
+        function searchClinic() {
+            var textSearch1 = document.getElementById('textSearch1').value;
+            var category = document.getElementById('category').value;
+            var searchValue = document.getElementById('searchValue').value;
+            var clinicNight = document.getElementById('clinicNight').value;
+            var clinicWeekend = document.getElementById('clinicWeekend').value;
+            var guValue = document.getElementById('guValue').value;
+            var isOpening = document.getElementById('isOpening').value;
+            window.location.href = "/clinic-contact-category-list?textSearch=" + textSearch1 + "&category=" + category + "&searchValue=" + searchValue + "&clinicNight=" + clinicNight + "&clinicWeekend=" + clinicWeekend + "&guValue=" + guValue + "&isOpening=" + isOpening;
+        }
+
+        function opening() {
+            var textSearch = document.getElementById('textSearch').value;
+            var category = document.getElementById('category').value;
+            var searchValue = document.getElementById('searchValue').value;
+            var clinicNight = document.getElementById('clinicNight').value;
+            var clinicWeekend = document.getElementById('clinicWeekend').value;
+            var guValue = document.getElementById('guValue').value;
+            var isOpening;
+
+            if (document.getElementById('isOpening').value == "Y") {
+
+                isOpening = "";
+
+            } else {
+
+                isOpening = "Y";
+            }
+
+            window.location.href = "/clinic-contact-category-list?textSearch=" + textSearch + "&category=" + category + "&searchValue=" + searchValue + "&clinicNight=" + clinicNight + "&clinicWeekend=" + clinicWeekend + "&guValue=" + guValue + "&isOpening=" + isOpening;
+
+        }
+
+
+
+        function setSort(sort) {
+            var textSearch = document.getElementById('textSearch').value;
+            var category = document.getElementById('category').value;
+            var searchValue = document.getElementById('searchValue').value;
+            var clinicNight = document.getElementById('clinicNight').value;
+            var clinicWeekend = document.getElementById('clinicWeekend').value;
+            var isOpening = document.getElementById('isOpening').value;
+
+
+            $("#sort").addClass("clicked-background");
+
+            window.location.href = "/clinic-contact-category-list?textSearch=" + textSearch + "&category=" + category + "&searchValue=" + searchValue + "&clinicNight=" + clinicNight + "&clinicWeekend=" + clinicWeekend + "&guValue=" + sort + "&isOpening=" + isOpening;
+
+
+
+        }
+
+        function currentLoca() {
+            var textSearch = document.getElementById('textSearch').value;
+            var category = document.getElementById('category').value;
+            var searchValue = document.getElementById('searchValue').value;
+            var clinicNight = document.getElementById('clinicNight').value;
+            var clinicWeekend = document.getElementById('clinicWeekend').value;
+            var isOpening = document.getElementById('isOpening').value;
+            var locationValue = document.getElementById('currentLocation').value;
+
+
+
+
+            window.location.href = "/clinic-contact-category-list?textSearch=" + textSearch + "&category=" + category + "&searchValue=" + searchValue + "&clinicNight=" + clinicNight + "&clinicWeekend=" + clinicWeekend + "&locationValue=" + locationValue + "&isOpening=" + isOpening;
+
+        }
+
+        function fn_list(num) {
+            var textSearch = document.getElementById('textSearch').value;
+            var category = document.getElementById('category').value;
+            var searchValue = document.getElementById('searchValue').value;
+            var clinicNight = document.getElementById('clinicNight').value;
+            var clinicWeekend = document.getElementById('clinicWeekend').value;
+            var isOpening = document.getElementById('isOpening').value;
+            var locationValue = document.getElementById('currentLocation').value;
+            var curPage = num;
+
+            window.location.href = "/clinic-contact-category-list?textSearch=" + textSearch + "&category=" + category + "&searchValue=" + searchValue + "&clinicNight=" + clinicNight + "&clinicWeekend=" + clinicWeekend + "&locationValue=" + locationValue + "&isOpening=" + isOpening + "&curPage=" + curPage;
+
+
+        }
+    </script>
+</head>
+
+<body>
+    <div layout:fragment="content" class="clinic-list-container">
+        <div class="d-flex justify-content-between" style="height: calc(70vh)">
+            <div id="lnb-container">
+                <form>
+                    <div class="d-flex align-items-center" style="
+              width: calc(100% - 24px);
+              border: 2px solid royalblue;
+              border-radius: 8px;
+              padding-left: 8px;
+            ">
+                        <div style="padding-right: 4px">
+                            <button type="button" class="" style="border: 0; background-color: #fff" onclick="searchClinic()">
+                                <div width="24" class="">
+                                    <span class="" size="24">
+                                        <i class="fa-solid fa-magnifying-glass" style="color:royalblue"></i>
+                                    </span>
+                                </div>
+                            </button>
+                        </div>
+                        <div style="width: calc(100% - 40px)">
+                            <input id="textSearch1" tabindex="0" placeholder="병원 이름을 검색해보세요" style="height: 20px; border: none; padding: 8px; width: calc(100% - 16px);">
+                        </div>
+
+                        <div style="cursor: pointer">
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                </form>
+                <div class="spacing-height-8"></div>
+                <div class="d-flex justify-content-center" style="gap:13px;">
+                    <div class="filter-sort" id="currentLocationBtn" th:onclick="currentLoca()" th:style="">현재위치</div>
+                    <div class="filter-sort" id="openButton" th:onclick="opening()" th:style="">진료중</div>
+                    <div class="filter-sort" id="nightFilter" th:onclick="nightList()" th:style="">
+                        야간
+                    </div>
+                    <div class="filter-sort" id="weekendFilter" th:onclick="weekendList()" th:style="">
+                        주말
+                    </div>
+                </div>
+                <div class="spacing-height-8"></div>
+                <!-- 모달 -->
+                <div id="sort" class="_filter-sort" data-bs-toggle="modal" data-bs-target="#sortModal" th:style="">
+                    <span id="sort-text" th:text=""></span> &nbsp;<i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+                </div>
+                <!-- 모달 -->
+                <div class="spacing-height-8"></div>
+                <div class="filter-sort" style="color: royalblue; background-color: #e0ecff; border: 1px solid royalblue;width: 240px;margin: 0 auto;">
+                    <span th:text=""></span>
+                </div>
+
+                <div class="spacing-height-8"></div>
+                <div id="root" th:if="" >
+		    <p style="text-align: center;">검색결과가 없습니다</p>
+		    <div></div>
+		</div>
+ 		<div id="root" th:each="">
+          <div th:id="" class="col card-box d-flex" th:onclick="">
+            <div>
+              <div class="d-flex align-items-center">
+                <span
+                  class="clinicItem"
+                  style="
+                    color: rgb(34, 139, 230);
+                    font-size: 16px;
+                    padding: 3px 0px;
+                  "
+                  th:text=""
+                ></span>
+              </div>
+
+              <div
+                style="
+                  margin-bottom: 4px;
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: rgb(141, 146, 151);
+                "
+                
+                th:text="" 
+              ></div><!-- "${clinic.keyword}" -->
+              
+              
+              <div
+                style="
+                  margin-bottom: 8px;
+                  font-size: 14px;
+                  font-weight: 700;
+                  color: black;
+                "
+                
+                th:text="" 
+              ></div>
+              <div
+                class="d-flex align-items-center"
+                style="
+                  gap: 8px;
+                  margin-bottom: 4px;
+                  font-size: 12px;
+                  color: rgb(141, 146, 151);
+                "
+              >
+                <div
+                  
+                >진료증상</div>
+                
+                <div
+                  style="
+                    height: 3px;
+                    width: 3px;
+                    background: silver;
+                    border-radius: 50%;
+                  "
+                ></div>
+                
+                <div th:text=""></div>
+              </div>
+
+              <div class="d-flex align-items-center" style="gap: 4px; margin-bottom: 4px; font-size: 12px">
+                <div style="font-weight: 700;color: rgb(141, 146, 151)">의사</div>
+                <div style="height: 3px; width: 3px; background: silver; border-radius: 50%;"></div>
+                <div style="color: rgb(141, 146, 151)"></div>
+              </div>
+                            
+              <div class="d-flex align-items-center" style="gap: 8px; margin-bottom: 4px; font-size: 12px; color: rgb(141, 146, 151);">
+                <div th:if="" th:text=""></div>
+              </div>
+
+              
+            </div>
+            <div class="card-image-box">
+            <!--  
+            <svg class="card-image" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><title>Free Medical icons</title><rect x="18" y="34" width="12" height="10" transform="translate(-15 63) rotate(-90)" fill="#a6c7ff"></rect><path d="M40,48H8a3,3,0,0,1-3-3V13a3,3,0,0,1,3-3h7v4H9V44H39V14H33V10h7a3,3,0,0,1,3,3V45A3,3,0,0,1,40,48Z" fill="#3870ff"></path><rect x="22" y="6" width="4" height="10" transform="translate(13 35) rotate(-90)" fill="#a6c7ff"></rect><rect x="22" y="6" width="4" height="10" transform="translate(48 22) rotate(-180)" fill="#a6c7ff"></rect><path d="M32,22H16a3,3,0,0,1-3-3V3a3,3,0,0,1,3-3H32a3,3,0,0,1,3,3V19A3,3,0,0,1,32,22ZM17,18H31V4H17V18Z" fill="#3870ff"></path><rect width="48" height="48" fill="none"></rect></g></svg>
+            -->
+            
+               <img  class="card-image" th:src="" />  
+              
+		
+              </div>
+            </div>
+            
+         
+          </div>
+          <div class="spacing-height-8"></div><div class="spacing-height-8"></div>
+          
+          
+          <!-- 페이징 시작 -->
+
+		<div th:if="">
+ 		<div class="page_wrap">
+            <div class="page_nation">
+            
+            <a class="arrow prev" th:if="" href="javascript:void(0)" th:onclick="">
+            <span class="material-symbols-outlined">chevron_left</span></a>
+            
+    	<th:block th:each="">
+            <a th:if="" href="javascript:void(0)" th:onclick=""></a>
+            <a th:if="" href="javascript:void(0)" th:classappend=""></a>
+    	</th:block>
+    	
+            <a class="arrow next" th:if="" href="javascript:void(0)" th:onclick="">
+            <span class="material-symbols-outlined">chevron_right</span></a>
+            
+			</div>
+		</div>
+		</div>
+          <div class="spacing-height-8"></div><div class="spacing-height-8"></div><div class="spacing-height-8"></div>
+        </div>
+      
+        <input type="hidden" name="clinicNight" id="clinicNight" th:value="" />
+        <input type="hidden" name="clinicWeekend" id="clinicWeekend" th:value="" />
+        <input type="hidden" name="category" id="category" th:value="" />
+        <input type="hidden" name="searchValue" id="searchValue" th:value="" />
+        <input type="hidden" name="textSearch" id="textSearch" th:value="" />
+        <input type="hidden" name="guValue" id="guValue" th:value="" />
+        <input type="hidden" name="guName" id="guName" th:value="" />
+        <input type="hidden" name="isOpening" id="isOpening" th:value="}" />
+        <input type="hidden" name="currentLocation" id="currentLocation" value="" />
+        <input type="hidden" name="locationValue" id="locationValue" th:value="" />
+        
+        
+        <form  name="addrForm" id="addrForm" method="post" th:each="">		
+			<input type="hidden" name="mapAddr" id="mapAddr" th:value="" />
+			<input type="hidden" name="mapClinicName" id="mapClinicName" th:value="" />
+			<input type="hidden" name="mapClinicInstinum" id="mapClinicInstinum" th:value="" />
+		</form>
+		
+		<!-- 정렬 모달 -->
+	    <div class="modal fade-up" id="sortModal" tabindex="-1" aria-labelledby="sortModalLabel" aria-hidden="true">
+	      <div class="modal-dialog fixed-bottom">
+	        <div class="modal-content">
+	          <div class="modal-header">
+	            <h5 class="modal-title" id="sortModalLabel">
+	              지역을 선택하세요
+	            </h5>
+	          </div>
+	          <div class="modal-body" th:each="">
+	            <div class="sort-box" th:onclick="" data-bs-dismiss="modal">
+	              서울시  
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+      <!-- 정렬 모달 -->
+        <div id="map-container"></div>	
+        <!-- 지도 스크립트 시작-->
+		<!-- 지도 스크립트 끝 -->
+      </div>
+    </div>
+    </body>
+</html>

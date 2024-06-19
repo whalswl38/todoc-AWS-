@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>비대면 진료 결제</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swiper/swiper-bundle.min.css"
+    />
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <style>
+      .reserve-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      #lnb-container {
+        width: 140px;
+      }
+
+      .lnb-item a {
+        font-size: 18px;
+        padding: 8px;
+        display: block;
+      }
+
+      #lnb-container a:not(.lnb-active) {
+        color: black;
+        font-size: 18px;
+      }
+
+      .lnb-active {
+        color: royalblue;
+      }
+
+      input[type="radio"] {
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        border: 4px solid rgb(141, 146, 151);
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      input[type="radio"]:checked {
+        box-shadow: 0 0 0 1px transparent;
+        border: 4px solid  royalblue;
+      }
+
+      .next-btn {
+        width: cal(100% - 16px);
+        color: #fff;
+        padding: 8px;
+        background-color:  royalblue;
+        text-align: center;
+        border-radius: 8px;
+      }
+
+      .swiper-cotainer-box {
+        width: 400px;
+        height: 200px;
+      }
+
+      .swiper-container {
+        width: 100%;
+        height: 234px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .swiper-slide {
+        font-size: 18px;
+        background: #ddd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+        width: 100px;
+        border-radius: 16px;
+        margin: 0 auto;
+      }
+
+      .swiper-button-next,
+      .swiper-button-prev {
+        display: none;
+      }
+    </style>
+    <script>
+    var payPage;
+		$(document).ready(function () {
+			$(".next-btn").on("click", function () {
+				if ($("#kakao").is(":checked")) {
+					// 카카오페이 결제전송
+					$.ajax({
+						url:"/kakaoPay",
+						type: "post",
+				        success:function(response){
+				        	payPage= window.open(response,'kakaoPopUp','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,width=540,height=700,left=100,top=100');
+				        },
+				        error:function(error){
+				        }
+					});
+				}
+			});
+      });
+		
+		
+	function paySuccess(tid){
+		payPage.close();
+		
+		$("#tid").val(tid);
+		$("#kakaoPayResult").submit();
+	}
+	
+    </script>
+  </head>
+  <div
+    layout:fragment="content"
+    class="reserve-container"
+    style="width: 100%; max-width: 768px"
+  >
+    <div class="spacing-height-16"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px">
+      <div id="lnb-container">
+        <ul class="lnb flex-column">
+          <li class="lnb-item">
+            <a
+              class="lnb-link"
+              aria-current="page"
+              th:href="@{/select-subject-page}"
+              >병원찾기</a
+            >
+          </li>
+          <li class="lnb-item">
+            <a class="lnb-link" th:href="@{/select-item-page}">증상찾기</a>
+          </li>
+          <li class="lnb-item">
+            <a class="lnb-link lnb-active" th:href="@{/select-clinic-page}"
+              >병원 리스트</a
+            >
+          </li>
+        </ul>
+      </div>
+      <div
+        class="d-flex justify-content-center"
+        style="padding: 8px; width: 80%; margin: 0 auto"
+      >
+        <div class="" style="font-weight: 500">
+          <h4>결제 정보를 입력해주세요.</h4><br/>
+          <h5>진료비</h5>
+			<div class="d-flex align-items-center">
+			<div id="payPrice"><label>5,500원</label></div>
+			</div>
+          <div class="spacing-height-16"></div>
+          <div class="spacing-height-8"></div>
+          <h5>결제 수단 선택</h5>
+          <div class="spacing-height-8"></div>
+          <div class="d-flex" style="gap: 32px">
+            <div class="d-flex align-items-center">
+              <input type="radio" name="payment-type" id="credit" checked />
+              <label for="credit">신용/체크카드</label>
+            </div> 
+            <div class="d-flex align-items-center">
+              <input type="radio" name="payment-type" id="kakao" />
+              <div id="kakao" th:value="카카오페이"><label for="kakao">카카오페이</label></div>
+            </div>
+      		<input type="hidden" name="itemCode" id="itemCode" maxlength="32" class="form-control mb-2" placeholder="상품코드" value="0123456789" />
+	     	<input type="hidden" name="itemName" id="itemName" maxlength="50" class="form-control mb-2" placeholder="상품명" value="토닥토닥" />
+	     	<input type="hidden" name="quantity" id="quantity" maxlength="3" class="form-control mb-2" placeholder="수량" value="1" />
+	     	<input type="hidden" name="totalAmount" id="totalAmount" maxlength="10" class="form-control mb-2" placeholder="금액" value="5,500원" />
+	    
+		    <form name="kakaoForm" id="kakaoForm" method="post" target="kakaoPopUp" action="/kakao/payPopUp">
+		    	<input type="hidden" name="orderId" id="orderId" value=""/>
+		        <input type="hidden" name="tId" id="tId" value=""/>
+		        <input type="hidden" name="pcUrl" id="pcUrl" value=""/>
+			</form>
+			
+			<form id="kakaoPayResult" action="/kakaoPayResult" method="get">
+				<input type="hidden" name="userEmail" id="userEmail" th:value="${payLog.userEmail}"/>
+				<input type="hidden" name="reservationSeq" id="untactSeq" th:value="${payLog.reservationSeq}"/>
+				<input type="hidden" name="tid" id="tid"/>
+ 			</form>
+			
+          </div>
+          <script>
+            var swiper = new Swiper(".swiper-container", {
+              pagination: {
+                el: ".swiper-pagination",
+                type: "bullets",
+              },
+            });
+          </script>
+          <div class="spacing-height-16"></div>
+          <div class="spacing-height-16"></div>
+          <div class="next-btn">다음</div>
+          <div class="spacing-height-16"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</html>

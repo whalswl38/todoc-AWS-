@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>회원가입</title>
+    <style>
+      .form-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 768px;
+        margin: auto;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .form-group input[type="text"],
+      .form-group input[type="password"],
+      .form-group input[type="email"] {
+        width: calc(100% - 90px);
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .form-group button {
+        width: 80px;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        background-color: #5cb85c;
+        color: white;
+        cursor: pointer;
+        display: inline-block;
+      }
+      .form-group button:disabled {
+        background-color: #cccccc;
+      }
+      .agreement-group {
+        margin-bottom: 15px;
+        padding:2px;
+      }
+      .agreement {
+        background: #fff;
+        padding: 0px 4px;
+        border-radius: 5px;
+      }
+      .agreement label {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .register-button {
+        width: 100%;
+        height: 40px;
+        border: none;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        display: block;
+      }
+      .agreement-box{
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .agreement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+      .agreement-label {
+        margin: 0;
+        color: #666;
+
+        span {
+            color: red;
+        }
+      }
+      .agreement-checkbox {
+        margin-right: 10px;
+      }
+      .detail-button {
+        padding: 5px 10px;
+        color: #007bff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .agreement-details {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+      .input-container {
+        display: flex;
+        height: 48px;
+        background: rgb(255, 255, 255);
+        box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px 0px;
+        -webkit-box-align: center;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 768px;
+        border: 1px solid #EFEFEF;
+      }
+      .input-container input {
+        border: 0;
+        height: 24px;
+        width: 100%;
+        font-size: 16px;
+      }
+      .input-input:focus {
+        outline: none;
+      }
+      .input-container{
+        display: flex;
+        height: 48px;
+        background: rgb(255, 255, 255);
+        box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px 0px;
+        -webkit-box-align: center;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 768px;
+        border: 1px solid #EFEFEF;
+      }
+      #error, #invalid-feedback, #email-feedback, #phone-feedback{
+     	 color:red;
+     	 font-size: 12px;
+      }
+      #emailC {
+        width: 15%;
+        height: 40px;
+        background:  #3296D7;	
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+    </style>
+    
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script" >
+    	<!-- 서버에서 보낸 메세지를 사용하는 타입리프 문법
+    	정적 페이지에서는 null 값 표시, 타임리프 실행 시에는 타임리프 문법으로 해석해서 출력 -->
+    	<script th:inline="javascript" >
+    		$(document).ready(function(){
+    			var errorMessage = /*[[${errorMessage}]]*/ "";
+    			if(errorMessage != null)
+    			{
+    				alert(errorMessage);
+    			}
+    		});
+    	</script>
+    </th:block>
+    
+    <script>
+    
+    var emailCheckButton = 0;
+    var phoneButton = 0;
+    var phoneCheckButton = 0;
+    var phoneReCheckButton = 0;
+    
+      function checkDuplicateEmail() 
+      {
+          $.ajax({
+				type:"POST",
+				url:"/sign/emailCheck",
+				data:{
+					userEmail:$("#userEmail").val().trim()
+				},
+				success:function(response)
+				{
+					if(response == 0)
+	                  {
+	                	  document.getElementById('email-feedback').innerHTML = "사용가능한 이메일입니다.";
+	                	  emailCheckButton = 1;
+	                  }
+	                  else if(response == 1)
+	                  {
+	                	  document.getElementById('email-feedback').innerHTML = "이미 사용 중인 이메일입니다.";
+	                	  emailCheckButton = 0;
+	                	  document.getElementById('userEmail').focus();
+	                  }
+	                  else if(response == 404)
+	                  {
+	                	  document.getElementById('email-feedback').innerHTML = "입력값이 올바르지 않습니다.";
+	                	  emailCheckButton = 0;
+	                	  document.getElementById('userEmail').focus();
+	                  }
+				},
+				error: function(xhr) 
+				{
+					alert("알 수 없는 오류가 발생했습니다.");
+		        }
+          });
+          
+          emailCheckButton = 1;
+      }
+      
+      var phoneExpreg = /^\d{3}-\d{3,4}-\d{4}$/;
+      var phoneCheckNum = "";
+      
+      function sendSMS()
+      {
+    	  var to = $("#userPhone").val().trim();
+    	  
+    	  if(to.length <= 0)
+    	  {
+    		  document.getElementById('phone-feedback').innerHTML = "전화번호를 입력해주세요.";
+    		  return;
+    	  }
+    	  
+    	  if(phoneExpreg.test($("#userPhone").val()) == false)
+    	  {
+    		  document.getElementById('phone-feedback').innerHTML = "전화번호 형식이 올바르지 않습니다.";
+    		  return;
+    	  }
+    	  
+    	  $.ajax({
+    		 type:"GET",
+    		 url:"/sign/send",
+    		 dataType:"json",
+    		 data:{
+    			 to:to
+    		 },
+    		 success:function(response)
+    		 {
+    			 phoneCheckNum = response;
+    			 phoneButton = 1;
+    			 document.getElementById('phone-feedback').innerHTML = "인증번호를 전송했습니다.";
+    		 },
+    		 error:function(xhr)
+    		 {
+    			 alert("문자 전송 실패 !");
+    		 }
+    	  });
+      }
+      
+      function phoneNumCheck()
+      {
+    	  if(phoneButton == 0)
+    	  {
+    		  return;
+    	  }
+    	      	  
+    	  if($.trim($("#smsNum").val()).length <= 0)
+    	  {
+    		  document.getElementById('phone-feedback').innerHTML = "인증번호를 입력해주세요.";
+    		  return;
+    	  }
+    	  
+    	  if($("#smsNum").val() != phoneCheckNum)
+    	  {
+    		  document.getElementById('phone-feedback').innerHTML = "인증번호가 올바르지 않습니다.";
+    		  return;
+    	  }
+    	  
+    	  document.getElementById('phone-feedback').innerHTML = "인증이 완료되었습니다.";
+    	  phoneCheckButton = 1;
+      }
+      
+      function reSend()
+      {
+    	  sendSMS();
+    	  phoneNumCheck();
+      }
+
+      function sign() 
+      {   
+    	  if(emailCheckButton != 1)
+    	  {
+    		  document.getElementById('email-feedback').innerHTML = "이메일 중복 확인이 필요합니다.";
+    		  return;
+    	  }
+    	  
+    	  if(phoneButton == 0)
+    	  {
+    		  document.getElementById('phone-feedback').innerHTML = "문자 인증이 필요합니다.";
+    		  return;
+    	  }
+    	  
+    	  if(phoneCheckButton == 0)
+    	  {
+    		  document.getElementById('phone-feedback').innerHTML = "문자 인증이 필요합니다.";
+    		  return;
+    	  }
+    	  
+    	  if($.trim($("#registerNoFormer").val()).length <= 0)
+    	  {
+    		  document.getElementById('invalid-feedback').innerHTML = "주민등록번호는 필수 입력 항목입니다.";
+    		  return;
+    	  }
+    		      	  
+    	  if($.trim($("#registerNoLatter").val()).length <= 0)
+    	  {
+    		  document.getElementById('invalid-feedback').innerHTML = "주민등록번호는 필수 입력 항목입니다.";
+    		  return;
+    	  }
+    	  
+    	  var identityCheck = /^(?:[0-9]{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[1,2][0-9]|3[0,1]))-[1-4][0-9]{6}$/;
+    	  var userIdentity = $("#registerNoFormer").val() + '-' + $("#registerNoLatter").val();
+    	  
+    	  document.getElementById('userIdentity').value = userIdentity;
+    	  
+    	  if(identityCheck.test($("#userIdentity").val()) == false)
+    	  {
+    		  alert("document.getElementById('userIdentity').value : " + $("#userIdentity").val());
+    		  document.getElementById('invalid-feedback').innerHTML = "주민등록번호 형식이 올바르지 않습니다.";
+    		  return;
+    	  }
+    	  
+    	  if($("#agree1").is(':checked') == false)
+    	  {
+    		  alert("이용약관 동의는 필수 동의항목입니다.");
+    		  return;
+    	  }
+    	  
+    	  if($("#agree2").is(':checked') == false)
+    	  {
+    		  alert("개인정보 수집 및 이용 동의는 필수 동의항목입니다.");
+    		  return;
+    	  }
+    	  
+    	  document.getElementById('signForm').submit();
+    	  
+      }
+      
+      function toggleDetails(button) {
+        var detailsDiv = button.parentElement.parentElement.nextElementSibling;
+        detailsDiv.style.display =
+          detailsDiv.style.display === "block" ? "none" : "block";
+        button.innerHTML =
+          detailsDiv.style.display === "block" ? "내용숨기기" : `내용보기 <i class="fa-solid fa-chevron-down"></i>`;
+      }
+
+      function togglePasswordHide(){
+        const hideEye = document.querySelector('.password-hide');
+        const unHideEye = document.querySelector('.password-unhide');
+        hideEye.style.display =
+            hideEye.style.display === "block" ? "none" : "block";
+        unHideEye.style.display =
+            unHideEye.style.display === "block" ? "none" : "block";
+        if($("#userPwd").attr('type')=="password"){
+           $("#userPwd").attr('type',"text");
+        } else{
+            $("#userPwd").attr('type',"password");
+        }
+      }
+
+
+      function toggleRegisterLetterHide(){
+        const hideEye = document.querySelector('.register-hide');
+        const unHideEye = document.querySelector('.register-unhide');
+        hideEye.style.display =
+            hideEye.style.display === "block" ? "none" : "block";
+        unHideEye.style.display =
+            unHideEye.style.display === "block" ? "none" : "block";
+        if($("#registerNoLatter").attr('type')=="password"){
+           $("#registerNoLatter").attr('type',"text");
+        } else{
+            $("#registerNoLatter").attr('type',"password");
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var masterCheckbox = document.querySelector('.master-checkbox');
+        masterCheckbox.addEventListener('change', function() {
+            var allCheckboxes = document.querySelectorAll('.agreement-checkbox:not(.master-checkbox)');
+            allCheckboxes.forEach(function(checkbox) {
+            checkbox.checked = masterCheckbox.checked;
+            });
+
+        for(const checkbox of allCheckboxes){
+            checkbox.addEventListener('click',function(){
+            const totalCnt = allCheckboxes.length;
+            const checkedCnt = document.querySelectorAll('.agreement-checkbox:not(.master-checkbox):checked').length;
+            if(totalCnt == checkedCnt){
+            document.querySelector('.master-checkbox').checked = true;
+            }
+            else{
+            document.querySelector('.master-checkbox').checked = false;
+            }
+            
+        });
+  
+}
+        });
+        });
+       
+    </script>
+  </head>
+  <div layout:fragment="content" class="form-container">
+    <h3 style="text-align:center; padding:6px;">개인회원 가입</h3>
+    <form role="form" id="signForm" th:action="@{/sign}" th:object="${user}" method="post" >
+      <div class="input-container">
+        <div class="" style="padding-left: 16px">
+     
+            <i class="fa-regular fa-envelope"></i>
+        </div>
+        <div style="width: 100%; padding: 8px 16px">
+            <input type="email" placeholder="이메일" th:field="*{userEmail}" class="form-control" />
+        </div>
+        <div role="presentation" style="padding-right: 8px">
+            <button id="emailC" type="button" style="width: 96px; font-size: 14px; border-radius: 8px;" onclick="checkDuplicateEmail()">이메일 중복검색</button>
+        </div>
+      </div>
+      <p th:if="${#fields.hasErrors('userEmail')}" th:errors="*{userEmail}" id="error">Incorrect date</p>
+      <p id="email-feedback"></p>
+      <div class="input-container">
+        <div class="" style="padding-left: 16px">
+            <i class="fa-regular fa-calendar-days"></i>
+        </div>
+        <div style="width: 100%; padding: 8px 16px">
+            <input type="password" placeholder="비밀번호" th:field="*{userPwd}" class="form-control" />
+        </div>
+        <div role="presentation" style="padding-right: 16px">
+              <div class="password-hide" style="display: block" onclick="togglePasswordHide()"><i class="fa-solid fa-eye"></i></div>
+              <div class="password-unhide" style="display: none" onclick="togglePasswordHide()"><i class="fa-solid fa-eye-slash"></i></div>
+        </div>
+      </div>
+      <p th:if="${#fields.hasErrors('userPwd')}" th:errors="*{userPwd}" id="error">Incorrect date</p>
+      <div class="input-container">
+        <div class="" style="padding-left: 16px">
+            <i class="fa-regular fa-user"></i>
+        </div>
+        <div style="width: 100%; padding: 8px 16px">
+            <input placeholder="이름" th:field="*{userName}" class="form-control" />
+        </div>
+      </div>
+      <p th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" id="error">Incorrect date</p>
+      <div class="input-container">
+        <div class="" style="padding-left: 16px">
+            <i class="fa-solid fa-lock"></i>
+        </div>
+        <div style="width: 100%; padding: 8px 16px; display: flex;">
+            <input
+            type="text"
+            id="registerNoFormer"
+            placeholder="주민번호 앞 6자리"
+            pattern="\d{6}"
+            size=6
+            maxlength=6
+            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+            required
+          />
+          -
+          <input
+          style="text-align: center;"
+            id="registerNoLatter"
+            type="password"
+            placeholder="뒷 7자리"
+            pattern="\d{7}"
+            size=7
+            maxlength=7
+            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+            required
+          />
+          
+          <input type="hidden" id="userIdentity" name="userIdentity">
+          <div class="register-hide" style="display: block" onclick="toggleRegisterLetterHide()"><i class="fa-solid fa-eye"></i></div>
+          <div class="register-unhide" style="display: none" onclick="toggleRegisterLetterHide()"><i class="fa-solid fa-eye-slash"></i></div>
+        </div>
+      </div>
+      <p id="invalid-feedback"></p>
+      <div class="input-group">
+        <span class="input-group-text" style="font-size: 16px; background-color: white; border-right: none; padding-right: 24.5px;"> 전화번호<span style="color: red; margin-left: 4px;">*</span></span>
+        <input type="text" style="border-left: none;" th:field="*{userPhone}" class="form-control" placeholder="하이픈(-) 포함">
+        <span class="input-group-text" onclick="sendSMS()" style="font-size: 14px;color: #666; width: 102.5px; cursor: pointer;"><div style="margin: 0 auto;">인증번호 전송</div></span>
+      </div>
+      <p th:if="${#fields.hasErrors('userPhone')}" th:errors="*{userPhone}" id="error">Incorrect date</p>
+      <div class="spacing-height-8"></div>
+      <div class="input-group">
+        <span class="input-group-text" style="font-size: 16px;background-color: white;">인증번호 입력<span style="color: red; margin-left: 4px;">*</span></span>
+        <input type="text" class="form-control" id="smsNum" style="border-left: none;">
+        <span class="input-group-text" onclick="phoneNumCheck()" style="font-size: 14px;color: #666; cursor: pointer;">확인</span>
+        <span class="input-group-text" onclick="reSend()" style="font-size: 14px; margin-left: 16px; color: #666; cursor: pointer;">재전송</span>
+      </div>
+      <p id="phone-feedback"></p>
+
+ 	  <div>
+ 	  </div>
+    <div class="spacing-height-16"></div>
+      <div class="agreement-group">
+        <div class="agreement">
+            <div class="agreement-box" style="gap: 32px">
+            <div class="agreement-header">
+              <label class="agreement-label" style="color: black">
+                필수동의 항목 및 개인정보 수집 및 이용 동의(필수), <br/> 광고성 정보 수신(선택)에 모두 동의합니다.
+              </label>
+
+            </div>
+            <input type="checkbox" class="agreement-checkbox master-checkbox">
+        </div>
+          </div>
+          <hr/>
+          <div class="agreement">
+            <div class="agreement-box">
+            <div class="agreement-header">
+              <div><label class="agreement-label"> <span>[필수]</span>  이용약관 동의 </label></div>
+              <div class="detail-button" onclick="toggleDetails(this)">
+                내용보기 <i class="fa-solid fa-chevron-down"></i>
+              </div>
+            </div>
+            <input type="checkbox" id="agree1" class="agreement-checkbox" />
+             </div>
+            <div class="agreement-details">
+			  <p>전화처방 등 원격진료서비스는 정부 정책의 변경에 따라 예고 없이 중단될 수 있으며, 회사는 이에 대해 아무런 책임을 지지 않습니다.</p>
+			  <p>회사는 정부가 허용한 범위 내 원격진료를 보조하는 시스템을 제공할 뿐, <br />회원과 의료진(의사 및 병원)간 진료 행위 및 회원 본인의 건강에 관한 의사 결정에 대해 아무런 책임을 지지 않습니다.</p><br />
+			  
+			  <p>※중요 안내 사항</p>
+			  <p>이용자가 겪고 있는 증상이 경미한 증상이 아닌 경우, 반드시 가까운 병원/응급실에 내원하거나 119를 호출하시기 바랍니다.</p>
+            </div>
+          </div>
+          <div class="agreement">
+            <div class="agreement-box">
+            <div class="agreement-header">
+                <div> <label class="agreement-label"> <span>[필수]</span>  개인정보 수집 및 이용 동의 </label></div>
+              <div class="detail-button" onclick="toggleDetails(this)">
+                내용보기 <i class="fa-solid fa-chevron-down"></i>
+              </div>
+            </div>
+            <input type="checkbox" id="agree2" class="agreement-checkbox" />
+        </div>
+            <div class="agreement-details">
+              <p>[수집, 이용하는 개인정보의 항목 / 목적 / 보유기간]</p><br/>
+              <p>(1) 회사는 회원가입, 원활한 고객상담, 각종 서비스의 제공을 위해 아래와 같은 최소한의 개인정보를 필수항목으로 수집하고 있습니다.</p>
+              <p>(2) 정보주체는 개인정보의 수집. 이용에 대한 동의를 거부할 권리가 있으며,동의 거부 시에는 서비스 이용에 제한이 있습니다.</p><br/>
+              <p>[개인정보 수집 및 이용에 대한 동의]</p><br />
+
+			  <p>회사는 이용자들이 회사의 개인정보 보호정책 또는 이용약관의 내용에 대하여 체크박스를 클릭할 수 있는 절차를 마련하여, <br/>체크박스를 클릭하면 개인정보 수집 및 이용에 대해 동의한 것으로 봅니다.</p>
+            </div>
+          </div>
+          <hr />
+          <div class="agreement">
+            <div class="agreement-box">
+            <div class="agreement-header">
+                <div><label class="agreement-label"> [선택] 광고성 정보 및 이메일 수신 동의 </label></div>
+              <div class="detail-button" onclick="toggleDetails(this)">
+                내용보기 <i class="fa-solid fa-chevron-down"></i>
+              </div>
+            </div>
+            <input type="checkbox" class="agreement-checkbox" />
+        </div>
+            <div class="agreement-details">
+			  <p>todoc의 상품 안내, 이벤트 관련 정보 안내 목적으로 이메일을 통한 상품 및 이벤트 정보 송신을 위해 이용하고자 합니다.</p>
+			  <p>마케팅 및 홍보 관련에 대해 활용을 원하지 않을 경우 동의하시지 않으실 수 있습니다.</p>
+			  <p>위의 광고성 정보 및 이메일 수신에 대한 동의를 거부할 권리가 있습니다.</p>
+			  <p>그러나 체크 박스를 클릭하지 않는 경우, 상품 및 이벤트 정보를 받을 수 없습니다.</p>
+            </div>
+          </div>
+          <div class="agreement">
+            <div class="agreement-box">
+            <div class="agreement-header">
+                <div><label class="agreement-label"> [선택] 광고성 정보 SMS 수신 동의 </label></div>
+              <div class="detail-button" onclick="toggleDetails(this)">
+                내용보기 <i class="fa-solid fa-chevron-down"></i>
+              </div>
+            </div>
+            <input type="checkbox" class="agreement-checkbox" />
+        </div>
+            <div class="agreement-details">
+			  <p>todoc의 상품 안내, 이벤트 관련 정보 안내 목적으로 SMS을 통한 상품 및 이벤트 정보 송신을 위해 이용하고자 합니다.</p>
+			  <p>마케팅 및 홍보 관련에 대해 활용을 원하지 않을 경우 동의하시지 않으실 수 있습니다.</p>
+			  <p>위의 광고성 정보 및 이메일 수신에 대한 동의를 거부할 권리가 있습니다.</p>
+			  <p>그러나 체크 박스를 클릭하지 않는 경우, 상품 및 이벤트 정보를 받을 수 없습니다.</p>
+            </div>
+          </div>
+        </div>
+        </form>
+        <button type="submit" class="register-button" onclick="sign()">
+          가입하기
+        </button>
+      </div>
+</html>

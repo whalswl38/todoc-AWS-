@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>비대면 진료 상세</title>
+    <style>
+      .select-item-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      #lnb-container {
+        width: 140px;
+      }
+
+      .lnb-item a {
+        font-size: 18px;
+        padding: 8px;
+        display: block;
+      }
+
+      #lnb-container a:not(.lnb-active) {
+        color: black;
+        font-size: 18px;
+      }
+
+      .lnb-active {
+        color:royalblue;
+      }
+
+      .row,
+      .d-flex {
+        gap: 8px;
+      }
+
+      .filter-sort,
+      .filter-box {
+        background-color: #f7f9fa;
+        border-radius: 20px;
+        padding: 8px 12px;
+        font-size: 14px;
+        color: #8d9297;
+        font-weight: 500;
+      }
+
+      .clicked-background {
+        font-weight: 700;
+        border-bottom: 2px solid #212529;
+      }
+
+      .card-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 10px;
+      }
+
+      .card-image-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #bdbdbd;
+      }
+
+      .card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .clinicItem {
+        padding: 4px 6px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 13px;
+        margin-right: 8px;
+        background-color: #f5f6f7;
+        color: #a9aeb1;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      .each-review {
+        border: 0.2px solid rgb(141, 146, 151);
+        padding: 16px;
+        border-radius: 16px;
+        width: 90%;
+        margin: 0 auto;
+      }
+
+      #pagingBox {
+        width: 100%;
+        font-size: 18px;
+        gap: 20px;
+        font-weight: 500;
+      }
+
+      #pagingBox div {
+        cursor: pointer;
+      }
+
+      .paging-active {
+        color: green;
+        opacity: 0.8;
+        font-weight: 700;
+      }
+
+      .review-ul {
+        display: block;
+        color: rgb(141, 146, 151);
+        font-weight: 500;
+        padding-left: 16px;
+      }
+
+      .review-li {
+        list-style-type: initial;
+      }
+
+      .review-filter {
+        padding: 8px 16px;
+        border: 1px solid rgb(141, 146, 151);
+        border-radius: 16px;
+        color: #212529;
+        background-color: rgb(247, 249, 250);
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .clicked-filter-background {
+        color: rgb(247, 103, 7);
+        background-color: #fff4e6;
+        border: 1px solid rgb(247, 103, 7);
+      }
+    </style>
+    <script>
+      $(document).ready(function () {
+        $(".tab").click(function () {
+          $(".clicked-background").removeClass("clicked-background");
+          $(this).addClass("clicked-background");
+          const thisClassList = $(this).attr("class");
+          if (thisClassList.includes("review-tab")) {
+            const offset = $(".review-container").offset();
+            console.log(offset);
+            $("html, body").animate({ scrollTop: offset.top }, 0);
+          } else if (thisClassList.includes("doctor-detail-tab")) {
+            const offset = $("#doctor-detail-top").offset();
+            console.log(offset);
+            $("html, body").animate({ scrollTop: offset.top }, 0);
+          }
+        });
+
+        $(".paging").click(function () {
+          $(".paging-active").removeClass("paging-active");
+          $(this).addClass("paging-active");
+        });
+        $(".review-filter").click(function () {
+          $(this).toggleClass("clicked-filter-background");
+        });
+      });
+      
+      function reservation(){
+		
+		if(document.getElementById('loginFlag').value == 'N'){
+		  alert("로그인 후 이용가능합니다.");
+		  window.location.href = "/login-page";
+		  
+		}
+    	  var clinicInstinum = document.getElementById('clinicInstinum').value;
+
+          window.location.href = "/contact-clinic-reserve-page?clinicInstinum=" + clinicInstinum;
+
+      }
+      
+    </script>
+  </head>
+  <body>
+  <div layout:fragment="content" class="select-item-container">
+    <div class="spacing-height-16"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px">
+      <div id="lnb-container">
+        <ul class="lnb flex-column">
+          <li class="lnb-item">
+            <a
+              class="lnb-link"
+              aria-current="page"
+              th:href="@{/clinic-contact-subject-page}"
+              >병원찾기</a
+            >
+          </li>
+          <li class="lnb-item">
+            <a class="lnb-link" th:href="@{/clinic-contact-item-page}">증상찾기</a>
+          </li>
+          <li class="lnb-item">
+            <a class="lnb-link lnb-active" th:href="@{/clinic-contact-category-list}"
+              >병원 리스트</a
+            >
+          </li>
+        </ul>
+      </div>
+      <div style="padding: 8px; width: 500px">
+        <div id="doctor-detail-top">
+          <div class="row d-flex">
+            <div class="col-md-1 d-flex">
+              <button class="" style="border: 0; background-color: #fff">
+                <div width="24" class="">
+                  <span class="" size="24" color="#1C1D1F"
+                    ><i
+                      class="fa-solid fa-chevron-left"
+                      style="font-size: 24px"
+                    ></i
+                  ></span>
+                </div>
+              </button>
+            </div>
+            <div
+              class="col-md-8 d-flex justify-content-center"
+              style="color: #212529; font-size: 24px; font-weight: 500"
+              th:text="${clinic.clinicDoctor}"
+            >
+              이현호 의사
+            </div>
+          </div>
+          <div class="spacing-height-16"></div>
+          <div class="row">
+            <div class="col card-box d-flex">
+              <div style="width: 60%">
+                <div class="d-flex align-items-center" style="gap: 8px">
+                  <div
+                    class="d-flex align-items-center"
+                    style="color: #212529; font-size: 24px; font-weight: 500"
+                    th:text="${clinic.clinicDoctor}"
+                  >
+                    이현호 의사
+                    <span
+                      style="
+                        color: rgb(34, 139, 230);
+                        font-size: 16px;
+                        padding-left: 16px;
+                      "
+                      ><i
+                        class="fa-solid fa-lightbulb"
+                        style="color: #74c0fc"
+                      ></i
+                      >&nbsp;이비인후과 전문의</span
+                    >
+                  </div>
+                </div>
+                <div
+                  style="
+                    color: rgb(141, 146, 151);
+                    font-weight: 600;
+                    padding-bottom: 8px;
+                  "
+                  th:text="${clinic.clinicName}"
+                >
+                  일등이비인후과의원
+                </div>
+                <div th:inline="text">
+                   <span class="clinicItem" th:each="clinicSubject : ${clinicSubjectList}" th:text="${clinicSubject}">진료과</span>
+                </div>
+              </div>
+              <div class="card-image-box" style="background: #bdbdbd">
+                <img th:if="${clinic.fileOrgName != null}"
+                  class="card-image"
+                  th:src="@{/upload/clinicFolder/__${clinic.fileOrgName}__}"
+                />
+                <img th:if="${clinic.fileOrgName == null}"
+                  class="card-image"
+                  th:src="@{/image/nullprofile.jpg}"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="spacing-height-16"></div>
+          <div class="spacing-height-16"></div>
+          <div
+            style="
+              border: 0.1px solid rgb(141, 146, 151);
+              border-radius: 16px;
+              background-color: rgb(247, 249, 250);
+              padding: 16px;
+            "
+          >
+          
+            <h4>경력사항</h4>
+		<ul style="display: block; padding-left: 20px">
+		    <li th:if="${careerList == null or #lists.isEmpty(careerList)}" style="list-style-type: initial">경력이 없습니다</li>
+		    <li th:each="career : ${careerList}" style="list-style-type: initial" th:text="${career}"></li>
+		</ul>
+          </div>
+          <div class="spacing-height-16"></div>
+          <div class="d-flex" style="gap: 28px">
+            <div
+              class="p-2 tab clicked-background doctor-detail-tab"
+              style="font-size: 20px; cursor: pointer"
+            >
+              병원상세
+            </div>
+<!--             <div
+              class="p-2 tab review-tab"
+              style="font-size: 20px; cursor: pointer"
+            >
+              후기
+            </div> -->
+          </div>
+          <div class="silver-hr" style="margin: 1.4px 0px 8px 0px"></div>
+          <div class="spacing-height-16"></div>
+          <div>
+            <h4>일등이비인후과 진료센터</h4>
+            <div>
+              <p th:text="${clinic.clinicDetail}">안녕하세요</p>
+            </div>
+          </div>
+          <div class="silver-hr"></div>
+          <div class="spacing-height-16"></div>
+          <div>
+            <div class="d-flex align-items-center justify-content-center">
+              <h4>진료시간</h4>
+            </div>
+            <div
+              class="d-flex justify-content-center"
+              style="color: rgb(141, 146, 151); gap: 32px"
+            >
+              <div class="p-2" style="width: 200px">
+                <span class="p-3">월요일</span> [[${clinicTimeList[0]}]]
+              </div>
+              <div class="p-2" style="width: 200px">
+                <span class="p-3">화요일</span> [[${clinicTimeList[1]}]]
+              </div>
+            </div>
+            <div
+              class="d-flex justify-content-center"
+              style="color: rgb(141, 146, 151); gap: 32px"
+            >
+              <div class="p-2" style="width: 200px">
+                <span class="p-3">수요일</span> [[${clinicTimeList[2]}]]
+              </div>
+              <div class="p-2" style="width: 200px">
+                <span class="p-3">목요일</span> [[${clinicTimeList[3]}]]
+              </div>
+            </div>
+            <div
+              class="d-flex justify-content-center"
+              style="color: rgb(141, 146, 151); gap: 32px"
+            >
+              <div class="p-2" style="width: 200px">
+                <span class="p-3">금요일</span> [[${clinicTimeList[4]}]]
+              </div>
+              <div class="p-2" style="width: 200px">
+                <span class="p-3" style="color: rgb(34, 139, 230)">토요일</span>
+                [[${clinicTimeList[5]}]]
+              </div>
+            </div>
+            <div
+              class="d-flex justify-content-center"
+              style="color: rgb(141, 146, 151); gap: 32px"
+            >
+              <div class="d-flex align-items-center" style="width: 200px">
+                <span class="p-2" style="color: red">일요일</span>
+                
+                   [[${clinicTimeList[6]}]]
+                
+              </div>
+              <div class="d-flex align-items-center" style="width: 200px">
+                <span style="color: red; padding-left: 24px">공휴일</span>
+                <div class="d-flex justify-content-start" style="width: 123px">
+                  &nbsp;&nbsp;&nbsp;[[${clinicTimeList[7]}]]
+                </div>
+              </div>
+            </div>
+            </div>
+          
+
+          <div class="silver-hr"></div>
+          <div
+            style="color: rgb(141, 146, 151); text-align: center; padding: 16px"
+          >
+            휴식시간 : [[${clinic.clinicBreak}]]
+            <div></div>
+          </div>
+          <div class="silver-hr"></div>
+          <div class="d-flex justify-content-between p-3">
+            <div>
+              <div style="font-size: 20px; font-weight: 700" th:text="${clinic.clinicName}">
+                일등이비인후과의원
+              </div>
+              <div th:text="${clinic.clinicAddr}">서울 중구 퇴계로 452-1 3층 일등이비인후과의원</div>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+              <i class="fa-solid fa-phone" style="font-size: 20px"></i>
+            </div>
+            
+             
+          </div>
+           <div id="map" style="width:100%;height:350px;"></div>
+           <input type="hidden" id="mapClinicAddr" name="mapClinicAddr" th:value="${clinic.clinicAddr}" />	
+			<input type="hidden" id="mapClinicName" name="mapClinicName" th:value="${clinic.clinicName}" />	
+
+
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+          <div
+            style="
+              width: 100%;
+              background-color:royalblue;
+              color: #fff4e6;
+              border-radius: 12px;
+              padding: 12px 0px;
+              text-align: center;
+              font-size: 18px;
+            "
+            th:onclick="reservation()"
+          >
+            진료 예약
+          </div>
+          
+          <!-- 지도  -->
+            <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ba782e0da2a2ffd54dfb01c48b963e38&libraries=services"></script>
+			<script>
+				var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+			    mapOption = {
+			        center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+			        level: 3 // 지도의 확대 레벨
+			    };  
+
+				// 지도를 생성합니다    
+				var map = new kakao.maps.Map(mapContainer, mapOption); 
+		
+				// 주소-좌표 변환 객체를 생성합니다
+				var geocoder = new kakao.maps.services.Geocoder();
+		
+				//검색할 주소
+				var addr = $("#mapClinicAddr").val();
+		
+				//장소설명
+				var locaName = $("#mapClinicName").val();
+		
+				// 주소로 좌표를 검색합니다
+				geocoder.addressSearch(addr, function(result, status) {
+		
+				    // 정상적으로 검색이 완료됐으면 
+				     if (status === kakao.maps.services.Status.OK) {
+		
+				        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+		
+				        // 결과값으로 받은 위치를 마커로 표시합니다
+				        var marker = new kakao.maps.Marker({
+				            map: map,
+				            position: coords
+				        });
+		
+				        // 인포윈도우로 장소에 대한 설명을 표시합니다
+				        var infowindow = new kakao.maps.InfoWindow({
+				            content: '<div style="width:220px;text-align:center;padding:6px 0;">'+locaName+'</div>'
+				        });
+				        infowindow.open(map, marker);
+		
+				        // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+				        map.setCenter(coords);
+				    } 
+				});    
+			</script>
+          
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+        <input type="hidden" name="clinicInstinum" id="clinicInstinum" th:value="${clinic.clinicInstinum}" />
+		<input type="hidden" id="loginFlag" name="loginFlag" th:value="${loginFlag}">
+		</div>
+    </div>
+   
+  </div>
+  </body>
+
+  
+
+</html>

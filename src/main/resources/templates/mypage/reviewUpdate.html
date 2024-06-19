@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>리뷰작성 페이지</title>
+    <style>
+      .review-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      .silver-hr-block {
+        width: 100%;
+        height: 20px;
+        background: #a9aeb1;
+        opacity: 0.2;
+      }
+
+      .silver-hr-inline {
+        width: 10px;
+        background: #a9aeb1;
+        opacity: 0.2;
+      }
+
+      .silver-hr-inline-short {
+        width: 4px;
+        background: #a9aeb1;
+        opacity: 0.2;
+      }
+      h2 {
+        margin-bottom: 0;
+      }
+
+      p {
+        font-weight: 500;
+        padding: 4px 0px;
+      }
+
+      label {
+        font-weight: 700;
+        font-size: 18px;
+      }
+
+      label span {
+        font-weight: 500;
+        font-size: 14px;
+        color: rgb(141, 146, 151);
+      }
+
+      #submit-btn {
+        border-radius: 7px;
+        font-weight: 500;
+        text-align: center;
+        width: 80%;
+        height: 36px;
+      }
+
+      .btn:disabled {
+        color: #fff;
+        border: none;
+        background-color: #a9aeb1;
+      }
+
+      .diagnosis-info-box {
+        color: rgb(141, 146, 151);
+      }
+
+      .form-control {
+        width: 90%;
+        resize: none;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: rgb(141, 146, 151);
+        font-size: 14px;
+      }
+
+      .good-point {
+        font-size: 16px;
+        font-weight: 500;
+        color: rgb(141, 146, 151);
+      }
+
+      .good-point-checkbox {
+        width: 18px;
+        height: 18px;
+      }
+
+      input[type="checkbox"] {
+        display: none;
+      }
+      input[type="checkbox"] + label {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: none;
+        position: relative;
+      }
+      .good-point-checkbox + label:before {
+        content: "✔";
+        font-size: 8px;
+        width: 18px;
+        height: 18px;
+        text-align: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding-top: 2px;
+        background-color: #a9aeb1;
+        opacity: 0.4;
+        border-radius: 4px;
+        color: white;
+      }
+
+      .good-point-checkbox:checked + label::before {
+        background-color: cornflowerblue;
+        color: white;
+        opacity: 1;
+      }
+      .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        font-size: 2.25rem;
+        line-height: 2.5rem;
+        justify-content: space-around;
+        padding: 0 0.2em;
+        text-align: center;
+        width: 160px;
+      }
+
+      .star-rating input {
+        display: none;
+      }
+
+      .star-rating label {
+        -webkit-text-fill-color: transparent;
+        -webkit-text-stroke-width: 2.3px;
+        -webkit-text-stroke-color: #2b2a29;
+        cursor: pointer;
+      }
+
+      .star-rating :checked ~ label {
+        -webkit-text-fill-color: gold;
+      }
+
+      .star-rating label:hover,
+      .star-rating label:hover ~ label {
+        -webkit-text-fill-color: #fff58c;
+      }
+    </style>
+    <script>
+      $(document).ready(function () {
+        $("#diagnosis-title").on("input", function () {
+          let textInput = $(this).val();
+          let text_length = textInput.length;
+          if (text_length > 30) {
+            textInput = textInput.substring(0, 30);
+            $(this).val(textInput);
+          }
+          text_length = textInput.length;
+          $("#diagnosis-title-help").text(text_length + "/30");
+        });
+
+        $("#diagnosis-comments").on("input", function () {
+          let textInput = $(this).val();
+          let text_length = textInput.length;
+          if (text_length > 1000) {
+            textInput = textInput.substring(0, 1000);
+            $(this).val(textInput);
+          }
+          text_length = textInput.length;
+          $("#diagnosis-comments-help").text(text_length + "/1000");
+        });
+
+        $("input").on("propertychange change keyup paste input", function () {
+          checkValidation();
+        });
+
+        $("textarea").on(
+          "propertychange change keyup paste input",
+          function () {
+            checkValidation();
+          }
+        );
+
+        function checkValidation() {
+          const ratingVal = $("input[name=rating]:checked").val();
+          const diagnosisTitleLength = $("#diagnosis-title").val().length;
+          const diagnosisCommentsLength = $("#diagnosis-comments").val().length;
+
+          const canSubmit =
+            ratingVal > 0 &&
+            diagnosisTitleLength >= 2 &&
+            diagnosisCommentsLength >= 15;
+            
+          if (canSubmit) {
+            $("#submit-btn").attr("disabled", false);
+          } else {
+            $("#submit-btn").attr("disabled", true);
+          }
+        }
+        
+        $("#submit-btn").on("click", function (){
+        	if($.trim($("#diagnosis-title").val()).length <= 0)
+			{
+				alert("받으신 진료를 입력하세요.");
+				$("#diagnosis-title").val("");
+				$("#diagnosis-title").focus();
+			
+				return;
+			}
+        	
+        	if($.trim($("#diagnosis-comments").val()).length <= 0)
+       		{
+       			alert("내용을 입력하세요.");
+       			$("#diagnosis-comments").val("");
+       			$("#diagnosis-comments").focus();
+       			
+       			return;
+       		}
+        	
+        	var reviewSeq = [[${review.reviewSeq}]];
+        	var reviewUpdate = {
+        			reviewTitle : $("#diagnosis-title").val(),
+ 	        	 	reviewContent : $("#diagnosis-comments").val(),
+ 	        	 	reviewGrade : $("input[name=rating]:checked").val(),
+ 	        	 	reviewSeq : reviewSeq
+        	}
+        	
+        	$.ajax({
+ 	           type: "POST",
+ 	           url: "/reviewUpdate",
+ 	           contentType: 'application/json',
+ 	           data: JSON.stringify(reviewUpdate),
+ 	           dataType: "json",
+	               success: function(response) 
+	               {
+	  	                if(response == 0) 
+	  	                {
+	  	                	alert("리뷰를 수정하였습니다.");
+	  	                	location.href="/review-detail-page";
+	    	            } 
+	  	                else if(response == 1)
+	  	                {
+	  	                	alert("오류1");
+	    	            } 
+	  	                else if(response == 2)
+	  	                {
+	  	                	alert("오류2");
+	  	                	location.href = "/mypage-page";
+	    	            }
+	  	                else if(response == 3)
+	  	                {
+	  	                	alert("오류3");
+	    	                location.href = "/mypage-page";
+	    	            }
+	  	                else if(response == 4)
+	  	                {
+	  	                	alert("오류4");
+	    	                location.href = "/mypage-page";
+	    	            }
+	    	       },
+	    	       error: function(xhr,err)
+	    	       {
+	                  alert("리뷰수정 실패");
+	    	       }
+	    	    });
+        });
+        
+        
+      });
+    </script>
+  </head>
+  <div layout:fragment="content" class="review-container d-flex">
+    <div class="silver-hr-inline-short"></div>
+    <div class="spacing-height-16"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px">
+      <div style="padding: 0px 16px; width: 800px">
+        <div class="review-details">
+          <div style="text-align: center">
+            <h2>리뷰작성</h2>
+          </div>
+          <div class="spacing-height-16"></div>
+          <div class="d-flex">
+            <div class="p-2">별점을 매겨주세요.</div>
+            <div class="star-rating space-x-4">
+              <input type="radio" id="5-stars" name="rating" value="5" />
+              <label for="5-stars" class="star pr-4">
+                <i class="fa-solid fa-star" style="color: #ffd43b"></i
+              ></label>
+              <input type="radio" id="4-stars" name="rating" value="4" />
+              <label for="4-stars" class="star">
+                <i class="fa-solid fa-star" style="color: #ffd43b"></i
+              ></label>
+              <input type="radio" id="3-stars" name="rating" value="3" />
+              <label for="3-stars" class="star">
+                <i class="fa-solid fa-star" style="color: #ffd43b"></i
+              ></label>
+              <input type="radio" id="2-stars" name="rating" value="2" />
+              <label for="2-stars" class="star">
+                <i class="fa-solid fa-star" style="color: #ffd43b"></i
+              ></label>
+              <input type="radio" id="1-star" name="rating" value="1" />
+              <label for="1-star" class="star">
+                <i class="fa-solid fa-star" style="color: #ffd43b"></i
+              ></label>
+            </div>
+          </div>
+          <div class="spacing-height-16"></div>
+          <div class="form-group">
+            <div class="spacing-height-16"></div>
+            <div>
+              <label class="p-2"
+                >어떤 진료를 받으셨나요? <span>(최소 2자)</span></label
+              >
+              <div class="d-flex justify-content-center">
+                <input
+                  id="diagnosis-title"
+                  placeholder="예시) 몸살 감기"
+                  class="form-control"
+                  th:value="${review.reviewTitle}"
+                />
+                <input type="hidden" id="contactSeq"  />
+              </div>
+              <div
+                class="d-flex"
+                style="justify-content: flex-end; padding-right: 8px"
+              >
+                <small id="diagnosis-title-help" class="form-text text-muted"
+                  >0/30</small
+                >
+              </div>
+            </div>
+
+            <div class="spacing-height-16"></div>
+            <div>
+              <label class="p-2"
+                >진료는 어떠셨나요? <span>(최소 15자)</span></label
+              >
+              <div class="d-flex justify-content-center">
+                <textarea
+                  id="diagnosis-comments"
+                  class="form-control"
+                  rows="4"
+                  maxlength="150"
+                  placeholder="예시) 친절하고 세심하게 봐주셨어요."
+                  th:text="${review.reviewContent}"
+                ></textarea>
+              </div>
+              <div
+                class="d-flex"
+                style="justify-content: flex-end; padding-right: 8px"
+              >
+                <small id="diagnosis-comments-help" class="form-text text-muted"
+                  >0/1000</small
+                >
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        <div class="spacing-height-16"></div>
+        
+        <div class="form-group d-flex justify-content-center">
+          <button id="submit-btn" class="btn btn-primary p-2" disabled>
+            등록
+          </button>
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+      </div>
+    </div>
+    <div class="silver-hr-inline-short"></div>
+  </div>
+</html>

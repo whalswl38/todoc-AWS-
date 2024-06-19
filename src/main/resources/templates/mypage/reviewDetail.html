@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>리뷰내역</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+      .review-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      h2 {
+        margin-bottom: 0;
+      }
+
+      p {
+        font-weight: 500;
+        padding: 4px 0px;
+      }
+
+      .profileImg-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #bdbdbd;
+      }
+
+      .profileImg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .review-content {
+        white-space: normal;
+        font-weight: 500;
+        padding: 8px;
+      }
+
+      .review-btn {
+        background-color: #fff;
+        border: 1px solid #bdbdbd;
+        border-radius: 7px;
+        padding: 4px 12px;
+        color: rgb(141, 146, 151);
+        font-weight: 600;
+        flex: 1;
+        border: 2px solid silver;
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .clinic-info-box {
+        color: rgb(141, 146, 151);
+      }
+
+      .clinic-name,
+      .clinic-address {
+        font-weight: 600;
+      }
+
+      .tag-box {
+        display: flex;
+        flex-flow: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        background-color: rgb(247, 249, 250);
+        padding: 8px;
+        font-weight: 500;
+        border-radius: 8px;
+        color: rgb(141, 146, 151);
+        font-weight: 600;
+      }
+
+      .tag span {
+        font-size: 14px;
+        padding-right: 6px;
+        font-weight: 500;
+        opacity: 0.6;
+      }
+      
+       .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+      
+      .page_wrap {
+	text-align:center;
+	font-size:0;
+ }
+.page_nation {
+	display:inline-block;
+}
+.page_nation .none {
+	display:none;
+}
+.page_nation a {
+	display:block;
+	margin:0 3px;
+	float:left;
+	border:1px solid #e6e6e6;
+	width:28px;
+	height:28px;
+	line-height:28px;
+	text-align:center;
+	background-color:#fff;
+	font-size:13px;
+	color:#999999;
+	text-decoration:none;
+}
+.page_nation .arrow {
+	border:1px solid #ccc;
+}
+.page_nation .pprev {
+	margin-left:0;
+}
+.page_nation .prev {
+	margin-right:7px;
+}
+.page_nation .next {
+	margin-left:7px;
+}
+.page_nation .nnext {
+	margin-right:0;
+}
+.page_nation a.active {
+	background-color:#42454c;
+	color:#fff;
+	border:1px solid #42454c;
+}
+    </style>
+    <script>
+    $(document).ready(function () {
+    	
+      $("#collaspe-btn").on("click", function () {
+        document.bbsForm.endRow.value += 3;
+        document.bbsForm.action ="/review-detail-page";
+        document.bbsForm.submit;
+      });
+    });
+    
+    function fn_delete(reviewSeq)
+    {
+    	if(confirm("리뷰를 삭제하시겠습니까?"))
+   		{
+	    	$.ajax({
+					type:"POST",
+					url:"/reviewDelete",
+					data:{
+						reviewSeq : reviewSeq
+					},
+					success:function(response)
+					{
+						if(response == 0)
+		                  {
+							alert("리뷰를 삭제하였습니다.");
+							location.href="/review-detail-page";
+		                  }
+		                  else if(response == 1)
+		                  {
+		                	  alert("오류 발생");
+		                	  location.href = "/mypage-page;"
+		                  }
+		                  else
+	                	  {
+		                	  alert("오류 발생");
+		                	  location.href = "/mypage-page;"
+	                	  }
+		                	  
+					},
+					error: function(xhr, err) 
+					{
+						alert("알 수 없는 오류가 발생했습니다.");
+			        }
+	       });
+   		}
+    }
+    
+    
+    function fn_list(curPage)
+    {
+  	  	document.bbsForm.curPage.value = curPage;
+  		document.bbsForm.action = "/review-detail-page";
+  		document.bbsForm.submit();
+    }
+  </script>
+  
+  </head>
+  
+  <div layout:fragment="content" class="review-container d-flex " style="flex-wrap: wrap;" >
+    <div class="spacing-height-16"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px;" >
+      <div style="padding: 0px 16px; width: 800px">
+      <h2 style="text-align:center;" >리뷰 내역</h2>
+        <div class="review-details" th:each="list, listStat : ${list}" >
+          <div class="spacing-height-16"></div>
+          <div class="spacing-height-16"></div>
+          <div
+            class="d-flex align-items-center clinic-info-box"
+            style="gap: 16px"
+          >
+            <div class="clinic-info d-flex" style="flex-direction: column; ">
+              <div class="clinic-name">
+              <a th:text="${list.clinicName}"></a> &nbsp;&nbsp;
+              <a th:text="${list.clinicDoctor}"></a> &nbsp;&nbsp; 
+              <a th:text="${list.reviewRegdate}"></a></div>
+              <br/>
+              <div class="clinic-address" style="font-size:20px; color:black;" th:text="${list.reviewTitle}"></div>
+            </div>
+          </div>
+          
+          <th:block th:each="num: ${#numbers.sequence(1, list.reviewGrade)}">
+            <i class="fa-solid fa-star" style="color: #ffd43b"></i>
+          </th:block>
+          
+          <div class="review-content" th:text="${list.reviewContent}">
+          </div>
+          <div class="d-flex" style="gap: 16px; padding: 4px">
+            <div class="review-btn" th:onclick="|location.href='@{reviewUpdate-page(reviewSeq=${list.reviewSeq})}'|">리뷰수정</div>
+            <div class="review-btn" th:onclick="fn_delete([[${list.reviewSeq}]])">리뷰삭제</div>
+          </div>
+          <div class="spacing-height-16"></div>
+          <div class="silver-hr"></div>
+        </div>
+        
+            	<form id="bbsForm" name="bbsForm">
+            		<input type="hidden" id="curPage" name="curPage" th:value="${curPage}" />
+            
+            	</form>
+        
+        
+      </div>
+    </div>
+    <br/><br/>
+
+<div th:if="${#lists.isEmpty(list)}" style="width:800px; height:300px; text-align:center;">
+ <div class="spacing-height-16"></div>
+  <div class="spacing-height-16"></div>
+   <div class="spacing-height-16"></div>
+
+<h2 >리뷰목록이 없습니다.</h2>  
+</div>
+ 
+      
+<th:block th:if="${#lists.isEmpty(paging)}">   
+            <div class="page_wrap">
+				     <div class="page_nation">
+				     <th:block th:if="${paging != null}">
+						<th:block th:if="${paging.prevBlockPage gt 0}">
+				         	<a class="arrow prev" href="javascript:void(0)" th:onclick="fn_list(${paging.prevBlockPage})"><span class="material-symbols-outlined">chevron_left</span></a>
+				         </th:block>
+				         <th:block th:each="i : ${#numbers.sequence(paging.startPage, paging.endPage)}">
+				         	<th:block th:if="${i != curPage}">
+				         		<a class="" th:onclick="fn_list([[${i}]])" href="javascript:void(0)" th:text="${i}"></a>
+				         	</th:block>
+				         	<th:block th:if="${i == curPage}"> 
+								<a class="active" href="javascript:void(0)" th:text="${i}"></a>
+				         	</th:block>
+				     	</th:block>
+				     </th:block>
+				     </div>
+				 </div>
+            	</th:block>
+      
+  </div>
+  
+  
+  <form name="bbsForm" id="bbsForm" method="post">
+		<input type="text" name="endRow" id="endRow" th:value="${endRow}" />
+  </form>
+</html>

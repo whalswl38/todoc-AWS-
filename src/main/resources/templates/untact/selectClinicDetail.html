@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <title>비대면 진료 상세</title>
+    <style>
+        .select-item-container {
+            max-width: 768px;
+            margin: auto;
+        }
+
+        #lnb-container {
+            width: 140px;
+        }
+
+        .lnb-item a {
+            font-size: 18px;
+            padding: 8px;
+            display: block;
+        }
+
+        #lnb-container a:not(.lnb-active) {
+            color: black;
+            font-size: 18px;
+        }
+
+        .lnb-active {
+            color: royalblue;
+        }
+
+        .row,
+        .d-flex {
+            gap: 8px;
+        }
+
+        .filter-sort,
+        .filter-box {
+            background-color: #f7f9fa;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #8d9297;
+            font-weight: 500;
+        }
+
+        .clicked-background {
+            font-weight: 700;
+            border-bottom: 2px solid #212529;
+        }
+
+        .card-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 10px;
+        }
+
+        .card-image-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #bdbdbd;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .clinicItem {
+            padding: 4px 6px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 13px;
+            margin-right: 4px;
+            background-color: #f5f6f7;
+            color: #a9aeb1;
+        }
+
+        .silver-hr {
+            width: 100%;
+            height: 1px;
+            background: #a9aeb1;
+            margin: 12px 0;
+            opacity: 0.4;
+        }
+
+        .each-review {
+            border: 0.2px solid rgb(141, 146, 151);
+            padding: 16px;
+            border-radius: 16px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        #pagingBox {
+            width: 100%;
+            font-size: 18px;
+            gap: 20px;
+            font-weight: 500;
+        }
+
+        #pagingBox div {
+            cursor: pointer;
+        }
+
+        .paging-active {
+            color: green;
+            opacity: 0.8;
+            font-weight: 700;
+        }
+
+        .review-ul {
+            display: block;
+            color: rgb(141, 146, 151);
+            font-weight: 500;
+            padding-left: 16px;
+        }
+
+        .review-li {
+            list-style-type: initial;
+        }
+
+        .review-filter {
+            padding: 8px 16px;
+            border: 1px solid rgb(141, 146, 151);
+            border-radius: 16px;
+            color: #212529;
+            background-color: rgb(247, 249, 250);
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .clicked-filter-background {
+            color: royalblue;
+            background-color: #e5f4ff;
+            border: 1px solid royalblue;
+        }
+
+        .page_wrap {
+            text-align: center;
+            font-size: 0;
+        }
+
+        .page_nation {
+            display: inline-block;
+        }
+
+        .page_nation .none {
+            display: none;
+        }
+
+        .page_nation a {
+            display: block;
+            margin: 0 3px;
+            float: left;
+            border: 1px solid #e6e6e6;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            background-color: #fff;
+            font-size: 13px;
+            color: #999999;
+            text-decoration: none;
+        }
+
+        .page_nation .arrow {
+            border: 1px solid #ccc;
+        }
+
+        .page_nation .pprev {
+            margin-left: 0;
+        }
+
+        .page_nation .prev {
+            margin-right: 7px;
+        }
+
+        .page_nation .next {
+            margin-left: 7px;
+        }
+
+        .page_nation .nnext {
+            margin-right: 0;
+        }
+
+        .page_nation a.active {
+            background-color: #42454c;
+            color: #fff;
+            border: 1px solid #42454c;
+        }
+
+        .carousel {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel ul {
+            list-style-type: none;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            transition: transform 0.5s ease;
+            position: relative;
+        }
+
+        .carousel li {
+            flex: 0 0 100%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .each-review {
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .carousel-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            position: absolute;
+            top: 40%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        .carousel-buttons .prev-button,
+        .carousel-buttons .next-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .prev-button {
+            position: absolute;
+            left: 0;
+        }
+
+        .next-button {
+            position: absolute;
+            right: 0;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".tab").click(function() {
+                $(".clicked-background").removeClass("clicked-background");
+                $(this).addClass("clicked-background");
+                const thisClassList = $(this).attr("class");
+                if (thisClassList.includes("review-tab")) {
+                    const offset = $(".carousel").offset();
+                    console.log(offset);
+                    $("html, body").animate({
+                        scrollTop: offset.top
+                    }, 0);
+                } else if (thisClassList.includes("doctor-detail-tab")) {
+                    const offset = $("#doctor-detail-top").offset();
+                    console.log(offset);
+                    $("html, body").animate({
+                        scrollTop: offset.top
+                    }, 0);
+                }
+            });
+
+            $(".paging").click(function() {
+                $(".paging-active").removeClass("paging-active");
+                $(this).addClass("paging-active");
+            });
+
+            $(".review-filter").click(function() {
+                $(this).toggleClass("clicked-filter-background");
+            });
+        });
+
+        function setCurPage(data) {
+            $("#curPage").val(data);
+            $("#searchWord").submit();
+        }
+
+        function goToClinicReservation() {
+            $.ajax({
+                url: "/loginCheck",
+                type: "GET",
+                success: function(response) {
+                    if (response === null) {
+                    	alert('로그인 후 이용해주세요.');
+                        window.location.href = "/login-page";
+                    } else {
+                        window.location.href = "/clinic-reserve-application-page?clinicInstinum=" + $("#instinum").val();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error occurred while checking login status:", error);
+                    alert('로그인 후 이용해주세요.');
+                    window.location.href = "/login-page";
+                }
+            });
+        }
+
+        function carousel() {
+            const carouselContainer = document.querySelector(".carousel");
+            const carouselList = carouselContainer.querySelector("ul");
+            const carouselItems = carouselList.querySelectorAll("li");
+            const carouselWidth = carouselContainer.offsetWidth;
+            const totalItems = carouselItems.length;
+            let currentIndex = 0;
+
+            // 초기 위치 설정
+            carouselList.style.transform = `translateX(-${
+              currentIndex * carouselWidth
+            }px)`;
+
+            // 이전 버튼 클릭 시
+            function prev() {
+                currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+                carouselList.style.transform = `translateX(-${
+                currentIndex * carouselWidth
+              }px)`;
+            }
+
+            // 다음 버튼 클릭 시
+            function next() {
+                currentIndex = (currentIndex + 1) % totalItems;
+                carouselList.style.transform = `translateX(-${
+                currentIndex * carouselWidth
+              }px)`;
+            }
+
+            // 이전/다음 버튼 이벤트 리스너 추가
+            const prevButton = carouselContainer.querySelector(".prev-button");
+            prevButton.addEventListener("click", prev);
+
+            const nextButton = carouselContainer.querySelector(".next-button");
+            nextButton.addEventListener("click", next);
+        }
+
+        // DOM이 로드된 후에 Carousel을 초기화합니다.
+        window.addEventListener("DOMContentLoaded", carousel);
+    </script>
+</head>
+<body>
+    <div layout:fragment="content" class="select-item-container">
+        <div class="spacing-height-16"></div>
+        <div class="d-flex justify-content-between" style="gap: 32px">
+            <div id="lnb-container">
+                <ul class="lnb flex-column">
+                    <li class="lnb-item">
+                        <a class="lnb-link" aria-current="page" th:href="@{/select-subject-page}">병원찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link" th:href="@{/select-item-page}">증상찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link lnb-active" th:href="@{/select-clinic-page}">병원 리스트</a>
+                    </li>
+                </ul>
+            </div>
+            <div style="padding: 8px; width: 500px" th:each="clinic : ${untact}">
+                <div id="doctor-detail-top">
+                    <div class="row d-flex">
+                        <div class="col-md-1 d-flex">
+                            <button class="" style="border: 0; background-color: #fff">
+                                <div width="24" class="">
+                                    <span class="" size="24" color="#1C1D1F"><i class="fa-solid fa-chevron-left" style="font-size: 24px"></i></span>
+                                </div>
+                            </button>
+                        </div>
+                        <div class="col-md-8 d-flex justify-content-center" style="color: #212529; font-size: 24px; font-weight: 500">
+
+                        </div>
+                    </div>
+                    <div class="spacing-height-16"></div>
+                    <div class="row">
+                        <div class="col card-box d-flex">
+                            <div style="width: 60%">
+                                <div class="d-flex align-items-center" style="gap: 8px">
+                                    <div class="d-flex align-items-center" style="color: #212529; font-size: 24px; font-weight: 500" th:text="${clinic.clinicDoctor}">
+                                    </div>
+                                </div>
+                                <div style="color: rgb(141, 146, 151); font-weight: 600; padding-bottom: 8px;" th:text="${clinic.clinicName}"></div>
+                                <div>
+                                    <span class="clinicItem" th:each="list : ${subjectList}" th:text="${list}"></span>
+                                </div>
+                            </div>
+                            <div class="card-image-box" style="background: #bdbdbd">
+                                <img class="card-image" th:src="@{${clinic.fileOrgName} != null} ? @{/upload/clinicFolder/__${clinic.fileOrgName}__} : @{/image/nullprofile.jpg}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spacing-height-16"></div>
+                    <div class="spacing-height-16"></div>
+                    <div style="border: 0.1px solid rgb(141, 146, 151); border-radius: 16px; background-color: rgb(247, 249, 250); padding-top: 15px; padding-bottom: 15px; padding-left:10px;">
+                        <h4 style="padding-left: 23px">경력사항</h4>
+                        <ul style="display: block; padding-left: 23px" th:each="career : ${careerList}">
+                            <li style="list-style-type: initial" th:text="${career}"></li>
+                        </ul>
+                    </div>
+                    <div class="spacing-height-16"></div>
+                    <div class="d-flex" style="gap: 28px">
+                        <div class="p-2 tab clicked-background doctor-detail-tab" style="font-size: 20px; cursor: pointer">
+                            병원상세
+                        </div>
+                        <div class="p-2 tab review-tab" style="font-size: 20px; cursor: pointer">
+                            후기
+                        </div>
+                    </div>
+                    <div class="silver-hr" style="margin: 1.4px 0px 8px 0px"></div>
+                    <div class="spacing-height-16"></div>
+                    <div>
+                        <div th:text="${clinic.clinicDetail}">
+                        </div>
+                    </div>
+                    <div class="silver-hr"></div>
+
+                    <!-- 리뷰 캐러셀 -->
+					<div class="carousel">
+					    <div class="carousel-buttons" th:if="${reviewList != null && !reviewList.isEmpty()}">
+					        <button class="prev-button"><i class="bi bi-arrow-left-square-fill"></i></button>
+					        <button class="next-button"><i class="bi bi-arrow-right-square-fill"></i></button>
+					    </div>
+					    <ul>
+					        <li th:each="reviewItem : ${reviewList}">
+					            <div class="each-review">
+					                <div class="d-flex align-items-center">
+					                    <div style="font-weight: 600; font-size: 18px" th:text="${reviewItem.userName}"></div>
+					                    <div style="color: rgb(141, 146, 151); font-weight: 500" th:text="${reviewItem.reviewRegdate}"></div>
+					                </div>
+					                <div style="font-size: 14px">
+					                    <i th:each="i : ${#numbers.sequence(1, reviewItem.reviewGrade)}" class="fa-solid fa-star" style="color: #ffd43b"></i>
+					                </div>
+					                <div class="spacing-height-16"></div>
+					                <div>
+					                    <h5 style="font-weight: 600" th:text="${reviewItem.reviewTitle}"></h5>
+					                    <div th:text="${reviewItem.reviewContent}"></div>
+					                </div>
+					                <div class="spacing-height-16"></div>
+					            </div>
+					        </li>
+					        <li th:if="${reviewList == null || reviewList.isEmpty()}">
+								<p style="text-align: center;">등록된 후기가 없습니다.</p>
+							</li>
+					    </ul>
+					</div>
+                    <div class="silver-hr"></div>
+                    <div class="spacing-height-16"></div>
+                    <div>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <h4>진료시간</h4>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-center" style="color: rgb(141, 146, 151); gap: 32px">
+                                <div class="p-2" style="width: 200px ">
+                                    <span class="p-3">월요일</span> <span th:text="${timeList[0]}"></span>
+                                </div>
+                                <div class="p-2" style="width: 200px">
+                                    <span class="p-3">화요일</span> <span th:text="${timeList[1]}"></span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center" style="color: rgb(141, 146, 151); gap: 32px">
+                                <div class="p-2" style="width: 200px">
+                                    <span class="p-3">수요일</span> <span th:text="${timeList[2]}"></span>
+                                </div>
+                                <div class="p-2" style="width: 200px">
+                                    <span class="p-3">목요일</span> <span th:text="${timeList[3]}"></span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center" style="color: rgb(141, 146, 151); gap: 32px">
+                                <div class="p-2" style="width: 200px">
+                                    <span class="p-3">금요일</span> <span th:text="${timeList[4]}"></span>
+                                </div>
+                                <div class="p-2" style="width: 200px">
+                                    <span class="p-3" style="color: rgb(34, 139, 230)">토요일</span>
+                                    <span th:text="${timeList[5]}"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center" style="color: rgb(141, 146, 151); gap: 32px">
+                            <div class="p-2" style="width: 200px">
+                                <span class="p-3" style="color: red">일요일</span>
+                                <span th:text="${timeList[6]}"></span>
+                                <!--<div class="d-flex justify-content-center" style="width: 130px"></div> -->
+                            </div>
+                            <div class="p-2" style="width: 200px">
+                                <span class="p-3" style="color: red;">공휴일</span>
+                                <span th:text="${timeList[7]}"></span>
+                                <!-- <div class="d-flex justify-content-center" style="width: 123px"> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="silver-hr"></div>
+                <div style="color: rgb(141, 146, 151); text-align: center; padding: 16px" th:text="'점심시간 : '+ ${clinic.clinicBreak}">
+                </div>
+                <div class="silver-hr"></div>
+                <div class="d-flex justify-content-between p-3">
+                    <div>
+                        <div style="font-size: 20px; font-weight: 700" th:text="${clinic.clinicName}">
+                        </div>
+                        <div th:text="${clinic.clinicAddr}"></div>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <i class="fa-solid fa-phone" style="font-size: 20px"></i>
+                    </div>
+                </div>
+                <!-- 지도 -->
+                <div align="center">
+                    <div id="map" class="form-join d-flex justify-content-center" style="width:500px;height:400px;" align="center"></div>
+                </div><br/>
+                <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=db49e5d8b07a8b328167f31f905596dc&libraries=services"></script>
+                <script th:inline="javascript">
+                    var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+                        mapOption = {
+                            center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+                            level: 3 // 지도의 확대 레벨
+                        };
+                    // 지도를 생성합니다    
+                    var map = new kakao.maps.Map(mapContainer, mapOption);
+
+                    // 주소-좌표 변환 객체를 생성합니다
+                    var geocoder = new kakao.maps.services.Geocoder();
+
+                    // 주소로 좌표를 검색합니다
+                    geocoder.addressSearch('[[${clinic.clinicAddr}]]', function(result, status) {
+
+                        // 정상적으로 검색이 완료됐으면 
+                        if (status === kakao.maps.services.Status.OK) {
+
+                            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                            // 결과값으로 받은 위치를 마커로 표시합니다
+                            var marker = new kakao.maps.Marker({
+                                map: map,
+                                position: coords
+                            });
+
+                            // 인포윈도우로 장소에 대한 설명을 표시합니다
+                            var infowindow = new kakao.maps.InfoWindow({
+                                content: '<div style="width:150px;text-align:center;padding:6px 0;">[[${clinic.clinicName}]]</div>'
+
+                            });
+                            infowindow.open(map, marker);
+
+                            // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                            map.setCenter(coords);
+                        }
+                    });
+                </script>
+                <input id="instinum" type="hidden" th:value="${clinic.clinicInstinum}">
+                <div id="clinicReservation" style="width: 100%; background-color:royalblue; color: #fff4e6; border-radius: 12px; padding: 12px 0px; text-align: center; font-size: 18px;" onclick="goToClinicReservation()">
+                    진료 신청
+                </div>
+                <br/>
+            </div>
+            <div class="spacing-height-16"></div>
+            <div class="spacing-height-16"></div>
+        </div>
+    </div>
+</body>
+</html>

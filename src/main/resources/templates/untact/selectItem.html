@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+<head>
+    <title>증상 선택</title>
+    <style>
+        .select-item-container {
+            max-width: 768px;
+            margin: auto;
+            width: 100%;
+        }
+
+        #lnb-container {
+            width: 120px;
+        }
+
+        #lnb-container a:not(.lnb-active) {
+            color: black;
+            font-size: 18px;
+        }
+
+        .lnb-active {
+            color: royalblue;
+            font-size: 18px;
+        }
+
+        .lnb-item {
+            padding: 8px;
+        }
+
+        .item-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: rgb(141, 146, 151);
+        }
+
+        .item-image {
+            color: rgb(141, 146, 151);
+            background-color: rgb(247, 249, 250);
+            width: 80px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .row {
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+    </style>
+    <script>
+        $("#collaspe-btn").click;
+
+        $(document).ready(function() {
+            $("#collaspe-btn").click(function() {
+                $(this).hide();
+            });
+
+            $(".item-box").click(function() {
+                var symptom = $(this).attr("id");
+                window.location.href = "/select-clinic-page?symptom=" + symptom;
+            });
+        });
+    </script>
+</head>
+<body>
+    <div layout:fragment="content" class="select-item-container">
+        <div class="spacing-height-16"></div>
+        <div class="d-flex justify-content-between" style="">
+            <div id="lnb-container">
+                <ul class="lnb flex-column">
+                    <li class="lnb-item">
+                        <a class="lnb-link" aria-current="page" th:href="@{/select-subject-page}">병원찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link lnb-active" th:href="@{/select-item-page}">증상찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link" th:href="@{/select-clinic-page}">병원 리스트</a>
+                    </li>
+                </ul>
+            </div>
+            <div style="padding: 16px">
+                <div>
+                    <h4>증상찾기</h4>
+                </div>
+                <div class="spacing-height-16"></div>
+                <div>
+                    <div class="row">
+                        <div class="col item-box" id="a">
+                            <div class="item-image">
+                                <div>
+                                    <div>감기/몸살</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col item-box" id="b">
+                            <div class="item-image">
+                                <div>
+                                    <div>소화불량</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col item-box" id="c">
+                            <div class="item-image">
+                                <div>
+                                    <div>알러지</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col item-box" id="d">
+                            <div class="item-image">
+                                <div>
+                                    <div>비염</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col item-box" id="e">
+                            <div class="item-image">
+                                <div>
+                                    <div>여드름</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col item-box" id="f">
+                            <div class="item-image">
+                                <div>
+                                    <div>탈모</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col item-box" id="g">
+                            <div class="item-image">
+                                <div>
+                                    <div>다이어트</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col item-box" id="h">
+                            <div class="item-image">
+                                <div>
+                                    <div>인공눈물</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin: 0 auto">
+                        <div class="d-flex justify-content-center align-items-center" style="width: 100%">
+                            <button id="collaspe-btn" class="btn btn-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse" aria-expanded="false" aria-controls="collapseExample">
+                                더보기
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapse" id="collapse">
+                        <div class="row">
+                            <div class="col item-box" id="i">
+                                <div class="item-image">
+                                    <div>
+                                        <div>위염</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col item-box">
+                                <div class="item-image" id="j">
+                                    <div>
+                                        <div>장염</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col item-box" id="k">
+                                <div class="item-image">
+                                    <div>
+                                        <div>당뇨</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col item-box" id="l">
+                                <div class="item-image">
+                                    <div>
+                                        <div>고혈압</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col item-box" id="m">
+                                <div class="item-image">
+                                    <div>
+                                        <div>여성질환</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col item-box" id="n">
+                                <div class="item-image">
+                                    <div>
+                                        <div>만성질환</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col item-box" id="o">
+                                <div class="item-image">
+                                    <div>
+                                        <div>복통</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col item-box" id="p">
+                                <div class="item-image">
+                                    <div>
+                                        <div>두통</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="spacing-height-16"></div>
+            <div class="spacing-height-16"></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.todoc.web.dao.KakaoPayDao">
+	<resultMap type="com.todoc.web.dto.PayLog" id="payResultMap">
+		<result column ="PAY_SEQ" property="paySeq"/>
+        <result column="PAY_METHOD" property="payMethod"/>
+        <result column="PAY_PRICE" property="payPrice"/>
+        <result column="PAY_DATE" property="payDate"/>
+        <result column="PAY_FLAG" property="payFlag"/>
+        <result column="USER_EMAIL" property="userEmail"/>
+        <result column="RESERVATION_SEQ" property="reservationSeq"/>
+	</resultMap>
+	
+	<insert id="insertPayLog" parameterType="com.todoc.web.dto.PayLog">
+		INSERT INTO TD_PAY_LOG (
+	    	PAY_SEQ, PAY_METHOD, PAY_PRICE, PAY_DATE, PAY_FLAG, USER_EMAIL, RESERVATION_SEQ
+		) VALUES (
+		    #{paySeq},
+		    #{payMethod},
+		    #{payPrice},
+		    SYSDATE,
+		    'Y',
+		    #{userEmail},
+		    #{reservationSeq}
+		)
+	</insert>
+</mapper>

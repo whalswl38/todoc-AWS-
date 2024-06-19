@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>병원리스트</title>
+    <style>
+      .clinic-list-container {
+        max-width: 968px;
+        margin: auto;
+        width: 100%;
+        height: calc(70vh);
+      }
+
+      #lnb-container {
+        width: 300px;
+        overflow-y: auto;
+      }
+
+      .lnb-item {
+        padding: 8px;
+      }
+
+      #map-container {
+        border: 0.4px solid rgb(141, 146, 151);
+        width: calc(100% - 300px);
+        height: calc(70vh);
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      input:focus {
+        outline: none;
+      }
+
+      input::placeholder {
+        font-size: 14px;
+      }
+
+      .row {
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 0px 8px;
+      }
+
+      .filter-sort {
+        background-color: rgb(247, 249, 250);
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 12px;
+        color: rgb(141, 146, 151);
+        font-weight: 500;
+        min-width: 40px;
+        text-align: center;
+        cursor: pointer;
+      }
+
+      .clinic-id {
+        background-color: rgb(247, 249, 250);
+        border-radius: 8px;
+        padding: 2px;
+        font-size: 10px;
+        color: rgb(141, 146, 151);
+        font-weight: 500;
+        text-align: center;
+      }
+
+      .clicked-background {
+        color: rgb(247, 103, 7);
+        background-color: #fff4e6;
+        border: 1px solid rgb(247, 103, 7);
+      }
+
+      .card-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #e5f4ff;
+        padding: 8px 8px 8px 12px;
+        border-top: 0.2px solid rgb(141, 146, 151);
+        cursor: pointer;
+      }
+      .card-image-box {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .card-image {
+        width: 64px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+      .clinicItem {
+        padding: 3px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 14px;
+      }
+    </style>
+    <script>
+      $(document).ready(function () {
+        $(".filter-sort").click(function () {
+          $(this).toggleClass("clicked-background");
+        });
+      });
+    </script>
+  </head>
+  <div layout:fragment="content" class="clinic-list-container">
+    <div class="d-flex justify-content-between" style="height: calc(70vh)">
+      <div id="lnb-container">
+        <form>
+          <div
+            class="d-flex align-items-center"
+            style="
+              width: calc(100% - 24px);
+              border: 2px solid #03c75a;
+              border-radius: 8px;
+              padding-left: 8px;
+            "
+          >
+            <div style="padding-right: 4px">
+              <button
+                type="submit"
+                class=""
+                style="border: 0; background-color: #fff"
+              >
+                <div width="24" class="">
+                  <span class="" size="24"
+                    ><i
+                      class="fa-solid fa-magnifying-glass"
+                      style="color: #03c75a"
+                    ></i
+                  ></span>
+                </div>
+              </button>
+            </div>
+            <div style="width: calc(100% - 40px)">
+              <input
+                tabindex="0"
+                placeholder="병원을 검색해보세요"
+                style="
+                  height: 20px;
+                  border: none;
+                  padding: 8px;
+                  width: calc(100% - 16px);
+                "
+              />
+            </div>
+            <div style="cursor: pointer">
+              <i class="fa-solid fa-xmark"></i>
+            </div>
+          </div>
+        </form>
+        <div class="spacing-height-8"></div>
+        <div class="d-flex" style="gap: 8px">
+          <div class="filter-sort">
+            진료과목 &nbsp;<i
+              class="fa-solid fa-chevron-down"
+              style="font-size: 10px"
+            ></i>
+          </div>
+          <div class="filter-sort">
+            야간/휴일 &nbsp;<i
+              class="fa-solid fa-chevron-down"
+              style="font-size: 10px"
+            ></i>
+          </div>
+          <div class="filter-sort">진료중</div>
+        </div>
+        <div class="spacing-height-8"></div>
+        <div id="root" th:each="clinic : ${clinicList}">
+          <div class="col card-box d-flex">
+            <div>
+              <div class="d-flex align-items-center">
+                <span
+                  class="clinicItem"
+                  style="
+                    color: rgb(34, 139, 230);
+                    background-color: rgb(231, 245, 255);
+                    font-size: 10px;
+                    border: 0.3px solid rgb(34, 139, 230);
+                    margin-right: 8px;
+                  "
+                  th:if="${clinic.hasAd}"
+                  >광고<i
+                    class="fa-solid fa-circle-info"
+                    style="color: #74c0fc"
+                  ></i
+                ></span>
+                <span
+                  class="clinicItem"
+                  style="
+                    color: rgb(34, 139, 230);
+                    font-size: 16px;
+                    padding: 3px 0px;
+                  "
+                  th:text="${clinic.name}"
+                ></span>
+              </div>
+              <div
+                style="
+                  margin-bottom: 4px;
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: rgb(247, 103, 7);
+                "
+                th:if="${clinic.hasAd}"
+                th:text="${clinic.keyword}"
+              ></div>
+              <div
+                style="
+                  margin-bottom: 4px;
+                  font-size: 14px;
+                  font-weight: 500;
+                  color: rgb(141, 146, 151);
+                "
+                th:if="${!clinic.hasAd}"
+                th:text="${clinic.keyword}"
+              ></div>
+              <div
+                class="d-flex align-items-center"
+                style="
+                  gap: 8px;
+                  margin-bottom: 4px;
+                  font-size: 12px;
+                  color: rgb(141, 146, 151);
+                "
+              >
+                <div
+                  th:text="${clinic.isOperationTime ? '진료중':'진료종료'}"
+                ></div>
+                <div
+                  style="
+                    height: 3px;
+                    width: 3px;
+                    background: silver;
+                    border-radius: 50%;
+                  "
+                ></div>
+                <div th:text="${clinic.endTime+'에 진료 종료'}"></div>
+              </div>
+
+              <div
+                class="d-flex align-items-center"
+                style="gap: 8px; margin-bottom: 4px; font-size: 12px"
+              >
+                <div
+                  style="font-weight: 700"
+                  th:text="${clinic.distance+'km'}"
+                ></div>
+                <div
+                  style="
+                    height: 3px;
+                    width: 3px;
+                    background: silver;
+                    border-radius: 50%;
+                  "
+                ></div>
+                <div
+                  style="color: rgb(141, 146, 151)"
+                  th:text="${clinic.address}"
+                ></div>
+              </div>
+              <div
+                class="d-flex align-items-center"
+                style="
+                  gap: 8px;
+                  margin-bottom: 4px;
+                  font-size: 12px;
+                  color: rgb(141, 146, 151);
+                "
+              >
+                <div
+                  th:if="${clinic.visitReviewCnt}"
+                  th:text="${'방문자 리뷰 '+clinic.visitReviewCnt}"
+                ></div>
+                <div
+                  style="
+                    height: 3px;
+                    width: 3px;
+                    background: silver;
+                    border-radius: 50%;
+                  "
+                  th:if="${clinic.visitReviewCnt>0 && clinic.blogReviewCnt>0}"
+                ></div>
+                <div
+                  th:if="${clinic.blogReviewCnt}"
+                  th:text="${'블로그 리뷰 '+clinic.blogReviewCnt}"
+                ></div>
+              </div>
+            </div>
+            <div class="card-image-box">
+              <img class="card-image" th:src="${clinic.profileImg}" />
+              <div
+                class="clinic-id"
+                th:if="${clinic.clinicId}"
+                th:text="${clinic.clinicId}"
+              >
+                한49603
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="map-container"></div>
+    </div>
+  </div>
+</html>

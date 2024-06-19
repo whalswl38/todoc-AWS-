@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.todoc.web.dao.ClinicContactDao">
+	<resultMap type="ClinicContact" id="ClinicContactMap">
+		<id property="clinicEmail" column="CLINIC_EMAIL" />
+		<result property="clinicInstinum" column="CLINIC_INSTINUM" />
+		<result property="clinicRegnum" column="CLINIC_REGNUM" />
+		<result property="clinicPhone" column="CLINIC_PHONE" />
+		<result property="clinicName" column="CLINIC_NAME" />
+		<result property="clinicSubject" column="CLINIC_SUBJECT" />
+		<result property="clinicSymptom" column="CLINIC_SYMPTOM" />
+		<result property="userEmail" column="USER_EMAIL" />
+		<result property="userPwd" column="USER_PWD" />
+		<result property="clinicDay" column="CLINIC_DAY" />
+		<result property="clinicTime" column="CLINIC_TIME" />
+		<result property="clinicDayoff" column="CLINIC_DAYOFF" />
+		<result property="clinicZipcode" column="CLINIC_ZIPCODE" />
+		<result property="clinicAddr" column="CLINIC_ADDR" />
+		<result property="clinicContactFlag" column="CLINIC_CONTACT_FLAG" />
+		<result property="clinicDetail" column="CLINIC_DETAIL" />
+		<result property="clinicStatus" column="CLINIC_STATUS" />
+		<result property="clinicDoctor" column="CLINIC_DOCTOR" />
+		<result property="clinicRefreshToken" column="CLINIC_REFRESH_TOKEN" />
+		<result property="clinicFax" column="CLINIC_FAX" />
+		<result property="clinicCareer" column="CLINIC_CAREER" />
+		<result property="clinicBreak" column="CLINIC_BREAK" />
+		<result property="clinicNight" column="CLINIC_NIGHT" />
+		<result property="clinicWeekend" column="CLINIC_WEEKEND" />
+	</resultMap>
+	  
+	<resultMap type="ReservationContact" id="ReservationContactMap">
+		<id property="reservationSeq" column="RESERVATION_SEQ" />
+		<result property="userEmail" column="USER_EMAIL" />
+		<result property="clinicInstinum" column="CLINIC_INSTINUM" />
+		<result property="reservationDate" column="RESERVATION_DATE" />
+		<result property="reservationTime" column="RESERVATION_TIME" />
+		<result property="reservationSymptom" column="RESERVATION_SYMPTOM" />
+		<result property="reservationFlag" column="RESERVATION_FLAG" />
+		<result property="regdate" column="REGDATE" />
+		<result property="clinicName" column="CLINIC_NAME"/>
+		<result property="reservationStatus" column="RESERVATION_STATUS" />
+	</resultMap>
+	
+	<resultMap type="ClinicFile" id="ClinicFileMap">
+        <result column="FILE_SEQ" property="fileSeq"/>
+        <result column="FILE_ORG_NAME" property="fileOrgName"/>
+        <result column="FILE_NAME" property="fileName"/>
+        <result column="FILE_EXT" property="fileExt"/>
+        <result column="FILE_SIZE" property="fileSize"/>
+        <result column="FILE_REGDATE" property="fileRegDate"/>
+    </resultMap>
+	
+	
+	<select id="clinicList" resultMap="ClinicContactMap">
+		SELECT *
+		FROM TD_CLINIC
+		WHERE CLINIC_CONTACT_FLAG LIKE '%C%'
+	</select>
+	
+	<select id="clinicListTotal" parameterType="ClinicContact" resultMap="ClinicContactMap">
+		SELECT *
+		FROM TD_CLINIC
+		WHERE CLINIC_CONTACT_FLAG LIKE '%C%'
+		<if test='textSearch != "" and textSearch != null'>
+		AND CLINIC_SYMPTOM LIKE '%' || #{textSearch} || '%'
+		OR CLINIC_SUBJECT LIKE '%' || #{textSearch} || '%'
+		OR CLINIC_NAME LIKE '%' || #{textSearch} || '%'
+		</if>
+	</select>
+	
+	<select id="clinicListCategory" parameterType="com.todoc.web.dto.ClinicContact" resultMap="ClinicContactMap">
+ SELECT RNUM,
+   				CLINIC_INSTINUM,
+   				CLINIC_REGNUM,
+   				CLINIC_PHONE,
+				CLINIC_NAME,
+				CLINIC_SUBJECT,
+				CLINIC_SYMPTOM,
+				USER_EMAIL,
+				USER_PWD,
+				CLINIC_DAY,
+				CLINIC_TIME,
+				CLINIC_DAYOFF,
+				CLINIC_ZIPCODE,
+				CLINIC_ADDR,
+				CLINIC_CONTACT_FLAG,
+				CLINIC_DETAIL,
+				CLINIC_STATUS,
+				CLINIC_DOCTOR,
+				CLINIC_REFRESH_TOKEN,
+				CLINIC_FAX,
+				CLINIC_CAREER,
+				CLINIC_BREAK,
+				CLINIC_NIGHT,
+				CLINIC_WEEKEND,
+				FILE_ORG_NAME,
+				FILE_NAME
+	    FROM ( SELECT ROWNUM RNUM, 
+    				A.CLINIC_INSTINUM,
+    				NVL(A.CLINIC_REGNUM,'') AS CLINIC_REGNUM,
+     				NVL(A.CLINIC_PHONE,'') AS CLINIC_PHONE,
+     				NVL(A.CLINIC_NAME,'') AS CLINIC_NAME,
+     				NVL(A.CLINIC_SUBJECT,'') AS CLINIC_SUBJECT,
+     				NVL(A.CLINIC_SYMPTOM,'') AS CLINIC_SYMPTOM,
+     				NVL(A.USER_EMAIL,'') AS USER_EMAIL,
+     				NVL(A.USER_PWD,'') AS USER_PWD,
+     				NVL(A.CLINIC_DAY,'') AS CLINIC_DAY,
+     				NVL(A.CLINIC_TIME,'') AS CLINIC_TIME,
+    				NVL(A.CLINIC_DAYOFF,'') AS CLINIC_DAYOFF,
+     				NVL(A.CLINIC_ZIPCODE,'') AS CLINIC_ZIPCODE,
+     				NVL(A.CLINIC_ADDR,'') AS CLINIC_ADDR,
+     				NVL(A.CLINIC_CONTACT_FLAG,'') AS CLINIC_CONTACT_FLAG,
+     				NVL(A.CLINIC_DETAIL,'') AS CLINIC_DETAIL,
+     				NVL(A.CLINIC_STATUS,'') AS CLINIC_STATUS,
+     				NVL(A.CLINIC_DOCTOR,'') AS CLINIC_DOCTOR,
+     				NVL(A.CLINIC_REFRESH_TOKEN,'') AS CLINIC_REFRESH_TOKEN,
+     				NVL(A.CLINIC_FAX,'') AS CLINIC_FAX,
+     				NVL(A.CLINIC_CAREER,'') AS CLINIC_CAREER,
+     				NVL(A.CLINIC_BREAK,'') AS CLINIC_BREAK,
+     				NVL(A.CLINIC_NIGHT,'') AS CLINIC_NIGHT,
+     				NVL(A.CLINIC_WEEKEND,'') AS CLINIC_WEEKEND,
+     				NVL(B.FILE_ORG_NAME,'') AS FILE_ORG_NAME,
+               	 	NVL(B.FILE_NAME,'') AS FILE_NAME
+			   FROM TD_CLINIC A
+		LEFT OUTER JOIN TD_CLINIC_FILE B ON A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+   WHERE A.CLINIC_CONTACT_FLAG = 'C'
+ 		<if test='category != "" and category != null and searchValue != "" and searchValue != null'>
+			<choose>
+				<when test='category == "1"'>
+					AND A.CLINIC_SUBJECT LIKE '%' || #{searchValue} || '%'
+				</when>
+				<when test='category == "2"'>
+					AND A.CLINIC_SYMPTOM LIKE '%' || #{searchValue} || '%'
+				</when>
+			</choose>
+		</if>
+       	<if test='clinicNight != "" and clinicNight != null'>
+					AND A.CLINIC_NIGHT='Y'
+		</if>
+        <if test='clinicWeekend != "" and clinicWeekend != null'>
+					AND A.CLINIC_WEEKEND='Y'
+		</if>
+        <if test='textSearch != "" and textSearch != null'>
+					AND A.CLINIC_NAME LIKE '%' || #{textSearch} || '%'
+		</if>
+        <if test='guName != "" and guName != null'>
+		
+					AND A.CLINIC_ADDR LIKE '%' || #{guName} || '%'
+		</if>
+        <if test='runningNumList != null and !runningNumList.isEmpty()'>
+        			AND A.CLINIC_INSTINUM IN
+        <foreach collection="runningNumList" item="runningNum" open="(" separator="," close=")">
+           			 #{runningNum}
+        </foreach>
+    	</if>
+        	)
+       WHERE RNUM <![CDATA[>=]]> #{startRow}
+		 AND RNUM <![CDATA[<=]]> #{endRow}
+
+	</select>
+	
+	<select id="listCount" parameterType="com.todoc.web.dto.ClinicContact" resultType="long">
+		SELECT COUNT(CLINIC_INSTINUM) AS CNT
+		FROM TD_CLINIC
+		WHERE CLINIC_CONTACT_FLAG LIKE '%C%'
+	 		<if test='category != "" and category != null and searchValue != "" and searchValue != null'>
+			<choose>
+				<when test='category == "1"'>
+					AND CLINIC_SUBJECT LIKE '%' || #{searchValue} || '%'
+				</when>
+				<when test='category == "2"'>
+					AND CLINIC_SYMPTOM LIKE '%' || #{searchValue} || '%'
+				</when>
+			</choose>
+			</if>
+       		<if test='clinicNight != "" and clinicNight != null'>
+					AND CLINIC_NIGHT='Y'
+			</if>	
+        	<if test='clinicWeekend != "" and clinicWeekend != null'>
+					AND CLINIC_WEEKEND='Y'
+			</if>
+        	<if test='textSearch != "" and textSearch != null'>
+					AND CLINIC_NAME LIKE '%' || #{textSearch} || '%'
+			</if>
+        	<if test='guName != "" and guName != null'>
+		
+					AND CLINIC_ADDR LIKE '%' || #{guName} || '%'
+			</if>
+        	<if test='runningNumList != null and !runningNumList.isEmpty()'>
+        			AND CLINIC_INSTINUM IN
+        	<foreach collection="runningNumList" item="runningNum" open="(" separator="," close=")">
+           			 #{runningNum}
+        	</foreach>
+   	 		</if>
+	
+	
+	</select>
+	
+	<select id="clinicTimeList"  resultMap="ClinicContactMap">
+		SELECT CLINIC_INSTINUM,CLINIC_TIME
+		FROM TD_CLINIC
+		WHERE CLINIC_CONTACT_FLAG LIKE '%C%'
+	</select>
+	
+	<select id="timeOnly"  parameterType="String" resultMap="ClinicContactMap">
+		SELECT CLINIC_TIME
+		  FROM TD_CLINIC
+		 WHERE CLINIC_CONTACT_FLAG LIKE '%C%'
+		   AND CLINIC_INSTINUM = #{value}
+	</select>
+	
+	
+	<select id="clinicDetail" resultMap="ClinicContactMap">
+		SELECT A.*,B.FILE_ORG_NAME, B.FILE_NAME
+		  FROM TD_CLINIC A
+		LEFT OUTER JOIN TD_CLINIC_FILE B ON A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+  	     WHERE A.CLINIC_CONTACT_FLAG = 'C'
+		   AND A.CLINIC_INSTINUM=#{value}
+	</select>
+	
+	  
+	<insert id="reservationInsert" parameterType="com.todoc.web.dto.ReservationContact">
+		<selectKey resultType="long" keyProperty="reservationSeq" order="BEFORE" >
+			SELECT SEQ_TD_RESERVATION.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO TD_RESERVATION (
+			    RESERVATION_SEQ,
+			    USER_EMAIL,
+			    CLINIC_INSTINUM,
+			    RESERVATION_DATE,
+			    RESERVATION_TIME,
+			    RESERVATION_SYMPTOM,
+			    RESERVATION_FLAG,
+			    REGDATE,
+			    RESERVATION_STATUS
+			) VALUES (
+			    #{reservationSeq},
+			    #{userEmail},
+			    #{clinicInstinum},
+			    #{reservationDate},
+			    #{reservationTime},
+			    #{reservationSymptom},
+			    'C',
+			    SYSDATE,
+			    '예약확인'
+			)
+	</insert>
+	
+	<!-- 예약된 날짜 찾기 -->
+	<select id="reservedTime" parameterType="String" resultMap="ReservationContactMap">
+		SELECT RESERVATION_TIME
+		  FROM TD_RESERVATION
+		 WHERE CLINIC_INSTINUM = #{clinicInstinum}
+		   AND RESERVATION_DATE = #{reservationDate}
+	</select>
+	
+	<!-- 대면 예약 확인 -->
+	<select id="contactReservationCheck" parameterType="com.todoc.web.dto.ReservationContact" resultMap="ReservationContactMap">
+			SELECT
+			    A.RESERVATION_SEQ,
+			    A.USER_EMAIL,
+			    A.CLINIC_INSTINUM,
+			    TO_CHAR(A.RESERVATION_DATE, 'YYYY-MM-DD') RESERVATION_DATE,
+			    A.RESERVATION_TIME,
+			    A.RESERVATION_SYMPTOM,
+			    A.RESERVATION_FLAG,
+			    A.RESERVATION_STATUS,
+			    B.CLINIC_NAME
+			FROM TD_RESERVATION A, TD_CLINIC B
+			WHERE A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+	        AND RESERVATION_FLAG = 'C'
+			AND A.USER_EMAIL = #{userEmail}
+			AND A.RESERVATION_DATE = #{reservationDate}
+			AND A.RESERVATION_STATUS = '예약확인'
+		
+	
+	</select>
+	
+	<!-- 예약확인 리스트 -->
+	<select id="reservationList" parameterType="String" resultMap="ReservationContactMap">
+		SELECT RESERVATION_SEQ,
+		        USER_EMAIL,
+		        USER_NAME,
+		        CLINIC_DOCTOR,
+		        CLINIC_NAME,
+		        CLINIC_INSTINUM,
+		        RESERVATION_DATE,
+		        RESERVATION_TIME,
+		        RESERVATION_SYMPTOM,
+		        RESERVATION_FLAG,
+		        REGDATE,
+		        STATUS
+		  FROM ( SELECT ROWNUM RNUM,
+		                RESERVATION_SEQ,
+		                USER_EMAIL,
+		                USER_NAME,
+		                CLINIC_DOCTOR,
+		                CLINIC_NAME,
+		                CLINIC_INSTINUM,
+		                RESERVATION_DATE,
+		                RESERVATION_TIME,
+		                RESERVATION_SYMPTOM,
+		                RESERVATION_FLAG,
+		                REGDATE,
+		                STATUS
+		          FROM ( SELECT A.RESERVATION_SEQ RESERVATION_SEQ,
+		                        NVL(A.USER_EMAIL, '') USER_EMAIL,
+		                        NVL(B.USER_NAME, '') USER_NAME,
+		                        NVL(C.CLINIC_DOCTOR, '') CLINIC_DOCTOR,
+		                        NVL(C.CLINIC_NAME, '') CLINIC_NAME,
+		                        NVL(A.CLINIC_INSTINUM, '') CLINIC_INSTINUM,
+		                        NVL(TO_CHAR(A.RESERVATION_DATE, 'YYYY.MM.DD'), '') RESERVATION_DATE,
+		                        NVL(A.RESERVATION_TIME, '') RESERVATION_TIME,
+		                        NVL(A.RESERVATION_SYMPTOM, '') RESERVATION_SYMPTOM,
+		                        NVL(A.RESERVATION_FLAG, '') RESERVATION_FLAG,
+		                        NVL(TO_CHAR(A.REGDATE, 'YYYY.MM.DD HH24:MI'), '') REGDATE,
+		                        NVL(A.RESERVATION_STATUS, '') STATUS
+		                  FROM TD_RESERVATION A, TD_USER B, TD_CLINIC C
+		                 WHERE A.USER_EMAIL = B.USER_EMAIL
+		                   AND A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+		                   AND A.CLINIC_INSTINUM = #{value}
+		                 ORDER BY A.RESERVATION_TIME ASC, A.RESERVATION_SEQ ASC))
+		 WHERE RNUM <![CDATA[>=]]> 0
+			   AND RNUM <![CDATA[<=]]> 10
+		
+	</select>
+	
+	
+	<select id="clinicListView" parameterType="String" resultMap="ClinicContactMap">
+		SELECT CLINIC_INSTINUM,
+			   NVL(CLINIC_DOCTOR, ''), CLINIC_DOCTOR,
+			   NVL(CLINIC_NAME, '') CLINIC_NAME
+		   FROM TD_CLINIC
+		 WHERE USER_EMAIL = #{value}
+	</select>
+	
+	<!-- 예약리스트에서 예약 승인 -->
+	<update id="reservationApprove" parameterType="long">
+			UPDATE TD_RESERVATION
+			   SET RESERVATION_STATUS = '예약확정'
+			 WHERE RESERVATION_SEQ = #{value}
+	</update>
+	
+	<!-- 예약리스트에서 예약 취소 -->
+	<update id="reservationCancel" parameterType="long">
+			UPDATE TD_RESERVATION
+			   SET RESERVATION_STATUS = '예약취소'
+			 WHERE RESERVATION_SEQ = #{value}
+	</update>
+	
+	<!-- 예약승인/취소 리스트 토탈카운트 -->
+	<select id="reservationListTotal" parameterType="String" resultType="int">
+		SELECT COUNT(CLINIC_INSTINUM)
+		  FROM TD_RESERVATION
+		 WHERE RESERVATION_STATUS = '예약확인'
+		   AND CLINIC_INSTINUM = #{value}
+	</select>
+	
+	<!-- 진료 대기 리스트 -->
+	<select id="contactListTotal" parameterType="String" resultType="int">
+		SELECT COUNT(CLINIC_INSTINUM)
+		  FROM TD_RESERVATION
+		 WHERE RESERVATION_STATUS = '예약확정'
+		   AND RESERVATION_FLAG = 'U'
+		   AND CLINIC_INSTINUM = #{value}
+	</select>
+	
+	<!-- 이메일로 의사 정보 불러오기 -->
+	<select id="clinicfindByEmail" parameterType="String" resultMap="ClinicContactMap">
+		SELECT *
+		  FROM TD_CLINIC
+		 WHERE USER_EMAIL = #{value}
+	</select>
+
+
+	<!-- test  5/22 승준코드 ////////////////////////////////////////////////////////////////////// -->
+	<!-- 의사 회원정보수정 할때 근무시간 파싱-->
+	
+	<select id="testTime" parameterType="String" resultMap="ClinicContactMap">
+			SELECT CLINIC_NAME,
+	       CLINIC_TIME
+	  FROM TD_CLINIC
+	 WHERE USER_EMAIL = #{value}
+	
+	</select>
+	
+	<!-- 마이페이지 회원 예약내역 불러오기 -->
+	<select id="mypageReservationList" parameterType="String" resultMap="ReservationContactMap">
+	
+		SELECT RESERVATION_SEQ,
+			   USER_EMAIL,
+			   CLINIC_INSTINUM,
+			   RESERVATION_DATE,
+			   RESERVATION_TIME,
+			   RESERVATION_SYMPTOM,
+			   RESERVATION_FLAG,
+			   REGDATE,
+			   RESERVATION_STATUS,
+			   CLINIC_NAME,
+			   CLINIC_DOCTOR
+	     FROM (SELECT ROWNUM RNUM,
+				 	   RESERVATION_SEQ,
+					   USER_EMAIL,
+					   CLINIC_INSTINUM,
+					   RESERVATION_DATE,
+					   RESERVATION_TIME,
+					   RESERVATION_SYMPTOM,
+					   RESERVATION_FLAG,
+					   REGDATE,
+					   RESERVATION_STATUS,
+					   CLINIC_NAME,
+					   CLINIC_DOCTOR
+			      FROM (SELECT A.RESERVATION_SEQ RESERVATION_SEQ,
+						        NVL(B.USER_EMAIL, '') USER_EMAIL,
+						        NVL(C.CLINIC_INSTINUM, '') CLINIC_INSTINUM,
+						        NVL(TO_CHAR(A.RESERVATION_DATE, 'YYYY.MM.DD'), '') RESERVATION_DATE,
+						        NVL(A.RESERVATION_TIME, '') RESERVATION_TIME,
+						        NVL(A.RESERVATION_SYMPTOM, '') RESERVATION_SYMPTOM,
+						        NVL(A.RESERVATION_FLAG, '') RESERVATION_FLAG,
+						        NVL(A.REGDATE, '') REGDATE,
+						        NVL(A.RESERVATION_STATUS, '') RESERVATION_STATUS,
+						        NVL(C.CLINIC_NAME, '') CLINIC_NAME,
+						        NVL(C.CLINIC_DOCTOR, '') CLINIC_DOCTOR
+						 FROM TD_RESERVATION A, TD_USER B, TD_CLINIC C
+						 WHERE A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+						   AND A.USER_EMAIL = B.USER_EMAIL
+						   AND A.USER_EMAIL = #{value}
+						   AND A.RESERVATION_STATUS != '진료취소'
+						   AND A.RESERVATION_STATUS != '결제완료'
+						   AND A.RESERVATION_STATUS != '처방완료'
+						   AND A.RESERVATION_FLAG = 'U'
+						 ORDER BY A.RESERVATION_DATE ASC, A.RESERVATION_TIME ASC))
+			WHERE RNUM = 1
+	
+	</select>
+	
+	<!-- 예약번호로 정보조회 -->
+	<select id="resrvationClickMapping" parameterType="long" resultMap="ReservationContactMap">
+				SELECT A.RESERVATION_SEQ,
+				       A.USER_EMAIL,
+				       A.CLINIC_INSTINUM,
+				       A.RESERVATION_STATUS,
+				       B.USER_EMAIL DOCTOR_EMAIL,
+				       A.RESERVATION_SYMPTOM
+				  FROM TD_RESERVATION A, TD_CLINIC B
+				 WHERE A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+				   AND RESERVATION_SEQ = #{value}
+	</select>
+	
+	<!-- 의사가 입장시 진료입장으로 변경 -->
+	<update id="reservationStatusUpdate" parameterType="long">
+	UPDATE TD_RESERVATION
+	    SET RESERVATION_STATUS = '진료대기'
+	 WHERE RESERVATION_SEQ = #{value}
+	</update>
+	
+	
+	<update id="streamEnd" parameterType="long" >
+	
+		UPDATE TD_RESERVATION
+		   SET RESERVATION_STATUS = '진료완료'
+		 WHERE RESERVATION_SEQ = #{value}
+		 
+	</update>
+	
+	<update id="contactCancel" parameterType="long">
+		UPDATE TD_RESERVATION
+		   SET RESERVATION_STATUS = '진료취소'
+		 WHERE RESERVATION_SEQ = #{value}
+	</update>
+	
+	
+	<!-- 대면 진료내역 -->
+	<select id="contactLogList2" parameterType="com.todoc.web.dto.ReservationContact" resultMap="ReservationContactMap">
+		 SELECT RESERVATION_SEQ,
+		        USER_EMAIL,
+		        USER_NAME,
+		        CLINIC_NAME,
+		        CLINIC_INSTINUM,
+		        RESERVATION_DATE,
+		        RESERVATION_TIME,
+		        RESERVATION_SYMPTOM,
+		        RESERVATION_FLAG,
+		        REGDATE,
+		        RESERVATION_STATUS
+		  FROM (SELECT ROWNUM RNUM,
+		                RESERVATION_SEQ,
+		                USER_EMAIL,
+		                USER_NAME,
+		                CLINIC_NAME,
+		                CLINIC_INSTINUM,
+		                RESERVATION_DATE,
+		                RESERVATION_TIME,
+		                RESERVATION_SYMPTOM,
+		                RESERVATION_FLAG,
+		                REGDATE,
+		                RESERVATION_STATUS
+		          FROM ( SELECT A.RESERVATION_SEQ RESERVATION_SEQ,
+		                        NVL(A.USER_EMAIL, '') USER_EMAIL,
+		                        NVL(B.USER_NAME, '') USER_NAME,
+		                        NVL(C.CLINIC_NAME, '') CLINIC_NAME,
+		                        NVL(A.CLINIC_INSTINUM, '') CLINIC_INSTINUM,
+		                        TO_CHAR(A.RESERVATION_DATE, 'YYYY.MM.DD') RESERVATION_DATE,
+		                        NVL(A.RESERVATION_TIME, '') RESERVATION_TIME,
+		                        NVL(A.RESERVATION_SYMPTOM, '') RESERVATION_SYMPTOM,
+		                        NVL(A.RESERVATION_FLAG, '') RESERVATION_FLAG,
+		                        NVL(A.REGDATE, '') REGDATE,
+		                        NVL(A.RESERVATION_STATUS, '') RESERVATION_STATUS
+		                   FROM TD_RESERVATION A, TD_USER B, TD_CLINIC C
+		                  WHERE A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+		                    AND A.USER_EMAIL = B.USER_EMAIL
+		                    AND A.RESERVATION_FLAG = 'C'
+		                    AND A.USER_EMAIL = #{userEmail}
+		                  ORDER BY RESERVATION_SEQ DESC))
+		 WHERE RNUM <![CDATA[>=]]> #{startRow}
+		   AND RNUM <![CDATA[<=]]> #{endRow}
+	</select>
+	
+	
+	<!-- 진료내역 토탈카운트 -->
+	<select id="contactLogTotal2" parameterType="String" resultType="int">
+	
+				SELECT COUNT(USER_EMAIL)
+				  FROM TD_RESERVATION
+				 WHERE USER_EMAIL = #{value}
+                   AND RESERVATION_FLAG = 'C'
+
+	</select>
+	<!-- ///////////////////////////////////////////////////////////////////////////////////////// 승준 -->
+	
+</mapper>

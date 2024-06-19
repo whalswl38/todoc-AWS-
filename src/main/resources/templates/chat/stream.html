@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+<style>
+
+  .call1{width: 100%;
+    height: 730px;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    align-items: flex-start;
+    flex-shrink: 0;
+    background-color: #fff;
+  }
+
+  .callscreen1{
+    top: 95px;
+    left: 15%;
+    width: 500px;
+    height: 596px;
+    display: flex;
+    position: absolute;
+    align-items: flex-start;
+    flex-shrink: 1;
+    background-color: #fff;
+  
+  }
+
+  .callscreen2{
+    top: 95px;
+    left: 55%;
+    width: 500px;
+    height: 596px;
+    display: flex;
+    position: absolute;
+    align-items: flex-start;
+    flex-shrink: 1;
+    background-color: #fff;
+  }
+
+</style>
+</head>
+<body>
+
+<div>
+	<input type="hidden" id="otherKey" th:value="${userEmail}" />
+	<input type="hidden" id="userEmail" th:value="${clinicEmail}" />
+	<input type="hidden" id="doctorEmail" th:value="${doctorEmail}" />
+	<input type="hidden" id="reservationSeq" th:value="${reservationSeq}" />
+	
+		<!-- 룸 아이디 번호를 입력하는 input -->
+    <input type="hidden" id="roomIdInput"  value="test"/>
+		<!-- 룸 아이디를 입력후 클릭하는 button -->
+		<!-- enterRoomBtn 클릭시 나타남, Streams 정보를 담은 Peer 를 웹소켓 ( 시그널링 )   -->
+    <button type="button" id="startSteamBtn" style="display: none;">start Streams</button>
+</div>
+
+
+<div class="call1">
+  <div class="callscreen1">
+    <video id="localStream" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+  </div>
+
+  <div class="callscreen2">
+    <video id="remoteStream" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video><br/>
+  </div>
+	
+</div>
+
+<div style="text-align:center;">
+	<button type="button" id="mute" style="background-color:royalblue; width:50px; height:50px; border-radius: 25px; cursor:pointer;" ><span style="color:#fff;" id="mic" class="material-symbols-outlined">
+mic
+</span></button>
+	<button type="button" id="camera" style="background-color:royalblue; width:50px; height:50px; border-radius: 25px; cursor:pointer; "><span style="color:#fff;" id="videoCam" class="material-symbols-outlined">
+videocam
+</span></button>
+	<button type="button" id="endSteamBtn" style="background-color:red; width:50px; height:50px; border-radius: 25px;  cursor:pointer; display:none;"><span style="color:#fff;" class="material-symbols-outlined">
+call_end
+</span></button>
+	
+</div>
+<script th:src="@{/RTCPeerConnection/peerConfig.js}"></script>
+</body>
+</html>

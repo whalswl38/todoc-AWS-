@@ -1,0 +1,143 @@
+* {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style-type: none;
+  box-sizing: unset;
+  font-family: "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+}
+
+.layout-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+p {
+  margin: 0;
+}
+
+ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  /* background-color: rgb(247, 103, 7); */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+  max-width: 768px;
+}
+
+.logo img {
+  width: 100px;
+}
+
+.navigation a {
+  text-decoration: none;
+  padding: 10px;
+  display: block;
+  font-size: 16px;
+}
+
+.navigation li {
+  margin-left: 8px;
+}
+
+footer {
+  display: flex;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  align-items: center;
+  width: 100%;
+  background-color: rgb(247, 249, 250);
+}
+
+.footer-container {
+  display: flex;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 768px;
+  padding: 48px 24px;
+}
+
+.footer-column h4 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.footer-column ul {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-column ul li {
+  margin-bottom: 4px;
+}
+
+.footer-column ul li a {
+  text-decoration: none;
+  color: rgb(141, 146, 151);
+  line-height: 24px;
+  font-size: 14px;
+}
+
+.footer-bottom {
+  width: 100%;
+  border-top: 1px solid rgb(223, 225, 226);
+  padding: 24px;
+  display: flex;
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+  flex-direction: column;
+  max-width: 768px;
+}
+
+.footer-bottom a {
+  font-size: 12px;
+}
+
+.footer-bottom p {
+  color: rgb(141, 146, 151);
+  font-size: 12px;
+}
+
+.spacing-height-8 {
+  display: block;
+  height: 8px;
+}
+
+.spacing-height-16 {
+  display: block;
+  height: 16px;
+}
+
+.spacing-width-8 {
+  display: inline-block;
+  width: 8px;
+}
+
+.spacing-width-16 {
+  display: inline-block;
+  width: 16px;
+}

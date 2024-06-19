@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>건강매거진 상세 페이지</title>
+    <style>
+      .megazine-detail-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      #location-box{
+        gap: 16px;
+      }
+
+      #location-box a, #location-box p{
+        color: rgb(169, 174, 177);
+      }
+
+      #megazine-content{
+        white-space: normal;
+      }
+
+      .bottom-box{
+        padding: 8px 16px;
+        border: 1px solid #212529;
+        border-radius: 8px;
+      }
+  
+      .fa-solid:not(.not-active) {
+        color: red;
+      }
+
+      #like, #share{
+        cursor: pointer;
+      }
+
+      .untact-btn{
+        width: 80%;
+        margin: 0 auto;
+        color: #fff;
+        padding: 8px;
+        background-color: royalblue;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .input-container {
+        display: flex;
+        gap: 3px; /* 요소 간의 간격을 설정할 수 있습니다 */
+      }
+	   pre { 
+	    white-space: pre-wrap;
+	  }
+    </style>
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+  integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4" crossorigin="anonymous"></script>
+
+<script>
+  Kakao.init('ba782e0da2a2ffd54dfb01c48b963e38'); // 사용하려는 앱의 JavaScript 키 입력
+</script>
+    <script>
+       $(document).ready(function () {
+		
+
+       
+          $("#btnUpd").on("click", function() {
+			    document.bbsForm.action = "/megazine-update-page";
+				document.bbsForm.submit();
+		   });
+       
+       
+    	   $("#btnDel").on("click", function() {
+    		   alert("글을 삭제하시겠습니까?");
+    		   
+    		   $.ajax({
+    	   	        url: '/megazine-delete-page', 
+    	   	        type: 'POST',
+    	   	        data: { 
+    	   	         newsSeq: $('#newsSeq').val()
+    	   	        },
+    	   	        success: function (response) {
+    	   	    		if(response == 0){
+    	   	    			alert("글을 삭제했습니다.");
+    	   	    			window.location.href = "/megazine-list-page";
+    	   	    		}else if(response == 202){
+    	   	    			alert("본인이 작성한 글만 삭제 가능합니다.");
+    	   	    		}else if(response == 303){
+    	   	    			alert("해당 글이 존재하지 않습니다.");
+    	   	    		}else if(response == 404){
+    	   	    			alert("파라미터가 올바르지 않습니다.");
+    	   	    		}else if(response == 500){
+    	   	    			alert("서버오류로 글 삭제에 실패하였습니다.");
+    	   	    		}
+    	   	        },
+    	   	        error: function (xhr) {
+    	   	            alert("서버오류로 글 삭제에 실패하였습니다.");
+    	   	        }
+    	   	    });
+    		   
+    		   
+               
+            });
+    	   
+    	   $("#btnUpd").on("click", function() {
+               document.bbsForm.action="/megazine-update-page";
+               document.bbsForm.submit();
+            });
+
+      });
+       
+       function likeCnt(){
+    	   
+    	   $.ajax({
+   	        url: '/likeCnt', 
+   	        type: 'POST',
+   	        data: { 
+   	         newsSeq: $('#newsSeq').val()
+   	        },
+   	        success: function (response) {
+   	    		if(response == -1){
+   	    			alert("로그인하세요");
+   	    			window.location.href = "/login-page";
+   	    		}else if(response == -2){
+   	    			alert("서버오류입니다");
+   	    		}else if(response == -3){
+   	    			alert("파라미터가 올바르지 않습니다.");
+   	    		}else{
+   	    	      
+   	    	          $(".fa-heart").toggleClass("fa-solid");
+   	    	          $(".fa-heart").toggleClass("fa-regular");
+   	    	       
+   	    			$('#totalLike').text(response);
+   	    		}
+   	        },
+   	        error: function (xhr) {
+   	            alert('좋아요 누르기 실패');
+   	        }
+   	    });
+    	   
+    	   
+    	   
+       }
+       
+    </script>
+  </head>
+  <div layout:fragment="content" class="megazine-detail-container">
+    <div style="padding: 8px; width: 768px">
+      <div style="width: 100%">
+        <div class="d-flex" id="location-box">
+          <div><p><a href="/main-page">홈</a></p></div>
+          <div><p><i class="fa-solid fa-chevron-right not-active"></i></p></div>
+          <div><p><a href="/megazine-list-page">건강매거진</a></p></div>
+          <div><p><i class="fa-solid fa-chevron-right not-active"></i></p></div>
+          <div><p><a>[[${megazines.newsTitle}]]</a></p></div>
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+        <div><h2 id="newsTitle">[[${megazines.newsTitle}]]</h2></div>
+        <div class="spacing-height-16"></div>
+        <div><h4 id="newsSubtitle">[[${megazines.newsSubtitle}]]</h4></div>
+        <div><h6>[[${megazines.newsUpdateDate}]]&nbsp;&nbsp;  <img src="/image/megazineReadCnt.png" style="width:17px"/> [[${megazines.newsReadCnt}]]</h6></div>
+        <div class="spacing-height-16"></div>
+        <div style="width: 80%; margin: 0 auto;" id="megazine-content">
+                  <!-- 글 삭제 버튼 시작 -->
+        <li sec:authorize="hasAuthority('ROLE_ADMIN')">
+        <div th:if="${delFlag == 'Y'}">
+			<div class="spacing-height-16"></div> 
+			<div class="d-flex justify-content-end" style="width: 100%">
+			 <div class="input-container">
+			    <button id="btnDel" class="btn btn-primary d-flex justify-content-center" 
+			            style="border: none; width: 80px; background-color: rgb(169, 174, 177);" 
+			            onclick="">
+			        삭제
+			    </button>
+			
+			<div class="spacing-height-16"></div> 
+			    <button id="btnUpd" class="btn btn-primary d-flex justify-content-center" 
+			            style="border: none; width: 80px; background-color: rgb(169, 174, 177);" 
+			            onclick="">
+			        수정
+			    </button>
+			</div>
+			</div>
+			</div>
+		</li>
+		<!-- 글삭제 버튼 끝 -->
+		  <div class="spacing-height-16"></div>
+		
+          <div><img id="megazineImage" th:src="@{/upload/megazinesFolder/__${megazines.megazinesFile.fileName}__}" width="100%"/></div>
+          <!-- th:src="@{/upload/megazinesFolder/__${megazine.fileName}__}" -->
+
+          
+          <div class="spacing-height-16"></div>
+          <div class="spacing-height-16"></div>
+          <pre style="width: 600px;"><p>[[${megazines.newsContent}]]</p></pre>
+        </div>
+             
+        <div class="spacing-height-16"></div>
+        <div class="d-flex justify-content-between" style="width: 80%; margin: 0 auto;">
+          <!-- <div class="bottom-box" id="like" onclick="likeCnt()"><i class="fa-regular fa-heart"></i>&nbsp;좋아요 [[${totalLike}]] </div> -->
+          
+        <div class="bottom-box" id="like" onclick="likeCnt()">
+        	<i class="fa-heart" th:classappend="${isLikedFlag == 'Y'} ? ' fa-solid':' fa-regular'"></i>&nbsp;좋아요 <span id="totalLike">[[${megazines.newsLikeCnt}]]</span>
+    	</div>
+          
+          
+		<div class="bottom-box d-flex justify-content-center align-items-center" id="share" style="gap: 4px" onclick="shareKakao()">
+		  <div><img src="image/kakao.png" style="width: 24px; height: 24px"/></div>
+		  <div>공유하기</div>
+		  </div>
+       <script>
+           
+            if (!Kakao.isInitialized()) {
+                Kakao.init('ba782e0da2a2ffd54dfb01c48b963e38');
+              } 
+           
+            function shareKakao(){
+        	
+	           var sendTitle = $('#newsTitle').text();
+	           var sendSubtitle = $('#newsSubtitle').text();
+	           var currentPageUrl = window.location.href;
+				    Kakao.Share.sendDefault({
+				      objectType: 'feed',
+				      content: {
+				        title: sendTitle,
+				        description: sendSubtitle,
+				        imageUrl:
+				        	'https://i.ibb.co/8bRWDyM/2024-05-27-022620.png',
+				        link: {
+				          // [내 애플리케이션] > [플랫폼] 에서 등록한 사이트 도메인과 일치해야 함
+				          mobileWebUrl: 'https://developers.kakao.com',
+				          webUrl: 'https://developers.kakao.com',
+				        },
+				      },
+				      buttons: [
+				        {
+				          title: '자세히보기',
+				          link: {
+				            mobileWebUrl: currentPageUrl,
+				            webUrl: currentPageUrl,
+				          },
+				        },
+				
+				      ],
+				    });
+	            }
+       </script>
+            
+            
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+        <div class="untact-btn" onclick="window.location.href='/select-clinic-page'">비대면 진료 받으러가기</div>
+        <div class="spacing-height-16"></div>    
+        <div class="silver-hr"></div>
+        
+        <div class="spacing-height-16"></div>
+        <div style="width: 80%; margin: 0 auto; border: 1px solid #212529; border-radius: 8px; padding: 16px;">
+          <div style="font-weight: 700;">영양제 뭐 먹을까?</div>
+          <div style="color: rgb(169, 174, 177); cursor: pointer;" onclick="window.location.href='/nutrients-list-page'">맞춤영양제 찾으러 가기 <i class="fa-solid fa-chevron-right not-active"></i></div>
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+
+        
+        <form id="bbsForm" name="bbsForm" method="get">
+        	<input type="hidden" id="newsSeq" name="newsSeq" th:value="${newsSeq}">
+        	<input type="hidden" id="isLikedFlag" name="isLikedFlag" th:value="${isLikedFlag}">
+		</form>
+        
+        
+
+        
+        
+        
+        
+        
+        
+        
+      </div>
+    </div>
+  </div>
+
+</html>

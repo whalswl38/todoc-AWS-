@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>회원정보수정</title>
+    <style>
+      .form-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 768px;
+        margin: auto;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .form-group input[type="text"],
+      .form-group input[type="password"],
+      .form-group input[type="email"] {
+        width: calc(100% - 90px);
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .form-group button {
+        width: 80px;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        background-color: #5cb85c;
+        color: white;
+        cursor: pointer;
+        display: inline-block;
+      }
+      .form-group button:disabled {
+        background-color: #cccccc;
+      }
+      .agreement-group {
+        margin-bottom: 15px;
+      }
+      .agreement {
+        background: #fff;
+        padding: 0px 4px;
+        border-radius: 5px;
+      }
+      .agreement label {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .register-button {
+        width: 100%;
+        height: 40px;
+        border: none;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        display: block;
+      }
+      .agreement-box{
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .agreement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+      .agreement-label {
+        margin: 0;
+        color: #666;
+
+        span {
+            color: red;
+        }
+      }
+      .agreement-checkbox {
+        margin-right: 10px;
+      }
+      .detail-button {
+        padding: 5px 10px;
+        color: #007bff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .agreement-details {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+      .input-container {
+        display: flex;
+        height: 48px;
+        background: rgb(255, 255, 255);
+        box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px 0px;
+        -webkit-box-align: center;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 768px;
+        border: 1px solid #EFEFEF;
+      }
+      .input-container input {
+        border: 0;
+        height: 24px;
+        width: 100%;
+        font-size: 16px;
+      }
+      .input-input:focus {
+        outline: none;
+      }
+      .input-container{
+        display: flex;
+        height: 48px;
+        background: rgb(255, 255, 255);
+        box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px 0px;
+        -webkit-box-align: center;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 768px;
+        border: 1px solid #EFEFEF;
+      }
+      
+      #error, #invalid-feedback, #email-feedback, #phone-feedback{
+         color:red;
+         font-size: 12px;
+      }
+    </style>
+
+<script>    
+
+   $(document).ready(function(){
+      $("#updateBtn").on("click", function(){
+         if($.trim($("#registerNoFormer").val()).length <= 0)
+            {
+               document.getElementById('invalid-feedback').innerHTML = "주민등록번호는 필수 입력 항목입니다.";
+               return;
+            }
+                        
+            if($.trim($("#registerNoLatter").val()).length <= 0)
+            {
+               document.getElementById('invalid-feedback').innerHTML = "주민등록번호는 필수 입력 항목입니다.";
+               return;
+            }
+            
+            var identityCheck = /^(?:[0-9]{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[1,2][0-9]|3[0,1]))-[1-4][0-9]{6}$/;
+            var userIdentity = $("#registerNoFormer").val() + '-' + $("#registerNoLatter").val();
+            
+            document.getElementById('userIdentity').value = userIdentity;
+            
+            if(identityCheck.test($("#userIdentity").val()) == false)
+            {
+               alert("document.getElementById('userIdentity').value : " + $("#userIdentity").val());
+               document.getElementById('invalid-feedback').innerHTML = "주민등록번호 형식이 올바르지 않습니다.";
+               return;
+            }
+            
+            var userUpdate = {
+                     userEmail : $("#userEmail").val(),
+                    userName : $("#userName").val(),
+                    userIdentity : $("#registerNoFormer").val() + '-' + $("#registerNoLatter").val()
+              }
+            
+            $.ajax({
+                  type: "POST",
+                  url: "/update",
+                  contentType: 'application/json',
+                  data: JSON.stringify(userUpdate),
+                  dataType: "json",
+                     success: function(response) 
+                     {
+                           if(response == 0) 
+                           {
+                             alert("회원정보가 수정되었습니다.");
+                             location.href = "/mypage-page";
+                         } 
+                           else if(response == 1)
+                           {
+                              alert("회원정보수정 실패");
+                              location.href = "/infoUpdate-page";
+                         }
+                           else if(response == 2)
+                           {
+                              alert("정보가 없습니다.");
+                              location.href = "/main-page";
+                           }
+                           else
+                           {
+                              alert("로그인 하세요.");
+                              location.href = "/login-page";
+                           }
+                    },
+                    error: function(xhr,err)
+                    {
+                        alert("오류가 발생하였습니다.");
+                    }
+                 });
+            
+      });
+   });
+
+      
+      
+      function toggleDetails(button) {
+        var detailsDiv = button.parentElement.parentElement.nextElementSibling;
+        detailsDiv.style.display =
+          detailsDiv.style.display === "block" ? "none" : "block";
+        button.innerHTML =
+          detailsDiv.style.display === "block" ? "내용숨기기" : `내용보기 <i class="fa-solid fa-chevron-down"></i>`;
+      }
+
+
+
+      function toggleRegisterLetterHide()
+      {
+        const hideEye = document.querySelector('.register-hide');
+        const unHideEye = document.querySelector('.register-unhide');
+        hideEye.style.display =
+            hideEye.style.display === "block" ? "none" : "block";
+        unHideEye.style.display =
+            unHideEye.style.display === "block" ? "none" : "block";
+        if($("#registerNoLatter").attr('type')=="password"){
+           $("#registerNoLatter").attr('type',"text");
+        } else{
+            $("#registerNoLatter").attr('type',"password");
+        }
+      }
+
+      
+</script>
+
+  </head>
+  <div layout:fragment="content" x class="form-container">
+    <h3>내 정보</h3>
+    <form role="form" id="updateForm" th:action="@{/update}" method="post" >
+      <div class="input-container">
+        <div class="" style="padding-left: 16px">
+     
+            <i class="fa-regular fa-envelope"></i>
+        </div>
+        <div style="width: 100%; padding: 8px 16px">
+            <input type="email" id="userEmail" disabled th:value="${user.userEmail}"/>
+        </div>
+      </div>
+      <div class="input-container">
+        <div class="" style="padding-left: 16px">
+            <i class="fa-regular fa-calendar-days"></i>
+        </div>
+        <div style="width: 100%; padding: 8px 16px; cursor:pointer;" th:onclick="|location.href='@{/login/findPwd'}|">비밀번호 재설정
+        </div>
+      </div>
+      <div class="input-container">
+        <div class="" style="padding-left: 16px">
+            <i class="fa-regular fa-user"></i>
+        </div>
+        <div style="width: 100%; padding: 8px 16px">
+            <input id="userName" placeholder="이름" th:value="${user.userName}" required/>
+        </div>
+      </div>
+      <div class="input-container">
+        <div class="" style="padding-left: 16px">
+            <i class="fa-solid fa-lock"></i>
+        </div>
+        <div style="width: 100%; padding: 8px 16px; display: flex;">
+            <input
+            type="text"
+            id="registerNoFormer"
+            placeholder="앞 6자리"
+            th:value="${#strings.substring(user.userIdentity, 0, 6)}"
+            pattern="\d{6}"
+            size=6
+            maxlength=6
+            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+            required
+          />
+          -
+          <input
+          style="text-align: center;"
+            id="registerNoLatter"
+            type="password"
+            placeholder="뒷 7자리"
+            th:value="${#strings.substring(user.userIdentity, 7, 14)}"
+            pattern="\d{7}"
+            size=7
+            maxlength=7
+            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+            required
+          />
+          <div class="register-hide" style="display: block" onclick="toggleRegisterLetterHide()"><i class="fa-solid fa-eye"></i></div>
+          <div class="register-unhide" style="display: none" onclick="toggleRegisterLetterHide()"><i class="fa-solid fa-eye-slash"></i></div>
+        </div>
+      </div>
+      <p id="invalid-feedback"></p>
+      <br/>
+   
+   
+      <input type="hidden" id="userIdentity" name="userIdentity">
+        <button type="button" class="register-button" id="updateBtn" name="updateBtn" >
+          수정하기
+        </button>
+      </div>
+    </form>
+  </div>
+</html>

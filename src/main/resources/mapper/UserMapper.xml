@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.todoc.web.dao.UserDao">
+	
+	<resultMap type="User" id="userMap" >
+		<id column="USER_EMAIL" property="userEmail" />
+		<result column="USER_PWD" property="userPwd" />
+		<result column="USER_NAME" property="userName" />
+		<result column="USER_IDENTITY" property="userIdentity" />
+		<result column="USER_PHONE" property="userPhone" />
+		<result column="USER_PHONE_FLAG" property="userPhoneFlag" />
+		<result column="USER_REGDATE" property="userRegdate" />
+		<result column="USER_STATUS" property="userStatus" />
+		<result column="USER_TYPE" property="userType" />
+		<result column="SOCIAL_TYPE" property="socialType" />
+		<result column="USER_REFRESH_TOKEN" property="userRefreshToken"/>
+	</resultMap>
+	
+	<resultMap type="Clinic" id="clinicMap" >
+		<id column="USER_EMAIL" property="userEmail" />
+		<result column="CLINIC_INSTINUM" property="clinicInstinum" />
+		<result column="CLINIC_REGNUM" property="clinicRegnum" />
+		<result column="CLINIC_PHONE" property="clinicPhone" />
+		<result column="CLINIC_NAME" property="clinicName" />
+		<result column="CLINIC_SUBJECT" property="clinicSubject" />
+		<result column="CLINIC_SYMPTOM" property="clinicSymptom" />
+		<result column="USER_PWD" property="userPwd" />
+		<result column="CLINIC_DAY" property="clinicDay" />
+		<result column="CLINIC_TIME" property="clinicTime" />
+		<result column="CLINIC_DAYOFF" property="clinicDayoff" />
+		<result column="CLINIC_ZIPCODE" property="clinicZipcode" />
+		<result column="CLINIC_ADDR" property="clinicAddr" />
+		<result column="CLINIC_NON_BENEFIT" property="clinicNonBenefit" />
+		<result column="CLINIC_CONTACT_FLAG" property="clinicContactFlag" />
+		<result column="CLINIC_DETAIL" property="clinicDetail" />
+		<result column="CLINIC_STATUS" property="clinicStatus" />
+		<result column="CLINIC_DOCTOR" property="clinicDoctor" />
+		<result column="CLINIC_REFRESH_TOKEN" property="clinicRefreshToken" />
+		<result column="CLINIC_FAX" property="clinicFax" />
+		<result column="CLINIC_CAREER" property="clinicCareer" />
+		<result column="CLINIC_BREAK" property="clinicBreak" />
+		<result column="CLINIC_NIGHT" property="clinicNight" />
+		<result column="CLINIC_WEEKEND" property="clinicWeekend" />
+	</resultMap>
+	
+	<resultMap type="Pharmacy" id="pharmacyMap" >
+		<id column="USER_EMAIL" property="userEmail" />
+		<result column="PHARMACY_INSTINUM" property="pharmacyInstinum" />
+		<result column="PHARMACY_REGNUM" property="pharmacyRegnum" />
+		<result column="PHARMACY_PHONE" property="pharmacyPhone" />
+		<result column="PHARMACY_NAME" property="pharmacyName" />
+		<result column="PHARMACIST_NAME" property="pharmacistName" />
+		<result column="USER_PWD" property="userPwd" />
+		<result column="PHARMACY_DAYOFF" property="pharmacyDayoff" />
+		<result column="PHARMACY_TIME" property="pharmacyTime" />
+		<result column="PHARMACY_ZIPCODE" property="pharmacyZipcode" />
+		<result column="PHARMACY_ADDR" property="pharmacyAddr" />
+		<result column="PHARMACY_STATUS" property="pharmacyStatus" />
+		<result column="PHARMACY_REFRESH_TOKEN" property="pharmacyRefreshToken" />
+		<result column="PHARMACY_FAX" property="pharmacyFax" />
+		<result column="PHARMACY_CAREER" property="pharmacyCareer" />
+	</resultMap>
+	
+	<!-- 요양기관번호 저장된 테이블 -->
+	<resultMap type="Institution" id="InstitutionMap" >
+		<id column="INSTITUTION_NUM" property="institutionNum" />
+		<result column="INSTITUTION_NAME" property="institutionName" />
+		<result column="ZIPCODE" property="zipcode" />
+		<result column="ADDR" property="addr" />
+		<result column="INSTITUTION_FLAG" property="institutionFlag" />
+	</resultMap>
+	
+	<!-- 병원 프로필 사진 테이블 -->
+	<resultMap type="ClinicFile" id="clinicFile" >
+		<id column="FILE_SEQ" property="fileSeq" />
+		<id column="CLINIC_INSTINUM" property="clinicInstinum" />
+		<result column="FILE_ORG_NAME" property="fileOrgName" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="FILE_REGDATE" property="fileRegdate" />
+	</resultMap>
+	
+	<!-- 병원 인감 사진 테이블 -->
+	<resultMap type="StampFile" id="stampFile" >
+		<id column="FILE_SEQ" property="fileSeq" />
+		<id column="USER_EMAIL" property="userEmail" />
+		<result column="FILE_ORG_NAME" property="fileOrgName" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="FILE_REGDATE" property="fileRegdate" />
+	</resultMap>
+	
+	<!-- 리프레쉬 토큰으로 회원 조회  -->
+	<select id="findByRefreshToken" parameterType="String" resultMap="userMap" >
+		SELECT
+		    USER_EMAIL,  NVL(USER_PWD,'') USER_PWD,  NVL(USER_NAME,'') USER_NAME,
+		    NVL(USER_IDENTITY,'') USER_IDENTITY,  NVL(USER_PHONE,'') USER_PHONE,  NVL(USER_PHONE_FLAG,'') USER_PHONE_FLAG,
+		    NVL(TO_DATE(USER_REGDATE,'YYYY.MM.DD HH24:MI:SS'),'') USER_REGDATE,  NVL(USER_STATUS,'') USER_STATUS,  NVL(USER_TYPE,'') USER_TYPE,
+		    NVL(SOCIAL_TYPE,'') SOCIAL_TYPE, NVL(USER_REFRESH_TOKEN,'') USER_REFRESH_TOKEN
+		FROM
+		    TD_USER
+		WHERE 
+		    USER_REFRESH_TOKEN = #{value}
+	</select>
+	
+	<!-- 일반 회원 리프레쉬 토큰 업데이트 -->	
+	<update id="refreshTokenUpdate" parameterType="com.todoc.web.dto.User" >
+		UPDATE TD_USER 
+		   SET USER_REFRESH_TOKEN = #{userRefreshToken} 
+		 WHERE USER_EMAIL = #{userEmail}
+	</update>
+	
+	<!-- 병원 리프레쉬 토큰 업데이트 -->	
+	<update id="clinicRefreshTokenUpdate" parameterType="com.todoc.web.dto.Clinic" >
+		UPDATE TD_CLINIC
+		   SET CLINIC_REFRESH_TOKEN = #{clinicRefreshToken} 
+		 WHERE USER_EMAIL = #{userEmail}
+	</update>
+	
+	<!-- 약국 리프레쉬 토큰 업데이트 -->	
+	<update id="pharmRefreshTokenUpdate" parameterType="com.todoc.web.dto.Pharmacy" >
+		UPDATE TD_PHARMACY 
+		   SET PHARMACY_REFRESH_TOKEN = #{pharmacyRefreshToken} 
+		 WHERE USER_EMAIL = #{userEmail}
+	</update>
+	
+	<!-- 일반 유저 이메일로 조회  -->
+	<select id="findByEmail" parameterType="String" resultMap="userMap" >
+		SELECT
+		    USER_EMAIL,  NVL(USER_PWD,'') USER_PWD,  NVL(USER_NAME,'') USER_NAME,
+		    NVL(USER_IDENTITY,'') USER_IDENTITY,  NVL(USER_PHONE,'') USER_PHONE,  NVL(USER_PHONE_FLAG,'') USER_PHONE_FLAG,
+		    NVL(TO_DATE(USER_REGDATE,'YYYY.MM.DD HH24:MI:SS'),'') USER_REGDATE,  NVL(USER_STATUS,'') USER_STATUS,  NVL(USER_TYPE,'') USER_TYPE,
+		    NVL(SOCIAL_TYPE,'') SOCIAL_TYPE, NVL(USER_REFRESH_TOKEN,'') USER_REFRESH_TOKEN
+		FROM
+		    TD_USER
+		WHERE USER_EMAIL = #{value}
+	</select>
+	
+	<!-- 소셜로그인 비밀번호 키값으로 조회 -->
+	<select id="findByPwd" parameterType="String" resultMap="userMap" >
+		SELECT
+		    USER_EMAIL,  NVL(USER_PWD,'') USER_PWD,  NVL(USER_NAME,'') USER_NAME,
+		    NVL(USER_IDENTITY,'') USER_IDENTITY,  NVL(USER_PHONE,'') USER_PHONE,  NVL(USER_PHONE_FLAG,'') USER_PHONE_FLAG,
+		    NVL(TO_DATE(USER_REGDATE,'YYYY.MM.DD HH24:MI:SS'),'') USER_REGDATE,  NVL(USER_STATUS,'') USER_STATUS,  NVL(USER_TYPE,'') USER_TYPE,
+		    NVL(SOCIAL_TYPE,'') SOCIAL_TYPE, NVL(USER_REFRESH_TOKEN,'') USER_REFRESH_TOKEN
+		FROM
+		    TD_USER
+		WHERE USER_PWD = #{value}
+	</select>
+	
+	<!-- 병원 회원 이메일로 조회 -->
+	<select id="findClinicEmail" parameterType="String" resultMap="clinicMap" >
+		SELECT
+		    NVL(CLINIC_INSTINUM,'') CLINIC_INSTINUM, NVL(CLINIC_REGNUM,'') CLINIC_REGNUM,
+		    NVL(CLINIC_PHONE,'') CLINIC_PHONE, NVL(CLINIC_NAME,'') CLINIC_NAME,  NVL(CLINIC_SUBJECT,'') CLINIC_SUBJECT,
+		    NVL(CLINIC_SYMPTOM,'') CLINIC_SYMPTOM,  USER_EMAIL,  NVL(USER_PWD,'') USER_PWD,  NVL(CLINIC_DAY,'') CLINIC_DAY,
+		    NVL(CLINIC_TIME,'') CLINIC_TIME,  NVL(CLINIC_DAYOFF,'') CLINIC_DAYOFF,  NVL(CLINIC_ZIPCODE,'') CLINIC_ZIPCODE,
+		    NVL(CLINIC_ADDR,'') CLINIC_ADDR,  NVL(CLINIC_CONTACT_FLAG,'') CLINIC_CONTACT_FLAG,
+		    NVL(CLINIC_DETAIL,'') CLINIC_DETAIL,  NVL(CLINIC_STATUS,'') CLINIC_STATUS,  NVL(CLINIC_DOCTOR,'') CLINIC_DOCTOR,
+		    NVL(CLINIC_REFRESH_TOKEN,'') CLINIC_REFRESH_TOKEN,  NVL(CLINIC_FAX,'') CLINIC_FAX,  NVL(CLINIC_CAREER,'') CLINIC_CAREER,
+		    NVL(CLINIC_BREAK,'') CLINIC_BREAK,  NVL(CLINIC_NIGHT,'') CLINIC_NIGHT,  NVL(CLINIC_WEEKEND,'') CLINIC_WEEKEND
+		FROM TD_CLINIC
+		WHERE USER_EMAIL = #{value}
+	</select>
+	
+	<!-- 약국 회원 이메일로 조회 -->
+	<select id="findPharmEmail" parameterType="String" resultMap="pharmacyMap" >
+		SELECT
+		    NVL(PHARMACY_INSTINUM,'') PHARMACY_INSTINUM, NVL(PHARMACY_REGNUM,'') PHARMACY_REGNUM,
+		    NVL(PHARMACY_PHONE,'') PHARMACY_PHONE,  NVL(PHARMACY_NAME,'') PHARMACY_NAME,
+		    NVL(PHARMACIST_NAME,'') PHARMACIST_NAME,USER_EMAIL,  NVL(USER_PWD,'') USER_PWD,
+		    NVL(PHARMACY_DAYOFF,'') PHARMACY_DAYOFF, NVL(PHARMACY_TIME,'') PHARMACY_TIME,
+		    NVL(PHARMACY_ZIPCODE,'') PHARMACY_ZIPCODE,  NVL(PHARMACY_ADDR,'') PHARMACY_ADDR,  
+		    NVL(PHARMACY_STATUS,'') PHARMACY_STATUS,  NVL(PHARMACY_REFRESH_TOKEN,'') PHARMACY_REFRESH_TOKEN,
+		    NVL(PHARMACY_FAX,'') PHARMACY_FAX,  NVL(PHARMACY_CAREER,'') PHARMACY_CAREER
+		FROM  TD_PHARMACY
+		WHERE USER_EMAIL = #{value}
+	</select>
+	
+	<!-- 자체 회원가입 -->
+	<insert id="userInsert" parameterType="com.todoc.web.dto.User" >
+		INSERT INTO TD_USER (
+		    USER_EMAIL, USER_PWD, USER_NAME,
+		    USER_IDENTITY,  USER_PHONE, USER_PHONE_FLAG,
+		    USER_REGDATE,  USER_STATUS,  USER_TYPE
+		) VALUES (#{userEmail},#{userPwd},#{userName},#{userIdentity},#{userPhone},'Y',SYSDATE,'Y','USER')
+	</insert>
+	
+	<!-- 병의원, 약국 요양기관번호 가입여부 확인 -->
+	<select id="findInstitution" parameterType="String" resultMap="InstitutionMap">
+		SELECT
+		    INSTITUTION_NUM, INSTITUTION_NAME, ZIPCODE,
+		    ADDR, INSTITUTION_FLAG
+		FROM TD_INSTITUTION
+		WHERE INSTITUTION_NUM = #{value}
+	</select>
+
+	<!-- 이메일 중복 체크 -->
+	<select id="checkEmail" parameterType="String" resultType="int" >
+		SELECT	NVL(SUM(CNT),0) CNT	
+		  FROM	(
+					SELECT	USER_EMAIL, COUNT(1) AS CNT
+					  FROM	TD_CLINIC
+				  GROUP BY	USER_EMAIL
+		
+						UNION ALL
+		
+					SELECT	USER_EMAIL, COUNT(1)
+					  FROM	TD_PHARMACY
+				  GROUP BY	USER_EMAIL
+		            
+		           		UNION ALL
+		
+					SELECT	USER_EMAIL, COUNT(1)
+					  FROM	TD_USER
+				  GROUP BY	USER_EMAIL
+		        ) T
+		WHERE	T.USER_EMAIL = #{value}
+	</select>
+	
+	<!-- 첨부파일 있는 경우 -->
+	<insert id="insertClinicFile" parameterType="com.todoc.web.dto.ClinicFile" >
+		INSERT INTO TD_CLINIC_FILE 
+		(
+		    FILE_SEQ, CLINIC_INSTINUM, FILE_ORG_NAME,
+		    FILE_NAME, FILE_EXT, FILE_SIZE, FILE_REGDATE
+	    ) 
+		VALUES ((SELECT NVL(MAX(FILE_SEQ), 0) + 1 
+					  FROM TD_CLINIC_FILE WHERE CLINIC_INSTINUM = #{clinicInstinum}),
+					   #{clinicInstinum}, #{fileOrgName}, #{fileName},
+		              #{fileExt}, #{fileSize}, SYSDATE)
+	</insert>
+	 
+	<insert id="insertStampFile" parameterType="com.todoc.web.dto.StampFile" >             
+		INSERT INTO TD_STAMP_FILE 
+		(
+		    FILE_SEQ, USER_EMAIL, FILE_ORG_NAME,
+		    FILE_NAME,  FILE_EXT,  FILE_SIZE,  FILE_REGDATE
+		)
+		VALUES ((SELECT NVL(MAX(FILE_SEQ), 0) + 1 
+					  FROM TD_STAMP_FILE WHERE USER_EMAIL = #{userEmail}), #{userEmail}, #{fileOrgName}, #{fileName},
+		              #{fileExt}, #{fileSize}, SYSDATE)
+	</insert>
+	
+	<!-- 약국 회원가입 -->
+	<insert id="insertPharmacy" parameterType="com.todoc.web.dto.Pharmacy" >
+		INSERT INTO TD_PHARMACY 
+		(
+		    PHARMACY_INSTINUM, PHARMACY_REGNUM, PHARMACY_PHONE, PHARMACY_NAME, PHARMACIST_NAME, USER_EMAIL,
+		    USER_PWD, PHARMACY_DAYOFF, PHARMACY_TIME, PHARMACY_ZIPCODE, PHARMACY_ADDR, PHARMACY_STATUS,
+		    PHARMACY_FAX, PHARMACY_CAREER
+		) 
+		VALUES( #{pharmacyInstinum}, #{pharmacyRegnum}, #{pharmacyPhone}, #{pharmacyName}, #{pharmacistName}, #{userEmail},
+			    #{userPwd}, #{pharmacyDayoff}, #{pharmacyTime}, #{pharmacyZipcode}, #{pharmacyAddr}, 'Y',
+			    #{pharmacyFax}, #{pharmacyCareer})
+	</insert>
+	
+	<!-- 병원 회원가입 -->
+	<insert id="insertClinic" parameterType="com.todoc.web.dto.Clinic" >
+		INSERT INTO TD_CLINIC 
+		(
+		    CLINIC_INSTINUM, CLINIC_REGNUM, CLINIC_PHONE, CLINIC_NAME, CLINIC_SUBJECT,
+		    CLINIC_SYMPTOM, USER_EMAIL, USER_PWD, CLINIC_DAY, CLINIC_TIME,
+		    CLINIC_DAYOFF, CLINIC_ZIPCODE, CLINIC_ADDR, CLINIC_CONTACT_FLAG,
+		    CLINIC_DETAIL, CLINIC_STATUS, CLINIC_DOCTOR, CLINIC_FAX, CLINIC_CAREER,
+		    CLINIC_BREAK, CLINIC_NIGHT, CLINIC_WEEKEND
+		) 
+		VALUES( #{clinicInstinum}, #{clinicRegnum}, #{clinicPhone}, #{clinicName}, #{clinicSubject},
+			    #{clinicSymptom}, #{userEmail}, #{userPwd}, #{clinicDay}, #{clinicTime},
+			    #{clinicDayoff}, #{clinicZipcode}, #{clinicAddr}, #{clinicContactFlag},
+			    #{clinicDetail}, 'Y', #{clinicDoctor}, #{clinicFax}, #{clinicCareer},
+			    #{clinicBreak}, #{clinicNight}, #{clinicWeekend})
+	</insert>	
+
+	<!-- 회원정보수정 -->
+	<update id="userUpdate" parameterType="User">
+		UPDATE TD_USER
+		   SET USER_NAME = #{userName}
+		 WHERE USER_EMAIL = #{userEmail}
+	</update>
+	
+	<!-- 회원 비밀번호 수정 -->
+	<update id="updateUser" parameterType="User">
+		UPDATE TD_USER
+		   SET USER_PWD = #{userPwd}
+		 WHERE USER_EMAIL = #{userEmail}
+	</update>
+	
+	<update id="updateClinic" parameterType="Clinic">
+		UPDATE TD_Clinic
+		   SET USER_PWD = #{userPwd}
+		 WHERE USER_EMAIL = #{userEmail}
+	</update>
+	
+	<update id="updatePharm" parameterType="Pharmacy">
+		UPDATE TD_Pharmacy
+		   SET USER_PWD = #{userPwd}
+		 WHERE USER_EMAIL = #{userEmail}
+	</update>
+	
+	<!-- 소셜로그인 -->
+	<insert id="insertSocial" parameterType="User" >
+		INSERT INTO TD_USER (
+		    USER_EMAIL, USER_PWD, USER_NAME, USER_REGDATE,
+		    USER_STATUS, USER_TYPE, SOCIAL_TYPE
+		) VALUES (#{userEmail},#{userPwd}, #{userName}, SYSDATE, 'Y', 'GUEST',#{socialType})
+	</insert>
+	
+	<!-- 소셜로그인 회원 추가 정보 입력 -->
+	<update id="oauthUpdate" parameterType="User" >
+		UPDATE TD_USER
+	      SET USER_NAME = #{userName},
+	             USER_PHONE = #{userPhone},
+	             USER_IDENTITY = #{userIdentity},
+	             USER_TYPE = 'USER',
+	             USER_PHONE_FLAG = 'Y'
+	   WHERE 1=1
+	   <if test="userEmail != null and userEmail != ''">
+	   AND USER_EMAIL = #{userEmail}
+	   </if>
+	   <if test="userPwd != null and userPwd != ''">
+	   AND USER_PWD = #{userPwd}
+	   </if>
+	   
+	</update>
+	
+	<!-- 병원 아이디 찾기 -->
+	<select id="findClinic" parameterType="com.todoc.web.dto.Clinic" resultMap="clinicMap">
+		SELECT USER_EMAIL, NVL(CLINIC_PHONE,'') CLINIC_PHONE
+		  FROM TD_CLINIC
+		 WHERE 1=1
+		 <if test="clinicDoctor != null and clinicDoctor != ''">
+		 AND CLINIC_DOCTOR = #{clinicDoctor}
+		 </if>
+		 <if test="clinicPhone != null and clinicPhone != ''">
+		 AND CLINIC_PHONE = #{clinicPhone}
+		 </if>
+		 <if test="clinicRegnum != null and clinicRegnum != ''">
+		 AND CLINIC_REGNUM = #{clinicRegnum}
+		 </if>
+	</select>
+	
+	<!-- 약국 아이디 찾기 -->
+	<select id="findPharmacy" parameterType="com.todoc.web.dto.Pharmacy" resultMap="pharmacyMap">
+		SELECT USER_EMAIL, NVL(PHARMACY_PHONE,'') PHARMACY_PHONE
+		  FROM TD_PHARMACY
+		 WHERE 1=1
+		 <if test="pharmacyName != null and pharmacyName != ''" >
+		 AND PHARMACIST_NAME = #{pharmacistName}
+		 </if>
+		 <if test="pharmacyPhone != null and pharmacyPhone != ''" >
+		 AND PHARMACY_PHONE = #{pharmacyPhone}
+		 </if>
+		 <if test="pharmacyRegnum != null and pharmacyRegnum != ''" >
+		 AND PHARMACY_REGNUM = #{pharmacyRegnum}
+		 </if>
+	</select>
+	
+	<!-- 일반 회원 아이디 찾기 -->
+	<select id="findUser" parameterType="com.todoc.web.dto.User" resultMap="userMap">
+		SELECT USER_EMAIL, USER_STATUS, USER_PHONE
+		  FROM TD_USER
+		 WHERE 1=1
+		 	<if test="userName != null and userName != ''">
+		 	AND USER_NAME = #{userName}
+		 	</if>
+		   <if test="userPhone != null and userPhone != ''">
+		   AND USER_PHONE = #{userPhone}
+		   </if>
+		   <if test="userIdentity != null and userIdentity != ''">
+		   AND USER_IDENTITY LIKE '%'||#{userIdentity}||'%'
+		   </if>
+	</select>
+	
+	<!-- 제휴 -->
+	<insert id="alliance" parameterType="com.todoc.web.dto.Institution" >
+		INSERT INTO TD_INSTITUTION (INSTITUTION_NUM, INSTITUTION_NAME, ZIPCODE, ADDR, INSTITUTION_FLAG)
+		VALUES (#{institutionNum},#{institutionName},#{zipcode},#{addr},#{institutionFlag})
+	</insert>
+	
+	<update id="updateMedicalClinic" parameterType="com.todoc.web.dto.Clinic" >
+		UPDATE TD_CLINIC 
+		   SET CLINIC_INSTINUM = #{clinicInstinum}, 
+		       CLINIC_REGNUM = #{clinicRegnum}, 
+		       CLINIC_PHONE = #{clinicPhone}, 
+		       CLINIC_NAME = #{clinicName}, 
+		       CLINIC_SUBJECT = #{clinicSubject},
+		       CLINIC_SYMPTOM = #{clinicSymptom}, 
+		       CLINIC_DAY = #{clinicDay}, 
+		       CLINIC_TIME = #{clinicTime},
+		       CLINIC_DAYOFF = #{clinicDayoff}, 
+		       CLINIC_ZIPCODE = #{clinicZipcode}, 
+		       CLINIC_ADDR = #{clinicAddr}, 
+		       CLINIC_CONTACT_FLAG = #{clinicContactFlag},
+		       CLINIC_DETAIL = #{clinicDetail}, 
+		       CLINIC_STATUS = 'Y', 
+		       CLINIC_DOCTOR = #{clinicDoctor}, 
+		       CLINIC_FAX = #{clinicFax}, 
+		       CLINIC_CAREER = #{clinicCareer},
+		       CLINIC_BREAK = #{clinicBreak}, 
+		       CLINIC_NIGHT = #{clinicNight}, 
+		       CLINIC_WEEKEND = #{clinicWeekend}
+		 WHERE USER_EMAIL = #{userEmail}
+	</update>	
+	
+	<!-- 사진불러오기 -->
+	<select id="clinicFileView" parameterType="String" resultMap="clinicFile" >
+		SELECT A.CLINIC_INSTINUM,
+		        A.USER_EMAIL,
+		        B.FILE_SEQ,
+				B.FILE_ORG_NAME,
+				B.FILE_NAME,
+				B.FILE_EXT,
+				B.FILE_SIZE,
+				B.FILE_REGDATE
+		  FROM TD_CLINIC A, TD_CLINIC_FILE B
+		 WHERE A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+		   AND A.CLINIC_INSTINUM = #{value}
+	
+	</select>
+	
+	<!-- 인감불러오기 -->
+	<select id="clinicStampFileView" parameterType="String" resultMap="stampFile">
+		SELECT A.CLINIC_INSTINUM,
+		        A.USER_EMAIL,
+		        B.FILE_SEQ,
+				B.FILE_ORG_NAME,
+				B.FILE_NAME,
+				B.FILE_EXT,
+				B.FILE_SIZE,
+				B.FILE_REGDATE
+		  FROM TD_CLINIC A, TD_STAMP_FILE B
+		 WHERE A.USER_EMAIL = B.USER_EMAIL
+		   AND A.USER_EMAIL = #{userEmail}
+	
+	</select>
+	
+	<!-- 사진 삭제 -->
+	<delete id="clinicFileDelete" parameterType="String">
+		DELETE FROM TD_CLINIC_FILE
+ 		 WHERE CLINIC_INSTINUM = #{value}
+	
+	</delete>
+	
+	<!-- 인감 삭제 -->
+	<delete id="clinicStampDelete" parameterType="String">
+		DELETE FROM TD_STAMP_FILE
+ 		 WHERE USER_EMAIL = #{value}
+	
+	</delete>
+</mapper>

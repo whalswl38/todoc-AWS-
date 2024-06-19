@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.todoc.web.dao.MegazinesDao">
+	<resultMap type="Megazines" id="MegazinesMap">
+		<id property="newsSeq" column="NEWS_SEQ" />
+		<result property="userEmail" column="USER_EMAIL" />
+		<result property="newsTitle" column="NEWS_TITLE" />
+		<result property="newsSubtitle" column="NEWS_SUBTITLE" />
+		<result property="newsContent" column="NEWS_CONTENT" />
+		<result property="newsDepartment" column="NEWS_DEPARTMENT" />
+		<result property="newsSymptom" column="NEWS_SYMPTOM" />
+		<result property="newsRegDate" column="NEWS_REG_DATE" />
+		<result property="newsUpdateDate" column="NEWS_UPDATE_DATE" />
+		<result property="newsReadCnt" column="NEWS_READ_CNT" />
+		<result property="newsLikeCnt" column="NEWS_LIKE_CNT" />
+		<result property="newsDelFlag" column="NEWS_DEL_FLAG" />
+	</resultMap>
+	
+	<resultMap type="MegazinesLike" id="MegazinesLikeMap">
+		<id property="likeNewsSeq" column="LIKE_NEWS_SEQ" />
+		<result property="userEmail" column="USER_EMAIL" />
+		<result property="newsSeq" column="NEWS_SEQ" />
+	</resultMap>
+	
+	<resultMap type="MegazinesFile" id="MegazinesFileMap">
+		<id column="NEWS_SEQ" property="newsSeq" />
+		<id column="FILE_SEQ" property="fileSeq" />
+		<result column="FILE_ORG_NAME" property="fileOrgName" />
+		<result column="FILE_NAME" property="fileName" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="REG_DATE" property="regDate" />
+	</resultMap>
+	
+	<select id="MegazinesList" parameterType="com.todoc.web.dto.Megazines" resultMap="MegazinesMap">
+		 SELECT RNUM,
+			    NEWS_SEQ,
+			    USER_EMAIL,
+			    NEWS_TITLE,
+			    NEWS_SUBTITLE,
+			    NEWS_CONTENT,
+			    NEWS_DEPARTMENT,
+			    NEWS_SYMPTOM,
+			    NEWS_REG_DATE,
+			    NEWS_UPDATE_DATE,
+			    NEWS_READ_CNT,
+			    NEWS_LIKE_CNT,
+			    NEWS_DEL_FLAG,
+			    NEWS_THUMBNAIL
+			    FROM(SELECT ROWNUM RNUM,
+			            NEWS_SEQ,
+			            USER_EMAIL,
+			            NEWS_TITLE,
+			            NEWS_SUBTITLE,
+			            NEWS_CONTENT,
+			            NEWS_DEPARTMENT,
+			            NEWS_SYMPTOM,
+			            NEWS_REG_DATE,
+			            NEWS_UPDATE_DATE,
+			            NEWS_READ_CNT,
+			            NEWS_LIKE_CNT,
+			            NEWS_DEL_FLAG,
+			            NEWS_THUMBNAIL
+			            FROM(SELECT
+			                    NVL(NEWS_SEQ,'') AS NEWS_SEQ,
+			                    NVL(USER_EMAIL,'') AS USER_EMAIL,
+			                    NVL(NEWS_TITLE,'') AS NEWS_TITLE,
+			                    NVL(NEWS_SUBTITLE,'') AS NEWS_SUBTITLE,
+			                    NVL(NEWS_CONTENT,'') AS NEWS_CONTENT,
+			                    NVL(NEWS_DEPARTMENT,'') AS NEWS_DEPARTMENT,
+			                    NVL(NEWS_SYMPTOM,'') AS NEWS_SYMPTOM,
+			                    NVL(NEWS_REG_DATE,'') AS NEWS_REG_DATE,
+			                    NVL(NEWS_UPDATE_DATE,'') AS NEWS_UPDATE_DATE,
+			                    NVL(NEWS_READ_CNT,'') AS NEWS_READ_CNT,
+			                    NVL(NEWS_LIKE_CNT,'') AS NEWS_LIKE_CNT,
+			                    NVL(NEWS_DEL_FLAG,'') AS NEWS_DEL_FLAG,
+			                    NVL(NEWS_THUMBNAIL,'') AS NEWS_THUMBNAIL
+			                FROM TD_NEWS
+			                WHERE NEWS_DEL_FLAG = 'N'
+			    <if test='searchValue != null and searchValue !=""'>
+			                AND NEWS_DEPARTMENT LIKE '%' || #{searchValue} || '%'
+			                OR NEWS_SYMPTOM LIKE '%' || #{searchValue} || '%'
+			                OR NEWS_TITLE LIKE '%' || #{searchValue} || '%'
+			                OR NEWS_SUBTITLE LIKE '%' || #{searchValue} || '%'
+			                OR NEWS_CONTENT LIKE '%' || #{searchValue} || '%'
+			    </if>
+				<if test='newsFilter == "1" or newsFilter == "" or newsFilter == null'>
+			                ORDER BY NEWS_UPDATE_DATE DESC))
+				</if>
+				<if test='newsFilter == "2"'>
+			                ORDER BY NEWS_READ_CNT DESC))
+				</if>
+				<if test='newsFilter == "3"'>
+			                ORDER BY NEWS_LIKE_CNT DESC))
+				</if>
+			WHERE RNUM <![CDATA[>=]]> #{startRow}
+			  AND RNUM <![CDATA[<=]]> #{endRow}
+			  
+			  
+			  
+	</select>
+
+
+	<select id="megazinesListCount" parameterType="com.todoc.web.dto.Megazines" resultType="long">
+			SELECT COUNT(*) AS CNT
+			  FROM TD_NEWS
+			 WHERE NEWS_DEL_FLAG = 'N'
+		<if test='searchValue != null and searchValue !=""'>
+			   AND NEWS_DEPARTMENT LIKE '%' || #{searchValue} || '%'
+			    OR NEWS_SYMPTOM LIKE '%' || #{searchValue} || '%'
+			    OR NEWS_TITLE LIKE '%' || #{searchValue} || '%'
+			    OR NEWS_SUBTITLE LIKE '%' || #{searchValue} || '%'
+			    OR NEWS_CONTENT LIKE '%' || #{searchValue} || '%'
+		</if>
+	</select>
+	
+	<select id="megazinesDetail" parameterType="long" resultMap="MegazinesMap" >
+			SELECT
+			    NEWS_SEQ,
+			    NVL(USER_EMAIL,'') AS USER_EMAIL,
+			    NVL(NEWS_TITLE,'') AS NEWS_TITLE,
+			    NVL(NEWS_SUBTITLE,'') AS NEWS_SUBTITLE,
+			    NVL(NEWS_CONTENT,'') AS NEWS_CONTENT,
+			    NVL(NEWS_DEPARTMENT,'') AS NEWS_DEPARTMENT,
+			    NVL(NEWS_SYMPTOM,'') AS NEWS_SYMPTOM,
+			    NVL(NEWS_REG_DATE,'') AS NEWS_REG_DATE,
+			    NVL(NEWS_UPDATE_DATE,'') AS NEWS_UPDATE_DATE,
+			    NVL(NEWS_READ_CNT,'') AS NEWS_READ_CNT,
+			    NVL(NEWS_LIKE_CNT,'') AS NEWS_LIKE_CNT,
+			    NVL(NEWS_DEL_FLAG,'') AS NEWS_DEL_FLAG,
+			    NVL(NEWS_THUMBNAIL,'') AS NEWS_THUMBNAIL
+			FROM TD_NEWS
+			WHERE NEWS_SEQ=#{value}
+
+	</select>
+	
+	<!-- 게시글 조회수 증가 -->
+	<update id="megazinesReadCntPlus" parameterType="long">
+		UPDATE TD_NEWS
+		   SET NEWS_READ_CNT = NEWS_READ_CNT + 1
+		 WHERE NEWS_SEQ = #{value}
+	</update>
+	
+	<!-- 좋아요 증가 MegazinesLike -->
+	<insert id="megazinesLikeCntPlus" parameterType="com.todoc.web.dto.MegazinesLike" >
+		INSERT INTO TD_NEWS_LIKE 
+		VALUES ( NVL((SELECT /*+ TD_NEWS_LIKE_INDEX(A.LIKE_NEWS_SEQ) */
+	                     A.LIKE_NEWS_SEQ
+	     			    FROM TD_NEWS_LIKE A
+	     		       WHERE ROWNUM = 1), 0) + 1
+	        	,#{userEmail}
+	        	,#{newsSeq}
+	       		 )
+	</insert>
+	
+
+	
+	<!-- 좋아요 클릭 여부 체크 -->
+	<select id="checkLikeCnt" parameterType="com.todoc.web.dto.MegazinesLike"  resultType="long">
+		SELECT COUNT(*) AS CNT
+  		  FROM TD_NEWS_LIKE
+		 WHERE USER_EMAIL = #{userEmail}
+   		   AND NEWS_SEQ = #{newsSeq}
+	</select>
+
+	<!-- 좋아요 삭제 MegazinesLike -->
+	<delete id="likeDelete" parameterType="com.todoc.web.dto.MegazinesLike">
+		DELETE FROM TD_NEWS_LIKE
+		 WHERE USER_EMAIL = #{userEmail}
+		   AND NEWS_SEQ = #{newsSeq}
+	</delete>
+	
+
+	
+	<!-- 좋아요 증가 Megazines -->
+	<update id="likeCntPlus" parameterType="com.todoc.web.dto.Megazines">
+		UPDATE TD_NEWS
+		SET NEWS_LIKE_CNT = NEWS_LIKE_CNT + 1
+		WHERE NEWS_SEQ=#{newsSeq}
+	</update>
+	
+	<!-- 좋아요 감소 Megazines -->
+	<update id="likeCntMinus" parameterType="com.todoc.web.dto.Megazines">
+		UPDATE TD_NEWS
+		SET NEWS_LIKE_CNT = NEWS_LIKE_CNT - 1
+		WHERE NEWS_SEQ=#{newsSeq}
+	</update>
+	
+	<!-- 글 등록 -->
+	<insert id="megazineInsert" parameterType="com.todoc.web.dto.Megazines" >
+  	<!-- 선행처리기(시퀀스 생성) -->
+  	<selectKey resultType="long" keyProperty="newsSeq" order="BEFORE" ><!-- insert하기 전에 hiBbsSeq의 값으로 생성한다는 뜻으로 order="before" -->
+  		SELECT SEQ_TD_NEWS.NEXTVAL FROM DUAL
+  	</selectKey>
+		INSERT INTO TD_NEWS (
+		    NEWS_SEQ,
+		    USER_EMAIL,
+		    NEWS_TITLE,
+		    NEWS_SUBTITLE,
+		    NEWS_CONTENT,
+		    NEWS_DEPARTMENT,
+		    NEWS_SYMPTOM,
+		    NEWS_REG_DATE,
+		    NEWS_UPDATE_DATE,
+		    NEWS_READ_CNT,
+		    NEWS_LIKE_CNT,
+		    NEWS_DEL_FLAG,
+		    NEWS_THUMBNAIL
+		) VALUES (
+		     #{newsSeq},
+		     #{userEmail},
+		     #{newsTitle},
+		     #{newsSubtitle},
+		     #{newsContent},
+		     #{newsDepartment},
+		     #{newsSymptom},
+		   	 SYSDATE,
+		   	 SYSDATE,
+		   	 0,
+		   	 0,
+		   	 'N',
+		     NULL
+		)
+  	</insert>
+	
+	
+	<!-- 첨부파일 등록 -->
+  <insert id="megazineFileInsert" parameterType="com.todoc.web.dto.MegazinesFile">
+		INSERT INTO TD_NEWS_FILE (
+		   			    NEWS_SEQ,
+		   			    FILE_SEQ,
+		    			FILE_ORG_NAME,
+		    			FILE_NAME,
+		    			FILE_EXT,
+		    			FILE_SIZE,
+		    			REG_DATE
+			) VALUES (
+		   				#{newsSeq},
+		    			#{fileSeq},
+		    			#{fileOrgName},
+		    			#{fileName},
+		            	 #{fileExt},
+		    			#{fileSize},
+		    			SYSDATE
+		)
+  </insert>
+  
+  <!-- 첨부파일 조회 -->
+  <select id="megazineFileSelect" parameterType="long" resultMap="MegazinesFileMap">
+  		SELECT NEWS_SEQ,
+       		   FILE_SEQ,
+       		   NVL(FILE_ORG_NAME,'') AS FILE_ORG_NAME,
+      		   NVL(FILE_NAME,'') AS FILE_NAME,
+       		   NVL(FILE_EXT,'') AS FILE_EXT,
+       		   NVL(FILE_SIZE,'') AS FILE_SIZE,
+        	   NVL(TO_CHAR(REG_DATE,'YYYY.MM.DD HH24:MI:SS'),'') AS REG_DATE
+  		  FROM TD_NEWS_FILE
+		 WHERE NEWS_SEQ = #{value}
+  		   AND FILE_SEQ = 1
+  </select>
+  
+  <!-- 게시글 삭제 -->
+  <delete id="megazineDelete" parameterType="long"> 
+		UPDATE TD_NEWS
+		   SET NEWS_DEL_FLAG = 'Y'
+	     WHERE NEWS_SEQ = #{value}
+	  </delete>
+  
+  <!-- 첨부파일 삭제 -->
+   <delete id="megazineFileDelete" parameterType="long"> 
+		 DELETE FROM TD_NEWS_FILE
+		       WHERE NEWS_SEQ = #{value}
+  </delete> 
+  
+
+  <!-- 게시물 수정 -->
+	<update id="megazineUpdate" parameterType="com.todoc.web.dto.Megazines">
+		UPDATE TD_NEWS
+		   SET NEWS_TITLE = #{newsTitle},
+		       NEWS_SUBTITLE = #{newsSubtitle},
+               NEWS_CONTENT = #{newsContent},
+               NEWS_DEPARTMENT = #{newsDepartment},
+               NEWS_SYMPTOM = #{newsSymptom},
+               NEWS_UPDATE_DATE = SYSDATE
+		 WHERE NEWS_SEQ = #{newsSeq}
+	</update>
+	
+	
+	
+
+</mapper>

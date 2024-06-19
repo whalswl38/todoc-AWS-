@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+    <script type="text/javascript">
+ 		$(document).ready(function() {
+/*             window.opener.location.href = "/kakaoPayResult";
+            window.close(); */
+        }); 
+ 		
+ 		function close(){
+ 			var formData = new FormData();
+ 			
+		    formData.append('approved_at', $('#approved_at').val());
+		    formData.append('partner_order_id', $('#partner_order_id').val());
+		    formData.append('item_name', $('#item_name').val());
+		    formData.append('quantity', $('#quantity').val());
+		    formData.append('total_amount', $('#total_amount').val());
+		    formData.append('payment_method_type', $('#payment_method_type').val());
+
+            $.ajax({
+                url: 'http://localhost:8099/kakaoPayResult',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                	var info = response.info;
+                    if (info) {
+                        alert('예약이 성공적으로 완료되었습니다.');
+                        window.opener.location.href = "http://localhost:8099/kakaoPayResult";
+                        window.close();
+                    } else {
+                        console.log('예약실패');
+                    }
+                },
+                error: function(error) {
+                    console.error('예약을 처리하는 도중 오류가 발생했습니다.');
+                    alert('예약을 처리하는 도중 오류가 발생했습니다. 다시 시도해주세요.');
+                }
+            });
+ 		}
+    </script>
+</head>
+<body>
+	<h3>결제가 완료되었습니다.</h3>
+	<form th:each="${info}">
+        <input id="approved_at" type="button" value="close" th:value="${info.approved_at}">
+        <input id="partner_order_id" type="button" value="close" th:value="${info.partner_order_id}">
+        <input id="item_name" type="button" value="close" th:value="${info.item_name}">
+        <input id="quantity" type="button" value="close" th:value="${info.quantity}">
+        <input id="total_amount" type="button" value="close" th:value="${info.total_amount}">
+        <input id="payment_method_type" type="button" value="close" th:value="${info.payment_method_type}">
+    </form>
+    <div onclick="close()"> 닫기 </div>
+</body>
+</html>

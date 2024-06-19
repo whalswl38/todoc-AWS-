@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>영양제 상세 페이지</title>
+    <style>
+      .nutrients-list-container {
+        max-width: 768px;
+        margin: auto;
+      }
+      .tab-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: rgb(141, 146, 151);
+      }
+      .search-container {
+        position: absolute;
+        display: flex;
+        background: rgb(255, 255, 255);
+        -webkit-box-align: center;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 99;
+        width: 270px;
+        border-radius: 8px;
+        border: 1px solid #212529;
+        top: 4px;
+        right: 2px;
+      }
+
+      input::placeholder {
+        font-size: 13px;
+      }
+
+      #nutrients-category-box {
+        min-height: 92px;
+        background: #fff;
+      }
+
+      #nutrients-list-box {
+        width: 100%;
+        background: #fff;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      .tab-active {
+        color: #0d6efd;
+      }
+
+
+      .nutrient {
+        width: 64px;
+        padding: 0px;
+        word-wrap: break-word;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .nutrient-text {
+        /* color: rgb(141, 146, 151); */
+        padding-top: 4px;
+        font-size: 14px;
+      }
+      .nutrient-category {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .circle-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+
+      #bottom-info {
+        color: rgb(141, 146, 151);
+      }
+
+      #bottom-info h6{
+        color: #212529
+      }
+
+      #preview{
+        object-fit: cover;
+      }
+
+      .row{
+        margin-left: 0px;
+        color: rgb(141, 146, 151);
+      }
+
+      .row span{
+        color: #212529;
+        font-weight: 600;
+      }
+
+      h2{
+        font-weight: 700;
+        padding-left: 8px;
+      }
+      .nutrient-image-box {
+        width: 140px;
+        height: 140px;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-top: 8px;
+        background: rgb(247, 249, 250);
+        position: relative;
+      }
+
+      .nutrient-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    </style>
+    <script>
+
+    const ingredientObjArr = [
+        { name: "종합영양", img: "image/medical-icon/allVita.png" },
+        { name: "피로회복", img: "image/medical-icon/piro.png" },
+        { name: "향산화", img: "image/medical-icon/medicalDiet.png" },
+        { name: "모발건강", img: "image/medical-icon/hair.png" },
+        { name: "혈당조절", img: "image/medical-icon/jojeol.png" },
+        { name: "뼈건강", img: "image/medical-icon/medicalBone.png" },
+        { name: "눈건강", img: "image/medical-icon/eye.png" },
+        { name: "장건강", img: "image/medical-icon/jang.png" },
+        { name: "다이어트", img: "image/medical-icon/hyang.png" },
+        { name: "간건강", img: "image/medical-icon/gan.png" },
+        { name: "스태미나", img: "image/medical-icon/stemina.png" }
+      ];
+
+      const functionObjArr = [
+        { name: "글루타치온", img: "image/medical-icon/glu.png" },
+        { name: "유산균", img: "image/medical-icon/probio.png" },
+        { name: "비타민B", img: "image/medical-icon/vita.png" },
+        { name: "효모", img: "image/medical-icon/inner.png" },
+        { name: "바나바", img: "image/medical-icon/nutri.png" },
+        { name: "칼슘", img: "image/medical-icon/diet.png" },
+        { name: "루테인", img: "image/medical-icon/rutain.png" },
+        { name: "콜라겐", img: "image/medical-icon/probio.png" },
+        { name: "오메가3", img: "image/medical-icon/omega.png" },
+        { name: "밀크씨슬", img: "image/medical-icon/milk.png" },
+        { name: "아르기닌", img: "image/medical-icon/bone.png" }
+      ];
+
+
+      function addNutrientsCategory(categoryArr)
+      {
+    	    const nutrientsDiv = $("#nutrients-category-box");
+    	    nutrientsDiv.empty();
+    	    $.each(categoryArr, function (index, object) {
+    	      var $div = $("<div>").addClass("nutrient");
+    	      var $box = $("<div>").addClass("circle-box");
+    	      var $img = $("<img>")
+    	        .attr("src", object.img)
+    	        .addClass("nutrient-category");
+    	      var $text = $("<div>").addClass("nutrient-text").text(object.name);
+    	      $box.append($img);
+    	      $div.append($box);
+    	      $div.append($text);
+    	      $div.on("click", function () {
+    	        $(".category-active").removeClass("category-active");
+    	        $(this).addClass("category-active");
+    	        let searchValue = $(this).find(".nutrient-text").text().trim();
+    	        searchValue = encodeURIComponent(searchValue);
+    	        window.location.href = `/nutrients-list-page?searchValue=${searchValue}&curPage=1`;
+    	      });
+    	      nutrientsDiv.append($div);
+    	    });
+    	  }
+
+    	  function goToDetail(element) 
+    	  {
+    	    const suppleSeq = $(element).attr("data-suppleseq");
+    	    location.href = "/nutrients-detail-page?id=" + suppleSeq;
+    	  }
+
+    	  $(document).ready(function () {
+
+    	    // 페이지 로딩 후 실행할 초기 로직
+    	    const defaultArr = functionObjArr;
+    	    addNutrientsCategory(defaultArr);
+
+    	    $(".tab").click(function () {
+    	      $(".tab-active").removeClass("tab-active");
+    	      $(this).addClass("tab-active");
+    	      let categoryArr = [];
+    	      if ($(this).attr("id") === "nutrientTab") 
+    	      {
+    	        categoryArr = ingredientObjArr;
+    	      }
+    	      else
+    	      {
+    	        categoryArr = functionObjArr;
+    	      }
+    	      addNutrientsCategory(categoryArr);
+    	    });
+    	  });
+
+    	  $(document).ready(function () {
+    	    // 영양제 카테고리 클릭 시
+    	    $(".nutrient").click(function () {
+    	      let searchValue = $(this).find(".nutrient-text").text().trim();
+    	      searchValue = encodeURIComponent(searchValue); // 검색어 인코딩
+    	      window.location.href = `/nutrients-list-page?searchValue=${searchValue}&curPage=1`;
+    	    });
+
+    	    // 탭 클릭 시
+    	    $(".tab").click(function () {
+    	      $(".tab-active").removeClass("tab-active");
+    	      $(this).addClass("tab-active");
+    	      let categoryArr = [];
+    	      if ($(this).attr("id") === "nutrientTab") {
+    	        categoryArr = ingredientObjArr;
+    	      } else {
+    	        categoryArr = functionObjArr;
+    	      }
+    	      addNutrientsCategory(categoryArr);
+    	    });
+
+    	    // 검색 아이콘 클릭 시
+    	    $("#search-icon").click(function () {
+    	      search();
+    	    });
+
+    	    // 초기 로딩 시 실행할 기본 카테고리 설정
+    	    const defaultArr = functionObjArr;
+    	    addNutrientsCategory(defaultArr);
+
+    	    function search() {
+    	      const searchValue = $('#search-input').val();
+    	      window.location.href = `/nutrients-list-page?searchValue=${searchValue}&curPage=1`;
+    	    }
+    	  });
+      
+      $(document).ready(function(){
+    	 $("#deleteBtn").on("click", function(){
+
+    		 $.ajax({
+    			 url:"/nutri/delete",
+    			 type:"post",
+    			 data:{
+    				 suppleSeq:$("#suppleSeq").val()
+    			 },
+    			 dataType:"json",
+    			 success: function(data)
+    			 {
+    				 if(data == 1)
+    			     {
+    					 alert("글이 삭제되었습니다.");
+    					 location.href="/nutrients-list-page";
+    			     }
+    				 else if(data == 404)
+    				 {
+    					 alert("해당 글이 존재하지 않습니다.");
+    				 }
+    				 else if(data == 500)
+    				 {
+    					 alert("서버 오류가 발생했습니다.");
+    				 }
+    			 },
+    			 error: function(error)
+    			 {
+    				 alert("오류가 발생했습니다.");
+    			 }
+    		 });
+    	 });
+    	 
+         $('#updateBtn').click(function() {
+             document.getElementById('suppleForm').submit();
+          });
+      });
+    </script>
+  </head>
+  <div layout:fragment="content" class="nutrients-list-container">
+    <div style="width: 768px">
+      <div style="width: 100%">
+        <div class="row" style="min-height: 140px">
+          <div
+            class="col tab-container"
+            style="background-color: white; position: relative; height: 48px"
+          >
+            <div class="d-flex align-items-center" style="gap: 16px">
+              <div class="tab tab-active" id="functionTab">성분별</div>
+              <div
+                style="width: 1px; height: 16px; background-color: #fff"
+              ></div>
+              <div id="nutrientTab" class="tab">기능별</div>
+            </div>
+            <div class="search-container">
+              <input
+                id="search-input"
+                class="form-control mr-sm-2"
+                style="border: none"
+                placeholder="궁금한 영양제, 증상, 성분을 검색해보세요!"
+              />
+              <div id="search-icon" style="padding: 0px 8px">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g clip-path="url(#clip0_2367_13371)">
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M8.14439 0.00740448C6.96401 0.0621085 5.82582 0.358628 4.75176 0.89126C3.71218 1.40678 2.80897 2.1128 2.03838 3.0122C1.20773 3.98172 0.584464 5.18337 0.265416 6.43052C-0.088472 7.81385 -0.088472 9.30318 0.265416 10.6865C0.516512 11.668 0.962352 12.6367 1.54676 13.4705C1.95391 14.0514 2.45622 14.6026 3.01408 15.0805C3.9275 15.8631 5.04158 16.4594 6.21639 16.7946C7.37532 17.1252 8.62415 17.2049 9.83639 17.0255C11.0486 16.8462 12.2452 16.3869 13.2724 15.7065C13.367 15.6439 13.4775 15.5687 13.518 15.5396C13.5585 15.5104 13.5945 15.4865 13.598 15.4865C13.6015 15.4865 14.5458 16.4281 15.6964 17.5789C17.8031 19.686 17.8553 19.737 17.9884 19.8162C18.3586 20.0365 18.8396 20.0595 19.2351 19.8757C19.4965 19.7543 19.7562 19.4946 19.8776 19.2332C20.061 18.8385 20.0379 18.356 19.818 17.9865C19.7389 17.8535 19.6879 17.8013 17.5808 15.6945C16.43 14.5439 15.4884 13.5997 15.4884 13.5961C15.4884 13.5926 15.5123 13.5566 15.5414 13.5161C15.7821 13.1822 16.0292 12.7679 16.2319 12.3584C16.8245 11.1613 17.1203 9.89597 17.1203 8.55852C17.1203 7.21796 16.8232 5.95008 16.2279 4.75052C15.8091 3.90663 15.2849 3.17815 14.6128 2.50606C13.9404 1.8336 13.2115 1.30903 12.369 0.89126C11.2832 0.352788 10.1598 0.0622765 8.94839 0.00670048C8.74754 -0.00251552 8.35098 -0.00217152 8.14439 0.00740448ZM8.35239 2.67116C7.20874 2.70679 6.09237 3.08442 5.14757 3.75524C4.62973 4.12292 4.1248 4.62785 3.75712 5.14569C3.084 6.09372 2.70746 7.20968 2.67351 8.35725C2.64307 9.38588 2.84598 10.307 3.30485 11.2234C3.67525 11.9631 4.25066 12.6635 4.92324 13.1933C5.78954 13.8756 6.84643 14.3052 7.93639 14.418C8.32628 14.4584 8.79755 14.4583 9.18439 14.4179C10.2789 14.3035 11.3307 13.8761 12.1975 13.1933C12.5489 12.9166 12.9184 12.547 13.1952 12.1957C13.878 11.3288 14.3054 10.2771 14.4198 9.18252C14.4603 8.79528 14.4603 8.32176 14.4198 7.93452C14.3457 7.22517 14.1479 6.55594 13.8174 5.89668C13.3628 4.98968 12.6322 4.1777 11.7602 3.61041C10.8925 3.04588 9.81502 2.70236 8.82439 2.67441C8.74299 2.67212 8.64579 2.66913 8.60839 2.66777C8.57099 2.66642 8.45579 2.66795 8.35239 2.67116Z"
+                      fill="#3D4551"
+                    ></path>
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_2367_13371">
+                      <rect width="20" height="20" fill="white"></rect>
+                    </clipPath>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div
+            id="nutrients-category-box"
+            style="display: flex; gap: 8px; padding: 4px 0px"
+          ></div>
+        </div>
+        <div id="nutrients-detail-box" style="padding: 0px"><br>
+          <div id="description" class="p-3" style="width: 95%; margin: 0 auto; border-radius: 16px; border: 1px solid rgb(141, 146, 151);">
+           <div sec:authorize="hasAuthority('ROLE_ADMIN')">
+           
+                      <button
+			            style="
+			              background-color: #0d6efd;
+			              padding: 5px 6px;
+			              border-radius: 8px;
+			              color: #fff;
+			              margin:3px;
+			              text-align: center;
+			              cursor: pointer;
+			              width:100px;
+			              float: right;
+			              border:none;
+			            "
+			            id="deleteBtn"
+			          >
+			            삭제
+			          </button>
+			          <button
+			            style="
+			              background-color: #0d6efd;
+			              padding: 5px 6px;
+			              border-radius: 8px;
+			              color: #fff;
+			              margin:3px;
+			              text-align: center;
+			              cursor: pointer;
+			              width:100px;
+			              float: right;
+			              border:none;
+			            "
+			            id="updateBtn"
+			          >
+			            수정
+			          </button>
+			          </div><br>
+		 <br>
+            <h2>[[${supple.suppleTitle}]]</h2>
+            <br>
+            <div style="width: calc(100% - 32px); min-height: 300px; border-radius: 16px; border: 1px solid rgb(141, 146, 151); padding: 16px;">
+              <div class="row">
+                <div class="col-md-4 d-flex justify-content-center align-items-center" style="flex-direction: column;">
+
+					<div th:if="${not #lists.isEmpty(supple.suppleFile)}" >
+                    <div class="nutrient-image-box">
+                      <img th:src="@{upload/suppleFolder/{fileName}(fileName=${supple.suppleFile[0].fileName})}" class="nutrient-image" />
+                    </div>
+                    </div>
+                    
+                    <br/>
+                  <div class="d-flex justify-content-center align-items-left" style="flex-direction: column;">
+                    
+                    <div style="color: #212529"><b>[[${supple.suppleName}]]</b><br>
+                    							  제형 : [[${supple.suppleFormula}]]</div>
+                    <div style="color:rgb(141, 146, 151);">작성일 : [[${supple.suppleRegdate}]]</div>
+                  </div>
+                </div>
+                <div class="col-md-7" style="color: #212529; padding-top: 16px;">
+                  <div><span style="color:rgb(141, 146, 151); padding: 12px;">주의사항</span><br>[[${supple.suppleCaution}]]</div><br>
+                  <div><span  style="color:rgb(141, 146, 151);  padding: 12px;">복용방법</span><br>[[${supple.suppleDose}]]</div><br>
+                  <div><span  style="color:rgb(141, 146, 151);  padding: 12px;">주요성분</span><br>[[${supple.suppleRaw}]]</div>
+                </div>
+              </div>
+              <div>
+                <div class="spacing-height-16"></div>
+                <div class="spacing-height-16"></div>
+                <div id="purchaseButton" style="width: calc(100% - 16px); background-color: #0d6efd; color: #fff; cursor: pointer; text-align: center;
+                padding: 8px; border-radius: 8px;">구매하기</div>
+                
+                <script>
+				    document.getElementById('purchaseButton').onclick = function() {
+				        // supple.suppleLink 값을 가져와서 페이지 이동
+				        var suppleLink = '[[${supple.suppleLink}]]';
+				        window.location.href = suppleLink;
+				    };
+				</script>
+                      <div class="spacing-height-16"></div>
+                      <div class="spacing-height-16"></div>
+              </div>
+        
+              <div>
+                <h4>주요 원료</h4>
+                <div class="spacing-height-16"></div>
+                <div class="row d-flex" style="background-color: rgb(247, 249, 250); width: 100%">
+                  <div class="col" style="padding: 16px;"><span><i class="fa-solid fa-circle" style="color: #0d6efd"></i>&nbsp;충족</span><div>식약처 기준 1일 섭취량 100%이상</div></div>
+                  <div class="col" style="padding: 16px;"><span><i class="fa-solid fa-circle" style="color: silver"></i>&nbsp;보통</span><div>식약처 기준 1일 섭취량 30% ~ 100%</div></div>
+                </div>
+              </div>
+              <div class="spacing-height-16"></div>
+              <div class="d-flex justify-content-between">
+                <div class="p-2"></div>
+                <div class="p-2">1.3mg&nbsp;<i class="fa-solid fa-circle" style="color: #0d6efd"></i></div>
+              </div><br>
+              
+              <div th:if="${not #lists.isEmpty(supple.suppleFile)}" >
+              <div id="preview" style="width:80%; height:80%; object-fit: inherit; margin: 0 auto;">
+			    <div th:each="file, iterStat : ${supple.suppleFile}">
+			        <img th:if="${iterStat.index != 0}" th:src="@{'upload/suppleFolder/' + ${file.fileName}}" class="nutrient-image" />
+			    </div>
+			  </div>
+			  </div>
+			   
+			   </div>
+          </div>
+          
+          <br><br>
+          <div id="bottom-info" class="d-flex justify-content-center " style="width: 100%; border-radius: 16px; background-color: rgb(247, 249, 250);padding: 4px;gap: 24px;margin: 3px 3px 0px;">
+            <div class="d-flex align-items-center " style="flex-direction: column;">
+              <br>
+              <h6>AI</h6>
+              <p style="text-align: center;">당영 AI테크놀로지를 통해 영양제에 대한 <br/>
+                식약처, 보건복지부, 제품 브랜드의 데이터 분석과 <br/>
+                트렌드와 고객 만족도 및 후기 데이터를 분석해요.
+              </p>
+              <br>
+              <div class="d-flex" style="gap: 16px">
+                <div>식품의약품안전처</div>
+                <div>보건복지부</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center ">
+              <i
+                class="fa-solid fa-chevron-right"
+                style="color: rgb(141, 146, 151); opacity: 0.6;"
+              ></i>
+              <i
+                class="fa-solid fa-chevron-right"
+                style="color: rgb(141, 146, 151); opacity: 0.6;"
+              ></i>
+            </div>
+            <br>
+            <div class="d-flex align-items-center " style="flex-direction: column;">
+            <br>
+              <h6>전문가</h6>
+              <p style="text-align: center;">약사, 영양사, 의사 등 전문가들이 모여 <br/>
+                AI 분석 자료와 함께  <br/>
+                꼼꼼히 검토하여 데이터를 분석해요.
+              </p>
+            </div>
+          </div>
+          <br><br><br>
+        </div>
+          
+        </div>
+    <form id="suppleForm" name="suppleForm" method="post" action="/nutri/update">
+       <input type="hidden" name="suppleSeq" id="suppleSeq" th:value="${supple.suppleSeq}" />
+    </form>
+      </div>
+    </div>
+</html>

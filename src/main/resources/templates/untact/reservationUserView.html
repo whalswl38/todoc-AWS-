@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http//www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+
+<head>
+    <title>비대면 진료 에약 완료</title>
+    <style>
+        .reserve-container {
+            max-width: 768px;
+            margin: auto;
+        }
+
+        #lnb-container {
+            width: 140px;
+        }
+
+        .lnb-item a {
+            font-size: 18px;
+            padding: 8px;
+            display: block;
+        }
+
+        #lnb-container a:not(.lnb-active) {
+            color: black;
+            font-size: 18px;
+        }
+
+        .lnb-active {
+            color: royalblue;
+        }
+
+        .clicked-background {
+            font-weight: 700;
+            border-bottom: 2px solid #212529;
+        }
+
+        .silver-hr {
+            width: 100%;
+            height: 1px;
+            background: #a9aeb1;
+            margin: 12px 0;
+            opacity: 0.4;
+        }
+
+        .silver-hr-block {
+            width: 100%;
+            height: 20px;
+            background: #a9aeb1;
+            margin: 12px 0;
+            opacity: 0.2;
+        }
+
+        p {
+            font-weight: 500;
+            padding: 4px 0px;
+        }
+
+        .status-icon {
+            border-radius: 50%;
+            padding: 6px 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgb(141, 146, 151);
+            background-color: rgb(247, 249, 250);
+        }
+
+        .status-process {
+            padding-top: 8px;
+        }
+
+        .status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgb(141, 146, 151);
+            font-weight: 500;
+        }
+
+        .status-icon-active {
+            color: #fff;
+            background-color: royalblue;
+            border: none;
+        }
+
+        .status-active {
+            color: royalblue;
+        }
+
+        .filter-sort {
+            background-color: rgb(247, 249, 250);
+            border-radius: 20px;
+            padding: 10px 20px 10px 20px;
+            font-size: 14px;
+            color: rgb(141, 146, 151);
+            font-weight: 500;
+            width: 70px;
+            text-align: center;
+            align-content: center;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            $(".tab").click(function() {
+                $(".clicked-background").removeClass("clicked-background");
+                $(this).addClass("clicked-background");
+            });
+        });
+    </script>
+</head>
+<body>
+<div layout:fragment="content" class="reserve-container">
+    <div class="spacing-height-16"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px">
+        <div id="lnb-container">
+            <ul class="lnb flex-column">
+                <li class="lnb-item">
+                    <a class="lnb-link" aria-current="page" th:href="@{/select-subject-page}">병원찾기</a>
+                </li>
+                <li class="lnb-item">
+                    <a class="lnb-link" th:href="@{/select-item-page}">증상찾기</a>
+                </li>
+                <li class="lnb-item">
+                    <a class="lnb-link lnb-active" th:href="@{/select-clinic-page}">병원 리스트</a>
+                </li>
+            </ul>
+        </div>
+        <div style="padding: 8px; width: 450px">
+            <div class="reservation-details" th:each="reserve : ${rsve}">
+                <h4>예약을 확인하고 있어요.</h4>
+                <p style="color: rgb(141, 146, 151)">
+                    병원이 예약을 확인하면 예약이 확정됩니다.
+                </p>
+                <div class="spacing-height-16"></div>
+                <div class="status-container d-flex justify-content-center" style="gap: 16px">
+                    <div class="status" style="flex-direction: column">
+                        <div class="status-icon status-icon-active">
+                            <i class="fa-regular fa-hospital"></i>
+                        </div>
+                        <div class="status-active">예약</div>
+                    </div>
+                    <div class="status-process">
+                        <i class="fa-solid fa-chevron-right" style="color: rgb(141, 146, 151)"></i>
+                        <i class="fa-solid fa-chevron-right" style="color: rgb(141, 146, 151)"></i>
+                    </div>
+                    <div class="status" style="flex-direction: column">
+                        <div class="status-icon">
+                            <i class="fa-solid fa-stethoscope"></i>
+                        </div>
+                        <div>진료</div>
+                    </div>
+                    <div class="status-process">
+                        <i class="fa-solid fa-chevron-right" style="color: rgb(141, 146, 151)"></i>
+                        <i class="fa-solid fa-chevron-right" style="color: rgb(141, 146, 151)"></i>
+                    </div>
+                    <div class="status" style="flex-direction: column">
+                        <div class="status-icon">
+                            <i class="fa-solid fa-money-check"></i>
+                        </div>
+                        <div>결제</div>
+                    </div>
+                    <div class="status-process">
+                        <i class="fa-solid fa-chevron-right" style="color: rgb(141, 146, 151)"></i>
+                        <i class="fa-solid fa-chevron-right" style="color: rgb(141, 146, 151)"></i>
+                    </div>
+                    <div class="status" style="flex-direction: column">
+                        <div class="status-icon">
+                            <i class="fa-solid fa-capsules"></i>
+                        </div>
+                        <div>처방</div>
+                    </div>
+                </div>
+                <div class="spacing-height-16"></div>
+                <div class="spacing-height-16"></div>
+                <div class="d-flex">
+                    <div class="p-2 tab clicked-background" style="
+                font-size: 20px;
+                cursor: pointer;
+                flex: 1;
+                text-align: center;
+              ">
+                        병원
+                    </div>
+                    <div class="p-2 tab" style="
+                font-size: 20px;
+                cursor: pointer;
+                flex: 1;
+                text-align: center;
+              ">
+                        약국
+                    </div>
+                </div>
+                <div class="spacing-height-16"></div>
+                <div class="reservation-info">
+                    <div class="d-flex justify-content-between align-items-center p-1">
+                        <div style="font-size: 18px; font-weight: 500">병원정보</div>
+                        <div style="color: rgb(141, 146, 151); cursor: pointer">
+                            <p>
+                                <i class="fa-regular fa-file"></i>&nbsp;D2024-2227-1427-7536
+                            </p>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between p-1">
+                        <div>
+                            <div style="color: rgb(141, 146, 151)">
+                                <p th:text="${reserve.clinicName}"></p>
+                            </div>
+                            <!-- <div><p>이현호 의사</p></div> -->
+                        </div>
+                        <div>
+                            <button id="call" style="
+                    background-color: #fff;
+                    border: 1px solid #bdbdbd;
+                    border-radius: 7px;
+                    padding: 8px 12px;
+                  ">
+                                전화하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="silver-hr"></div>
+
+                <div class="reservation-date-time">
+                    <div style="color: rgb(141, 146, 151)">
+                        <p>예약시간</p>
+                    </div>
+                    <p th:text="${reserve.reservationDate + ' ' + reserve.reservationTime}"></p>
+                    <div class="silver-hr"></div>
+                </div>
+                <div class="p-2 d-flex align-items-center justify-content-between">
+                    <div id="cancelReservation" style="cursor: pointer">
+                        <p>
+                            <i class="fa-regular fa-calendar-xmark"></i>&nbsp;&nbsp;
+                            예약 취소는 마이페이지에서 가능합니다.
+                        </p>
+                    </div>
+
+                    <div style="cursor: pointer">
+                        <i class="fa-solid fa-chevron-right" style="color: rgb(141, 146, 151)"></i>
+                        <!-- todo : 마이페이지로 링크 이동 -->
+
+                    </div>
+                </div>
+                <div class="silver-hr-block"></div>
+                <div class="patient-info">
+                    <div style="font-size: 18px; font-weight: 500; margin-bottom: 12px">
+                        진료 정보
+                    </div>
+                    <div style="color: rgb(141, 146, 151)">
+                        <p>증상</p>
+                    </div>
+                    <p th:text="${reserve.reservationSymptom}"></p>
+                </div>
+            </div>
+            <div class="spacing-height-16"></div>
+            <div class="spacing-height-16"></div>
+            <div class="filter-sort" style="color: royalblue; background-color: #e0ecff; border: 1px solid royalblue; align-content: center;">
+                <a href="/main-page" style="text-decoration: none; color: inherit; text-align: center;">
+                    확인
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

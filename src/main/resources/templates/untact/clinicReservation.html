@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http//www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+<head>
+    <title>비대면 진료 에약 및 증상 입력</title>
+    <style>
+        .reserve-container {
+            max-width: 768px;
+            margin: auto;
+        }
+
+        #lnb-container {
+            width: 140px;
+        }
+
+        .lnb-item a {
+            font-size: 18px;
+            padding: 8px;
+            display: block;
+        }
+
+        #lnb-container a:not(.lnb-active) {
+            color: black;
+            font-size: 18px;
+        }
+
+        .lnb-active {
+            color: royalblue;
+        }
+
+        label {
+            font-size: 20px;
+            font-weight: 600;
+            padding: 8px;
+        }
+
+        #comments {
+            width: 400px;
+            padding: 8px;
+            resize: none;
+        }
+
+        #comments::placeholder {
+            color: rgb(141, 146, 151);
+        }
+
+        #comments:hover {
+            color: rgb(141, 146, 151);
+            border: 1px solid #212529;
+        }
+
+        #timeSlots,
+        #dateSlots {
+            width: 400px;
+            background-color: rgb(247, 249, 250);
+            padding: 16px;
+            flex-wrap: wrap;
+        }
+
+        .dateBtn,
+        .timeBtn {
+            background-color: #fff;
+            font-weight: 600;
+            border-radius: 16px;
+            min-width: 90px;
+        }
+    </style>
+    <script>
+    $(document).ready(function() {
+        $("#comments").on("input", function() {
+            let textInput = $(this).val();
+            let text_length = textInput.length;
+            if (text_length > 150) {
+                textInput = textInput.substring(0, 150);
+                $(this).val(textInput);
+            }
+            text_length = textInput.length;
+            $("#commentsHelp").text(text_length + "/150");
+        });
+
+        const dateSlots = ["오늘", "내일"];
+        var $dateSlotsDiv = $("#dateSlots");
+        $.each(dateSlots, function(index, time) {
+            var $button = $("<button>")
+                .addClass("dateBtn btn btn-outline-secondary m-1")
+                .text(time);
+            $button.on("click", function() {
+                $(".dateBtn.active").removeClass("active");
+                $(this).addClass("active");
+            });
+            $dateSlotsDiv.append($button);
+        });
+
+        const timeButtons = document.querySelectorAll('.timeBtn');
+        timeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const selectedTime = button.textContent; 
+                console.log('Selected time:', selectedTime);
+
+                // 클릭된 버튼에만 active 클래스를 추가하고 나머지 버튼들에서는 active 클래스를 제거합니다.
+                timeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+        
+        <!--예약하기-->
+        $("#reserveBtn").on("click", function() {
+            const date = $(".dateBtn.active").text(); 
+            const time = $(".timeBtn.active").text(); 
+            const symptoms = $("#comments").val();
+            const clinicInstinum = $("#clinicInstinum").val();
+         
+            const formData = new FormData();
+            formData.append('date', date);
+            formData.append('time', time);
+            formData.append('symptoms', symptoms)
+            formData.append('clinicInstinum', clinicInstinum);
+
+            $.ajax({
+                url: '/clinic-reserve-page', 
+                type: 'POST', 
+                data: formData, 
+                processData: false,
+                contentType: false, 
+                success: function(response) {
+                	console.log(response);
+                	var res = response.res;
+                    var rsve = response.rsve;
+                    var code = response.code;
+                    
+               		$("#rsveUserEmail").val(rsve.userEmail);
+               		$("#rsveClinicInstinum").val(rsve.clinicInstinum);
+               		$("#rsveSymptoms").val(rsve.reservationSymptom);
+               		$("#reservationDate").val(rsve.reservationDate);
+               		$("#reservationTime").val(rsve.reservationTime);
+               		$("#rsveClinicName").val(rsve.clinicName);
+                    
+                	if(code >= 1){
+	                    alert('예약이 성공적으로 완료되었습니다.');
+	                    $("#form_success").submit();
+                	} else if (code == 200){
+                		alert('날짜, 시간, 증상을 입력해주세요.');
+                	} else if(code == 250){
+                		alert('예약에 실패했습니다.');
+                	} else if(code == 404){
+                		alert('예약 중 문제가 발생했습니다. 다시 시도해주세요.');
+                	}
+                },
+                error: function(error) {
+                    console.error('예약을 처리하는 도중 오류가 발생했습니다.');
+                }
+            });
+        });
+
+           /*  var $timeSlotsDiv = $("#timeSlots");
+            $.each(timeSlots, function(index, time) {
+                var $button = $("<button>")
+                    .addClass("timeBtn btn btn-outline-secondary m-1")
+                    .text(time);
+                $button.on("click", function() {
+                    $(".timeBtn.active").removeClass("active");
+                    $(this).addClass("active");
+                });
+                $timeSlotsDiv.append($button);
+            }); */
+	});
+    </script>
+</head>
+<body>
+    <div layout:fragment="content" class="reserve-container">
+        <div class="spacing-height-16"></div>
+        <div class="d-flex justify-content-between" style="gap: 32px">
+            <div id="lnb-container">
+                <ul class="lnb flex-column">
+                    <li class="lnb-item">
+                        <a class="lnb-link" aria-current="page" th:href="@{/select-subject-page}">병원찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link" th:href="@{/select-item-page}">증상찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link lnb-active" th:href="@{/select-clinic-page}">병원 리스트</a>
+                    </li>
+                </ul>
+            </div>
+            <div style="padding: 8px; width: 80%">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="date" style="margin-left: 2px"><i class="fa-regular fa-calendar"></i>&nbsp;날짜</label>
+                        </div>
+                        <div id="dateSlots" class="d-flex"></div>
+                        <div class="form-group">
+                            <label for="time"><i class="fa-regular fa-clock"></i>&nbsp;시간</label>
+                            <div th:if="${timeSlots == null}" id="timeSlots" class="d-flex">
+                            	<i>휴무일입니다.</i>
+                            </div>
+                            <div th:if="${message != null}" id="timeSlots" class="d-flex">
+                            	<i>진료시간이 아닙니다.</i>
+                            </div> 
+                            <div th:if="${message == null}" id="timeSlots" class="d-flex">
+                                <div th:each="timeSlot : ${timeSlots}">
+								    <button class="timeBtn btn btn-outline-secondary m-1" th:text="${#temporals.format(timeSlot, 'HH:mm')}"></button>
+								</div>
+							</div>
+						</div>
+                        <div class="form-group">
+                            <div class="spacing-height-16"></div>
+                            <label class="p-2">증상에 대해 알려주세요</label>
+                            <textarea id="comments" class="form-control" rows="4" maxlength="150" placeholder="예: 열이 나고 머리가 아파요."></textarea>
+                            <div class="d-flex" style="justify-content: flex-end; padding-right: 28px">
+                                <small id="commentsHelp" class="form-text text-muted">0/150</small>
+                            </div>
+                        </div>
+                        <!--<div class="d-flex justify-content-center align-items-center" style="width: 60px; height: 60px; border: 0.1px solid rgb(141, 146, 151); border-radius: 8px;">
+                            <label for="photo" style="cursor: pointer; padding: 4px 18px"><i class="fa-solid fa-camera"></i>
+                                <div style="font-size: 14px">0/4</div>
+                            </label>
+                            <input id="photo" type="file" style="display: none" />
+                        </div> -->
+                        <div class="spacing-height-16"></div>
+                        <div class="form-group d-flex justify-content-center">
+                            <div>
+                                <button id="reserveBtn" class="btn btn-primary p-2" style="width: 160px">예약하기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input id="clinicInstinum" type="hidden" th:value="${clinic.clinicInstinum}">
+                <div class="spacing-height-16"></div>
+                <div class="spacing-height-16"></div>
+                <form id="form_success" action="/clinic-reserve-user-page" method="get">
+               		<input name="rsveUserEmail" id="rsveUserEmail" type="hidden">
+               		<input name="rsveClinicInstinum" id="rsveClinicInstinum" type="hidden">
+               		<input name="rsveSymptoms" id="rsveSymptoms" type="hidden"> 
+               		<input name="reservationDate" id="reservationDate" type="hidden">
+               		<input name="reservationTime" id="reservationTime" type="hidden">
+               		<input name="rsveClinicName" id="rsveClinicName" type="hidden">
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

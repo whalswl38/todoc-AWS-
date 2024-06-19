@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>제휴문의</title>
+    <style>
+      .nutrients-list-container {
+        max-width: 768px;
+        margin: auto;
+      }
+      .tab-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: rgb(141, 146, 151);
+      }
+      .search-container {
+        position: absolute;
+        display: flex;
+        background: rgb(255, 255, 255);
+        -webkit-box-align: center;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 99;
+        width: 270px;
+        border-radius: 8px;
+        border: 1px solid #212529;
+        top: 4px;
+        right: 2px;
+      }
+      input type[text]{
+		  width: 200px;
+		  height: 32px;
+		  font-size: 15px;
+		  border-radius: 15px;
+		  outline: none;
+		  padding-left: 10px;
+		  cursor:pointer;
+	  }
+
+      input type[text] placeholder {
+        font-size: 10px;
+      }
+
+      #nutrients-category-box {
+        min-height: 92px;
+        background: #fff;
+      }
+
+      #nutrients-list-box {
+        width: 100%;
+        background: #fff;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      .tab-active {
+        color: #0d6efd;
+      }
+	  button, input, optgroup, select, textarea {
+		    margin: 2px;
+		    font-family: inherit;
+		    font-size: inherit;
+		    line-height: inherit;
+	  }
+
+      .nutrient {
+        width: 64px;
+        padding: 0px;
+        word-wrap: break-word;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .nutrient-text {
+        /* color: rgb(141, 146, 151); */
+        padding-top: 4px;
+        font-size: 14px;
+      }
+      .nutrient-category {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      input::placeholder{
+        font-size: 13px;
+      }
+      .circle-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+
+      .row{
+        margin-left: 0px;
+        color: rgb(141, 146, 151);
+      }
+            .agreement-box{
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .agreement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+      .agreement-label {
+        margin: 0;
+        color: #666;
+
+        span {
+            color: red;
+        }
+      }
+      .agreement-checkbox {
+        margin-right: 10px;
+      }
+      .detail-button {
+        padding: 5px 10px;
+        color: #007bff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .agreement-details {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+            .agreement-group {
+        width: 80%;
+        margin: 0 auto;
+      }
+      .agreement {
+        background: #fff;
+        padding: 0px 4px;
+        border-radius: 5px;
+      }
+      .agreement label {
+        display: block;
+        margin-bottom: 2px;
+      }
+
+      .row span{
+        color: #212529;
+        font-weight: 600;
+      }
+
+      h2{
+        font-weight: 700;
+        padding-left: 8px;
+      }
+    </style>
+    <script>
+	    function toggleDetails(button)
+	    {
+	      var detailsDiv = button.parentElement.parentElement.nextElementSibling;
+	      detailsDiv.style.display =
+	        detailsDiv.style.display === "block" ? "none" : "block";
+	      button.innerHTML =
+	        detailsDiv.style.display === "block" ? "내용숨기기" : `내용보기 <i class="fa-solid fa-chevron-down"></i>`;
+	    }
+    
+    	$(document).ready(function(){
+    		$("#submitBtn").on("click", function(){
+    			if($.trim($("#institutionNum").val()).length <= 0)
+    		    {
+    				alert("요양기관번호를 입력해주세요.");
+    				return;
+    		    }
+    			if($.trim($("#institutionName").val()).length <= 0)
+    		    {
+    				alert("요양기관명을 입력해주세요.");
+    				return;
+    		    }
+    			if($.trim($("#zipcode").val()).length <= 0)
+    		    {
+    				alert("우편번호를 입력해주세요.");
+    				return;
+    		    }
+    			if($.trim($("#addr1").val()).length <= 0)
+    		    {
+    				alert("주소를 입력해주세요.");
+    				return;
+    		    }
+    			if($.trim($("#addr2").val()).length <= 0)
+    		    {
+    				alert("상세주소를 입력해주세요.");
+    				return;
+    		    }
+    			$("#addr").val($("#addr1").val()+" "+$("#addr2").val());
+    			
+          	   if($("#agree2").is(':checked') == false)
+        	   {
+        		   alert("개인정보 수집 및 이용 동의는 필수 동의항목입니다.");
+        		   return;
+        	   }
+    			$.ajax({
+    				type:"POST",
+    				url:"/sign/institution",
+    				data:{
+    					institutionNum:$("#institutionNum").val(),
+    					institutionName:$("#institutionName").val(),
+    					institutionFlag:$("#institutionFlag").val(),
+    					zipcode:$("#zipcode").val(),
+    					addr:$("#addr").val()
+    				},
+  					success:function(data)
+  					{
+  						if(data == 2)
+  						{
+  							document.getElementById('moon').style.display='none';
+  							document.getElementById('msg').innerHTML = '문의해주셔서 감사합니다. 발송을 완료했습니다.';
+  							
+  						}
+  						else if(data == 400)
+  						{
+  							alert("입력값이 올바르지 않습니다.");
+  						}
+  						else if(data == 500)
+  						{
+  							alert("서버 오류가 발생했습니다.");
+  						}
+  					},
+  					error:function(error)
+  					{
+  						alert("오류가 발생했습니다.");
+  					}
+    			});
+    		});
+    	});
+    </script>
+  </head>
+  <div layout:fragment="content" class="nutrients-list-container">
+    <div style="width: 768px">
+      <div style="width: 100%">
+        <div class="row" style="min-height: 140px">
+          <div
+            id="nutrients-category-box"
+            style="display: flex; gap: 8px; padding: 4px 0px">
+                <div class="image">
+                <img  style="width:50%; height:auto;  border-radius: 16px; object-fit: cover; margin:0px auto;" src="https://file.doctornow.co.kr/official/partnership/partnership_title.jpg" alt="" /><br>
+                <div style="text-align:right;">
+                <div style="color:black;"><b>전화 : 02-990-5056</b></div><br>
+                제휴 문의 전송 후 최대 4주 가량 소요됩니다.<br>
+				정확한 정보를 기입해주시면 빠른 진행이 가능합니다.</div>
+            	</div>
+            </div>
+        </div>
+        <div id="nutrients-detail-box" style="padding: 0px"><br>
+          <div id="description" class="p-3" style="width: 95%; margin: 0 auto; border-radius: 16px; border: 1px solid rgb(141, 146, 151);">
+			<div style="width: calc(100% - 32px); min-height: 300px; border-radius: 16px; border: 1px solid rgb(141, 146, 151); padding: 16px;">
+              <div class="row">
+                <div class="col-md-4 justify-content-center align-items-center" style="color:black; flex-direction: column;">
+                <div id="moon">
+                문의유형&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				 <input type="text" id="institutionFlag" placeholder="  병원 또는 약국으로 입력" /><br><br>
+				 
+				요양기관번호&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				 <input type="text" id="institutionNum" placeholder="  하이픈(-) 제외" pattern="[0-9]+"/><br><br>
+				 
+				요양기관명&nbsp;
+				 <input type="text" id="institutionName" /><br><br>
+				 
+				우편번호 &nbsp;&nbsp;&nbsp;&nbsp;
+				 <input type="text" id="zipcode" placeholder="  하이픈(-) 포함"/><br><br>
+				 
+				주소&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				 <input type="text" id="addr1" /><br><br>  
+				  
+				상세주소<br>
+				 <input id="addr2" /><br><br>
+                <div class="col-md-7" style="color: #212529; padding-top: 16px;">
+				<input type="hidden" id="addr" >
+                </div>
+              </div>
+		      <div class="input-group">
+		          <hr/>
+		          <div class="agreement">
+		            <div class="agreement-box">
+		            <div class="agreement-header">
+		                <div> <label class="agreement-label"> <span>[필수]</span>  개인정보 수집 및 이용 동의 </label></div>
+		              <div class="detail-button" onclick="toggleDetails(this)">
+		                내용보기 <i class="fa-solid fa-chevron-down"></i>
+		              </div>
+		            </div>
+		            <input type="checkbox" id="agree2" class="agreement-checkbox" />
+		        </div>
+		            <div class="agreement-details">
+		            <p>[개인정보 수집 동의]</p><br/><br/>
+					<p>(주)todoc은 아래의 목적으로 개인정보를 수집 및 이용하며, 회원의 개인정보를 안전하게 취급하는데 최선을 다합니다.</p><br/>
+					<p>1. 개인정보의 수집 및 이용목적<br>
+					병원/약국 제휴 문의 응대</p>
+					
+					<p>2. 수집하는 개인정보의 항목<br>
+					제휴 문의시 : 상호, 성함, 연락처, 이메일, 주소</p>
+					
+					<p>3. 개인정보의 보유 및 이용기간<br>
+					문의사항 상담서비스를 위해 검토 완료 후 3개월 간 보관하며, 이후 해당 정보를 지체 없이 파기합니다.</p><br>
+					
+					<p>위 정보 수집에 대한 동의를 거부할 권리가 있으며, 동의 거부 시에는 문의 접수가 제한될 수 있습니다.</p>
+					<p>더 자세한 내용에 대해서는 [닥터나우 개인정보처리방침]을 참고하시기 바랍니다.</p>
+		            </div>
+		          </div>
+		          <hr />
+		        </div>
+              <div>
+              <br><br><br>
+                <div id="submitBtn" style="width: calc(95% - 20px); background-color: #0d6efd; color: #fff; cursor: pointer; text-align: center;
+                padding: 8px; border-radius: 8px;">문의하기</div>
+              </div>
+              </div>
+			  </div>
+
+              <p id="msg"></p>
+			  </div>
+			   </div>
+          </div>
+        </div>
+          
+        </div>
+
+      </div>  
+</html>

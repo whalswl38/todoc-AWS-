@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}">
+  <head>
+    <title>예약리스트</title>
+    <style>
+    
+    /* 높이값 고정 */
+		html,body{height:100% }
+		#page{height: 100%;}
+		.container{height: 100%;}
+
+		/* 페이지 스타일 */
+		.entry-header{display: flex;justify-content: space-between;}
+		.search-bar{display: flex; gap: 5px;}
+		select{height:33px; padding: 4px; border: 1px solid #ccc; border-radius: 0;}
+		input[type="text"]{width: 200px; height:33px; padding: 6px;}
+		input[type="submit"]{height: 33px;}
+		.table th, .table td{text-align: center; }
+		.table td:nth-of-type(2){text-align: center;}
+		
+      .mypage-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      h2 {
+        margin-bottom: 0;
+      }
+
+      p {
+        font-weight: 500;
+        padding: 4px 0px;
+      }
+
+      .status-icon {
+        border-radius: 50%;
+        margin-bottom: 8px;
+        background-color: rgb(247, 249, 250);
+        font-size: 14px;
+      }
+
+      .status-process {
+        width: 54px;
+        height: 2px;
+        margin-top: 8px;
+        background-color: #a9aeb1;
+        position: absolute;
+        right: -51px;
+      }
+
+            .role-selection {
+        margin: 20px 0;
+        display: flex;
+        justify-content: space-between;
+
+        > div {
+          flex: 1;
+          text-align: center;
+          padding: 8px;
+        }
+      }
+
+      .role-selection button {
+        background:  #007bff;
+        border: 1px solid #ddd;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .role-selection button.active {
+        background: #0056b3;
+        color: white;
+        border-color: #0056b3;
+      }
+
+      .input-group {
+        margin-bottom: 10px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      .form-group {
+        text-align: center;
+      }
+
+      .login-btn {
+        width: 100%;
+        height: 40px;
+        background:  #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .register-link,
+
+      .find-register {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      button:hover,
+      .login-btn:hover {
+        opacity: 0.8;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .toggle-switch {
+        display: flex;
+      }
+
+      .toggle-option {
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .selected {
+        border-bottom: 2px solid  #007bff;
+        color:  #007bff;
+        font-weight: 500;
+      }
+      #invalid-feedback{
+      	color:red;
+      	font-size:10px;
+      }
+      
+      td{
+      	align-content: center;
+		padding:3px;
+      }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      $(document).ready(function () {
+    	 toggleSwitch('left');
+        $(".tab").click(function () {
+          $(".clicked-background").removeClass("clicked-background");
+          $(this).addClass("clicked-background");
+        });
+        
+      });
+      
+      function toggleSwitch(option) 
+      {
+    	  var leftOption = document.getElementById("normal-user");
+    	    var rightOption = document.getElementById("medical-user");
+    	    //민지추가
+    	    var table1 = document.querySelector('.table1');
+    	    var table2 = document.querySelector('.table2');
+
+    	    leftOption.classList.remove("selected");
+    	    rightOption.classList.remove("selected");
+
+    	    if (option === "left") {
+    	      leftOption.classList.add("selected");
+    	      table2.style.display = 'none';
+    	      table1.style.display = 'table';
+
+    	    } else {
+    	      rightOption.classList.add("selected");
+    	      table2.style.display = 'table';
+    	      table1.style.display = 'none';
+
+    	    }
+
+    	    var rows = document.querySelectorAll("tr");
+    	  /*   for (var i = 0; i < rows.length; i++) {
+    	        var row = rows[i];
+    	        if (option === "left") {
+    	            if (row.id === "untactBtn1") {
+    	                row.style.display = 'revert';
+    	            } else if (row.id === "contactBtn1") {
+    	                row.style.display = 'none';
+    	            }
+    	        } else {
+    	            if (row.id === "untactBtn1") {
+    	                row.style.display = 'none';
+    	            } else if (row.id === "contactBtn1") {
+    	                row.style.display = 'revert';
+    	            }
+    	        }
+    	    } */
+      }
+
+    </script>
+  </head>
+  <div layout:fragment="content" class="mypage-container">
+    <div class="spacing-height-16"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px">
+      <div style="padding: 8px; width: 600px">
+        <div class="mypage-details">
+          <div
+            style="
+              text-align: center;
+              padding: 8px;
+            "
+          >
+            <h2>예약리스트</h2>
+          </div>
+          
+          <div class="role-selection">
+	        <div
+	          id="normal-user"
+	          class="toggle-option selected"
+	          onclick="toggleSwitch('left')"
+	        >
+	          진료대기
+	        </div>
+	        <div
+	          id="medical-user"
+	          class="toggle-option"
+	          onclick="toggleSwitch('right')"
+	        >
+	          진료완료
+	        </div>
+     	 </div>
+      
+      	<div style="font-size:20px; font-weight:bold;"><a th:text="|${clinic.clinicName}|"></a>&nbsp;&nbsp;
+      	<a th:text="|${clinic.clinicDoctor}의사|"></a></div><br/>
+          
+          <!-- <div id="nomedical" style="display:none;"> -->
+				<div class="entry-content">
+						<table class="table1">
+							<colgroup>
+								<col style="width: 7%" />
+								<col style="width: 10%" />
+								<col style="width: 15%" />
+								<col style="width: 10%" />
+								<col style="width: 15%" />
+								<col style="width: 15%" />
+							</colgroup>
+							<thead>
+								<tr id="untactBtn" >
+									<th>번호</th>
+									<th>환자이름</th>
+									<th>증상</th>
+									<th>진료상태</th>
+									<th>예약시간</th>
+									<th>진료실 입장하기</th>
+								</tr>
+							</thead>
+							<tbody > 
+								<tr id="untactBtn1"  th:each="list : ${list}" th:if="${list.reservationFlag == 'U'} and ${list.status == '예약확정'} and ${list.status != '예약확인'}" >
+									<td th:text="${list.reservationSeq}"></td>
+									<td th:text="${list.userName}"></td>
+									<td th:text="${list.reservationSymptom}"></td>
+									<td>진료대기중</td>
+									<td th:text="|${list.reservationDate}&nbsp;&nbsp;${list.reservationTime}|"></td>
+									<td>
+									<a style="color:royalblue; font-weight: bold; cursor:pointer;"
+									th:onclick="|location.href='@{room-page(reservationSeq=${list.reservationSeq})}'|"
+									>입장하기</a></td>
+								</tr>
+								
+								<!-- <tr th:if="${list.status == '예약확인'} and ${list.status == '진료대기'}">진료목록이 없습니다.</tr> -->
+							</tbody>
+						</table>
+						
+						 <table class="table2" id="table2"  style="align-content: center">
+						    <colgroup>
+						        <col style="width: 7%" />
+						        <col style="width: 10%" />
+						        <col style="width: 15%" />
+						        <col style="width: 10%" />
+						        <col style="width: 15%" />
+						        <col style="width: 15%" />
+						    </colgroup>
+						    <thead>
+						        <tr>
+						            <th>번호</th>
+						            <th>환자이름</th>
+						            <th>증상</th>
+						            <th>예약시간</th>
+						            <th>진료상태</th>
+						            <th>처방전 교부</th>
+						        </tr>
+						    </thead>
+						    <tbody> 
+						        <tr th:each="item : ${list}" th:if="${item.status == '처방완료'} or  ${item.status == '결제완료'}">
+						            <td th:text="${item.reservationSeq}"></td>
+						            <td th:text="${item.userName}"></td>
+						            <td th:text="${item.reservationSymptom}"></td>
+						            <td th:text="|${item.reservationDate}&nbsp;&nbsp;${item.reservationTime}|"></td>
+						            <td th:text="${item.status}"></td>
+									<td>                                    
+									    <a style="color:royalblue; font-weight: bold; cursor:pointer;"
+									       th:if="${item.status == '처방완료'}">
+									        작성 완료
+									    </a>
+									    <a style="color:royalblue; font-weight: bold; cursor:pointer;"
+									       th:if="${item.status == '결제완료'}"
+									       th:onclick="|location.href='@{prescription(reservationSeq=${item.reservationSeq})}'|">
+									        처방전 작성
+									    </a>
+									</td>
+						        </tr>
+						    </tbody>
+						</table> 
+				</div>
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+      </div>
+    </div>
+  </div>
+</html>

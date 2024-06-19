@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http//www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+    <title>진료내역 상세페이지</title>
+    <style>
+      .medical-history-container {
+        max-width: 768px;
+        margin: auto;
+      }
+
+      .silver-hr {
+        width: 100%;
+        height: 1px;
+        background: #a9aeb1;
+        margin: 12px 0;
+        opacity: 0.4;
+      }
+
+      .silver-hr-block {
+        width: 100%;
+        height: 20px;
+        background: #a9aeb1;
+        opacity: 0.2;
+      }
+
+      .silver-hr-inline {
+        width: 10px;
+        background: #a9aeb1;
+        opacity: 0.2;
+      }
+
+      .silver-hr-inline-short {
+        width: 2px;
+        background: #a9aeb1;
+        opacity: 0.2;
+      }
+
+      p {
+        font-weight: 500;
+        padding: 4px 0px;
+        font-size: 14px;
+      }
+
+      .profileImg-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #bdbdbd;
+      }
+
+      .profileImg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .medical-history-info {
+        padding: 16px;
+        border-top: 2px solid rgb(247, 249, 250);
+        border-bottom: 2px solid rgb(247, 249, 250);
+        border-left: 10px solid rgb(247, 249, 250);
+        border-right: 10px solid rgb(247, 249, 250);
+        margin: 0px 8px;
+      }
+
+      h5 {
+        margin: 0;
+      }
+
+      .doctor-info-box {
+        padding: 16px;
+      }
+
+      .doctor-name {
+        font-weight: 600;
+      }
+
+      .clinic-name {
+        color: rgb(141, 146, 151);
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .diagnosis-date {
+        color: rgb(141, 146, 151);
+        font-size: 14px;
+      }
+
+      .review-btn {
+        padding: 4px 12px;
+        border: 1px solid royalblue;
+        color: royalblue;
+        font-size: 14px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .advice {
+        border-radius: 8px;
+        background-color: rgb(247, 249, 250);
+        padding: 8px 16px;
+        font-size: 14px;
+        color: #212529;
+      }
+    </style>
+    <script>
+      function goDownload(seq){
+    	  location.href = "/prescriptionDetail?reservationSeq="+seq+"&download=Y";
+      }
+    </script>
+  </head>
+  
+  <th:block th:if="${!#lists.isEmpty(list)}">
+  <div layout:fragment="content" class="medical-history-container d-flex">
+    <div class="silver-hr-inline-short"></div>
+    <div class="d-flex justify-content-between" style="gap: 32px">
+      <div style="padding: 8px 0px; width: 800px">
+        <div class="medical-history-details">
+          <div class="spacing-height-16"></div>
+          <div
+            class="d-flex justify-content-center align-items-center"
+            style="position: relative; font-weight: 700"
+          >
+            <h2>진료 내역</h2>
+          </div>
+          <div
+            class="d-flex align-items-center doctor-info-box"
+            style="gap: 16px"
+          >
+            <div class="profileImg-box" style="background: #bdbdbd">
+              <img
+                class="profileImg"
+                th:src="@{/image/mypageNull.png}"
+              />
+            </div>
+            <div class="doctor-info d-flex" style="flex-direction: column">
+              <div class="doctor-name" ><h5 th:text="${contactLog.clinicDoctor}"></h5></div>
+              <div class="clinic-name" th:text="${contactLog.clinicName}">소망소아과의원</div>
+              <div class="diagnosis-date" th:text="|진료일시 ${contactLog.contactDate}|"></div>
+            </div>
+
+            <!-- 민지 -->
+            <div class="review-btn" style="width:100px; margin-left: 370px; text-align : center;" th:if="${contactLog.reservationStatus == '처방완료'}">
+              <div th:onclick="|goDownload('${contactLog.reservationSeq}')|">
+                처방전 다운로드
+              </div>
+            </div>
+
+          </div>
+          <div class="medical-history-info">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 style="margin-bottom: 0">진료</h4>
+              </div>
+              
+              
+              <div
+                class="review-btn"
+                th:onclick="|location.href='@{review-page(contactSeq=${contactLog.contactSeq})}'|"
+                th:if="${reviewSeq == 0}"
+              >
+                리뷰작성
+              </div>
+              
+            
+               <div
+                class="review-btn"
+                style="	color: rgb(141, 146, 151);
+    					background: rgb(247, 249, 250);
+    					border: 1px solid;
+    					pointer-events: none;
+    					"
+    			th:if="${reviewSeq != 0}"
+              >
+                작성완료
+              </div>
+             
+              
+            </div>
+            <div class="spacing-height-8"></div>
+            <div style="color: rgb(141, 146, 151)">
+              <div><p style="padding: 0">진료번호</p></div>
+              <div><p style="padding: 0" th:text="${contactLog.contactSeq}"></p></div>
+            </div>
+            <div class="spacing-height-16"></div>
+            <div style="font-weight: 600">
+              증상
+              <span style="font-size: 14px; color: rgb(141, 146, 151)"
+                >(본인)</span
+              >
+            </div>
+            <div style="color: rgb(141, 146, 151)">
+              <p th:text="${contactLog.reservationSymptom}">
+                
+              </p>
+            </div>
+            <div class="spacing-height-16"></div>
+            <div style="font-weight: 600; padding-bottom: 8px">간편 조언</div>
+            <div>
+              <div
+                class="advice d-flex justify-content-between align-items-center"
+              >
+                <div>&nbsp;&nbsp;
+                  <a th:text="${contactLog.advice}"></a>
+                </div>
+                <div>4일</div>
+              </div>
+            </div>
+            <div class="spacing-height-16"></div>
+            <div>
+              <div style="font-weight: 500">진료비</div>
+              <div><h5>5,500원</h5></div>
+              <div style="color: rgb(141, 146, 151)">
+                <p style="padding: 8px 0px 0px 0px" >
+                </p>
+              </div>
+              <div style="color: rgb(141, 146, 151)">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spacing-height-16"></div>
+        <div class="spacing-height-16"></div>
+      </div>
+    </div>
+    <div class="silver-hr-inline-short"></div>
+  </div>
+
+</th:block>
+
+</html>

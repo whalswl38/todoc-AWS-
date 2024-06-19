@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html xmlns:th="http//www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/layout}">
+<head>
+    <title>증상 선택</title>
+    <style>
+        .select-item-container {
+            max-width: 768px;
+            margin: auto;
+            width: 100%;
+        }
+
+        #lnb-container {
+            width: 124px;
+        }
+
+        #lnb-container a:not(.lnb-active) {
+            color: black;
+            font-size: 18px;
+        }
+
+        #pagingBox {
+            width: 100%;
+            font-size: 18px;
+            gap: 20px;
+            font-weight: 500;
+        }
+
+        #pagingBox div {
+            cursor: pointer;
+        }
+
+        .paging-active {
+            color: green;
+            opacity: 0.8;
+            font-weight: 700;
+        }
+        
+        .lnb-active {
+            color: royalblue;
+            font-size: 18px;
+        }
+
+        .lnb-item {
+            padding: 8px;
+        }
+
+        .row {
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 0px 8px;
+        }
+
+        .filter-sort {
+            background-color: rgb(247, 249, 250);
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: rgb(141, 146, 151);
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .filter-box,
+        .filter-location {
+            background-color: rgb(247, 249, 250);
+            border-radius: 16px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: rgb(141, 146, 151);
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .clicked-background {
+            color: royalblue;
+            background-color: #e5f4ff;
+            ;
+            border: 1px solid royalblue;
+        }
+
+        .clicked-filter-background {
+            color: royalblue;
+            background-color: #e5f4ff;
+            ;
+            border: 1px solid royalblue;
+            position: relative;
+        }
+
+        .card-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .card-image-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .clinicItem {
+            padding: 4px 6px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 13px;
+            margin-right: 4px;
+        }
+
+        .filter-cnts-style {
+            position: absolute;
+            top: -6px;
+            right: 0px;
+        }
+
+        /* 아래에서 위로 애니메이션 */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, 100%, 0);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateZ(0);
+            }
+        }
+
+        .fade-up {
+            /* 속도 조절 */
+            animation: fadeInUp 0.3s;
+        }
+
+        .sort-box {
+            font-size: 18px;
+            font-weight: 500;
+            padding: 16px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            max-height: 400px;
+        }
+        
+         .page_wrap {
+		   text-align:center;
+		   font-size:0;
+		 }
+		.page_nation {
+		   display:inline-block;
+		}
+		.page_nation .none {
+		   display:none;
+		}
+		.page_nation a {
+		   display:block;
+		   margin:0 3px;
+		   float:left;
+		   border:1px solid #e6e6e6;
+		   width:28px;
+		   height:28px;
+		   line-height:28px;
+		   text-align:center;
+		   background-color:#fff;
+		   font-size:13px;
+		   color:#999999;
+		   text-decoration:none;
+		}
+		.page_nation .arrow {
+		   border:1px solid #ccc;
+		}
+		.page_nation .pprev {
+		   margin-left:0;
+		}
+		.page_nation .prev {
+		   margin-right:7px;
+		}
+		.page_nation .next {
+		   margin-left:7px;
+		}
+		.page_nation .nnext {
+		   margin-right:0;
+		}
+		.page_nation a.active {
+		   background-color:#42454c;
+		   color:#fff;
+		   border:1px solid #42454c;
+		}
+		
+		.map_wrap {position:relative;width:100%;height:350px;}
+	    .title {font-weight:bold;display:block;}
+	    .hAddr {position:absolute;left:10px;top:10px;border-radius: 2px;background:#fff;background:rgba(255,255,255,0.8);z-index:1;padding:5px;}
+	    #centerAddr {display:block;margin-top:2px;font-weight: normal;}
+	    .bAddr {padding:5px;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+    </style>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=db49e5d8b07a8b328167f31f905596dc&libraries=services"></script>
+	<script type="text/javascript">
+        $(document).ready(function() {
+            $(".filter-box").click(function() {
+                $(this).toggleClass("clicked-background");
+                const count = $(".clicked-background").length;
+                if (count > 0) {
+                    $("#filter-cnt").addClass("clicked-filter-background");
+                    $(".filter-cnts").remove();
+                    let span = document.createElement("div");
+                    span.classList.add("filter-cnts-style");
+                    span.innerHTML = `<span class="filter-cnts" style="border-radius: 50%; font-size: 8px;background: red; color: #fff; padding: 2px 4px;">${count}</span>`;
+                    $("#filter-cnt")[0].appendChild(span);
+                } else {
+                    $("#filter-cnt").removeClass("clicked-filter-background");
+                    $(".filter-cnts").remove();
+                }
+            });
+            
+            $(".paging").click(function() {
+                $(".paging-active").removeClass("paging-active");
+                $(this).addClass("paging-active");
+            });
+            
+        });
+
+        function goToDetail(clinicInstinum) {
+            window.location.href = "/select-clinic-detail-page?clinicInstinum=" + clinicInstinum;
+        }
+
+        function setSort(sort) {
+            $("#sort").removeClass("clicked-background");
+            var sortType;
+			var status;
+			var curPage;
+			var location;
+			var searchWord;
+			var subject;
+			var symptom;
+            
+           if($("#location").hasClass("clicked-background")){
+               location = $("#location-text").text();
+           }else{
+        	   location = "";
+           }
+           
+           if($("#ing").hasClass("clicked-background")){
+        	   status = "Y";
+           }else{
+        	   status = "";
+           }
+      
+            
+            if (sort != null && sort != "") {
+                $("#sort-text").text(sort);
+                $("#sort").addClass("clicked-background");
+                if (sort === "평점 높은 순") {
+                    sortType = "grade"; 
+                } else if (sort === "리뷰 많은 순") {
+                    sortType = "review"; 
+                } else {
+                    sortType = ""; 
+                }
+                
+                curPage = $("#curPage").val();
+
+    			searchWord = $("#searchWord").val();
+    			subject = $("#subject").val();
+    			symptom = $("#symptom").val();
+                $.ajax({
+                    type: "GET",
+                    url: "/select-clinic-page",
+                    data: {
+                    	location : location,
+    					sortType : sortType,
+    					status   : status,
+    					curPage  : curPage,
+    					subject  : subject,
+    					symptom  : symptom
+                    }, 
+                    success: function(data) { 
+                        var newContent = $(data).find("#root").html();
+                        $('#root').html(newContent);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('오류 발생');
+                    }
+                });
+                $("#sortType").val(sortType);
+            } else {
+                $("#sort-text").text("가까운 순");
+                $("#sort").addClass("clicked-background");
+                sortType = ""; 
+                $("#sortType").val(sortType); 
+            }
+        }
+/*         function setSort(sortType) {
+            // 선택한 정렬 방식을 폼 필드에 설정합니다.
+            document.getElementById("sortType").value = sortType;
+
+            // 폼을 서버로 제출합니다.
+            document.getElementById("sortForm").submit();
+
+            // 모달을 닫습니다.
+            $('#sortModal').modal('hide');
+        } */
+
+        function setStatus(){
+        	var sortType;
+			var status;
+			var curPage;
+			var location;
+			var searchWord;
+			var subject;
+			var symptom;
+        	
+            // 정렬방식 세팅
+            if($("#sort").hasClass("clicked-background")){
+        		if ($("#sort-text").text() === "평점 높은 순") {
+                    sortType = "grade"; 
+                } else if ($("#sort-text").text() === "리뷰 많은 순") {
+                    sortType = "review"; 
+                } else {
+                    sortType = ""; 
+                }
+        	}else{
+        		sortType = "";
+        	}
+        	// 같이 던질 로케이션 값 세팅
+        	if($("#location").hasClass("clicked-background")){
+               	 location = $("#location-text").text();
+               }else{
+            	   location = "";
+               }
+               
+        	//진료중 값 세팅 빈값이면 검색안하게끔
+        	if($("#ing").hasClass("clicked-background")){
+                status = "";
+        	}else{
+                status = "Y";
+        	}
+      
+        	curPage = $("#curPage").val();
+        	searchWord = $("#searchWord").val();
+			subject = $("#subject").val();
+			symptom = $("#symptom").val();
+			
+		$.ajax({
+				type : "GET",
+				url : "/select-clinic-page",
+				data : {
+					location : location,
+					sortType : sortType,
+					status   : status,
+					curPage  : curPage,
+					subject  : subject,
+					symptom  : symptom
+				},
+				success : function(data) {
+					var newContent = $(data).find("#root").html();
+					$('#root').html(newContent);
+				},
+				error : function(xhr, status, error) {
+					console.error('오류 발생');
+				}
+			});
+		}
+
+		function setLocation(location) {
+			var sortType;
+			var status;
+			var curPage;
+			var searchWord;
+			var subject;
+			var symptom;
+
+			if ($("#sort").hasClass("clicked-background")) {
+				if ($("#sort-text").text() === "평점 높은 순") {
+					sortType = "grade";
+				} else if ($("#sort-text").text() === "리뷰 많은 순") {
+					sortType = "review";
+				} else {
+					sortType = "";
+				}
+			} else {
+				sortType = "";
+			}
+			if ($("#ing").hasClass("clicked-background")) {
+				status = "Y";
+			} else {
+				status = "";
+			}
+
+			$("#location").removeClass("clicked-background");
+			if (location != null && location != "") {
+				$("#location-text").text(location);
+				$("#location").addClass("clicked-background");
+			} else {
+				// 특정 태그에 kakao 맵으로 받아온 주소 저장해서 보내기
+				locaArr = $("#centerAddr").text().split(' ');
+				location = locaArr[0] + " " + locaArr[1];
+				$("#location-text").text(location);
+				$("#location").addClass("clicked-background");
+			}
+			curPage = $("#curPage").val();
+			searchWord = $("#searchWord").val();
+			subject = $("#subject").val();
+			symptom = $("#symptom").val();
+			$.ajax({
+				type : "GET",
+				url : "/select-clinic-page",
+				data : {
+					location : location,
+					sortType : sortType,
+					status   : status,
+					curPage  : curPage,
+					subject  : subject,
+					symptom  : symptom
+				},
+				success : function(data) {
+					var newContent = $(data).find("#root").html();
+					$('#root').html(newContent);
+				},
+				error : function(xhr, status, error) {
+					console.error('오류 발생');
+				}
+			});
+		}
+
+		function setCurPage(data) {
+			var sortType;
+			var status;
+			var curPage;
+			var location;
+			var searchWord;
+			var subject;
+			var symptom;
+			
+			//평점/리뷰순세팅
+			if ($("#sort").hasClass("clicked-background")) {
+				if ($("#sort-text").text() === "평점 높은 순") {
+					sortType = "grade";
+				} else if ($("#sort-text").text() === "리뷰 많은 순") {
+					sortType = "review";
+				} else {
+					sortType = "";
+				}
+			} else {
+				sortType = "";
+			}
+			
+			//진료중세팅
+			if ($("#ing").hasClass("clicked-background")) {
+				status = "Y";
+			} else {
+				status = "";
+			}
+			
+			//위치
+			if ($("#location").hasClass("clicked-background")) {
+				location = $("#location-text").text();
+			} else {
+				location = "";
+			}
+			
+			
+			curPage = data;
+			$("#curPage").val(data);
+
+			searchWord = $("#searchWord").val();
+			subject = $("#subject").val();
+			symptom = $("#symptom").val();
+/* 			alert("sortType=" + sortType + " status=" + status + " location="+ location + " curPage=" + curPage + " searchWord="
+					+ searchWord+" subject="+subject + " symptom="+symptom); */
+			$.ajax({
+				type : "GET",
+				url : "/select-clinic-page",
+				data : {
+					location : location,
+					sortType : sortType,
+					status   : status,
+					curPage  : curPage,
+					subject  : subject,
+					symptom  : symptom
+				},
+				success : function(data) {
+					var newContent = $(data).find("#root").html();
+					$('#root').html(newContent);
+				},
+				error : function(xhr, status, error) {
+					console.error('오류 발생');
+				}
+			});
+			//$("#searchWord").submit();
+		}
+	</script>
+</head>
+<body>
+    <div layout:fragment="content" class="select-item-container">
+        <div class="spacing-height-16"></div>
+        <div class="d-flex justify-content-between" style="gap: 32px">
+            <div id="lnb-container">
+                <ul class="lnb flex-column">
+                    <li class="lnb-item">
+                        <a class="lnb-link" aria-current="page" th:href="@{/select-subject-page}">병원찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link" th:href="@{/select-item-page}">증상찾기</a>
+                    </li>
+                    <li class="lnb-item">
+                        <a class="lnb-link lnb-active" th:href="@{/select-clinic-page}">병원 리스트</a>
+                    </li>
+                </ul>
+            </div>
+            <div style="padding: 8px; width: 100%">
+                <div>
+                    <div class="">
+                        <div class="d-flex" style="gap: 16px">
+                            <button class="" style="border: 0; background-color: #fff">
+                                <div width="24" class="">
+                                    <span class="" size="24" color="#1C1D1F"><i class="fa-solid fa-chevron-left" style="font-size: 24px"></i></span>
+                                </div>
+                            </button>
+                            <div class="" style="position: relative; width: 100%">
+                                <form id="searchWord" action="/select-clinic-page" method="get">
+                                    <input id="searchWord" tabindex="0" placeholder="증상, 질병, 병원을 검색해보세요" name="searchWord" th:value="${searchWord}" style="background-color: rgb(247, 249, 250); height: 28px; border: 0px; border-radius: 16px; padding: 8px 8px 8px 16px; width: calc(100% - 16px);"/>
+                                    <div class="" style="position: absolute; top: 4px; right: 0px">
+                                        <button type="submit" class="" style="padding: 4px; border: 0; background-color: transparent; color: rgb(141, 146, 151);">
+                                            <div width="24" class="">
+                                                <span class="" size="24" color="#565C65"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="curPage" name="curPage" th:value="${paging.curPage}">                     
+                                    <input type="hidden" id="sortType" name="sortType" th:value="${sortType}">
+                                    <input type="hidden" id="subject" name="subject" th:value="${clinicSubject}">
+                                    <input type="hidden" id="symptom" name="symptom" th:value="${clinicSymptom}">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spacing-height-16"></div>
+                    <div class="d-flex" style="gap: 8px">
+                        <div id="filter-cnt" class="filter-sort">
+                            <i class="fa-solid fa-bars"></i>
+                        </div>
+                        <div style="height: 28px; width: 1px; background: silver; margin-top: 4px;"></div>
+                        <div id="sort" class="filter-sort" data-bs-toggle="modal" data-bs-target="#sortModal">
+                            <span id="sort-text">평점 높은 순</span> &nbsp;<i class="fa-solid fa-chevron-down" style="font-size: 10px"></i>
+                        </div>
+
+                        <div id="location" class="filter-location" data-bs-toggle="modal" data-bs-target="#locationModal">
+                            <i class="fa-solid fa-location-crosshairs" style="font-size: 12px"></i>
+                            <span id="location-text">현재 내 위치</span>
+                        </div>
+                        <div id="ing" class="filter-box" th:onclick="setStatus();">진료중</div>
+                    </div>
+                    <div class="spacing-height-16"></div>
+                    <div class="spacing-height-16"></div>
+                    <div id="root">
+                    	<div th:if="${subject != null}">
+		                    <div class="row" th:each="clinic : ${subject}">
+		                        <div id=sortList  class="col card-box d-flex" th:onclick="goToDetail(this.getAttribute('data-clinicInstinum'))" th:data-clinicInstinum="${clinic.clinicInstinum}" th:data-status="${clinic.clinicStatus}">
+		                            <div style="width: 60%">
+		                                <div class="d-flex align-items-center" style="gap: 8px">
+		                                    <div class="" style="color: #212529; font-size: 20px; font-weight: 500" th:text="${clinic.clinicDoctor}"></div>
+		                                    <input type="hidden" id="clinicInstinumm" name="clinicInstinumm" th:value="${clinic.clinicInstinum}">
+		                                    <div class="" style="color: rgb(141, 146, 151)" th:text="${clinic.clinicName}"></div>
+		                                </div>
+		                                <div class="row" style="margin-bottom: 4px">
+		                                    <div class="col" style="padding-left: 4px">
+		                                        <span><i class="fa-solid fa-star" style="color: #ffd43b"></i></span>
+		                                        <span th:text="${clinic.reviewGrade}"></span><span style="color: rgb(141, 146, 151)">(</span><span th:text="${clinic.reviewSeq}" style="color: rgb(141, 146, 151)"></span><span style="color: rgb(141, 146, 151)">)</span>
+		                                    </div>
+		                                </div>
+		                                <div class="d-flex" style="gap: 8px; margin-bottom: 4px">
+		                                    <div th:if="${clinic.clinicStatus == 'Y'}" style="color: green">진료중</div>
+		                                    <div th:if="${clinic.clinicStatus == 'N'}" style="color: rgb(128, 128, 128)">진료종료</div>
+		                                    <div style="height: 13px; width: 1px; background: silver; margin-top: 5px;"></div>
+		                                    <div th:text="${clinic.clinicTime}" style="color: rgb(141, 146, 151)"></div>
+		                                </div>
+		                                <div>
+		                                    <span class="clinicItem" style="color: rgb(169, 174, 177); background-color: rgb(245, 246, 247);">영상진료</span>
+		                                </div>
+		                            </div>
+		                            <div class="card-image-box" style="background: #bdbdbd">
+		                            	<!--  서버에서 수정할 것-->
+		                                <img class="card-image" th:src="@{${clinic.fileOrgName} != null} ? @{/upload/clinicFolder/__${clinic.fileOrgName}__} : @{/image/nullprofile.jpg}" />
+		                            </div>
+		                        </div>
+		                        <div style="width: calc(100% - 30px); height: 1px; background: rgb(169, 174, 177); margin: 12px 0px; opacity: 0.4;"></div>
+		                    </div>
+	                    </div>
+	                    
+                  		<div class="row" th:if="${subject == ''}">
+						    <p>해당하는 병원이 없습니다.</p>
+						</div>
+						
+						 <div class="page_wrap">
+						     <div class="page_nation">
+							     <th:block th:if="${paging != null}">
+									<th:block th:if="${paging.prevBlockPage gt 0}">
+							         	<a class="arrow prev" href="javascript:void(0)" th:onclick="fn_list(${paging.prevBlockPage})"><span class="material-symbols-outlined">chevron_left</span></a>
+							         </th:block>
+							         <th:block th:each="i : ${#numbers.sequence(paging.startPage, paging.endPage)}">
+							         	<th:block th:if="${i != curPage}">
+							         		<a class="" th:onclick="'setCurPage(' + ${i} + ')'" href="javascript:void(0)" th:text="${i}"></a>
+							         	</th:block>
+							         	<th:block th:if="${i == curPage}"> 
+											<a class="active" href="javascript:void(0)" style="cursor:default;" th:text="${i}"></a>
+							         	</th:block>
+							     	</th:block>
+							     </th:block>
+						     </div>
+						 </div>
+				   </div>
+                </div>
+                <div class="spacing-height-16"></div>
+                <div class="spacing-height-16"></div>
+            </div>
+        </div>
+        <!-- 정렬 모달 -->
+        <div class="modal fade-up" id="sortModal" tabindex="-1" aria-labelledby="sortModalLabel" aria-hidden="true">
+            <div class="modal-dialog fixed-bottom">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="sortModalLabel">어떤 기준으로 정렬할까요?</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="sort-box" onclick="setSort('평점 높은 순')" data-bs-dismiss="modal">
+                            평점 높은 순
+                        </div>
+                        <div class="sort-box" onclick="setSort('리뷰 많은 순')" data-bs-dismiss="modal">
+                            리뷰 많은 순
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<!-- 위치 모달 -->
+        <div class="modal fade-up" id="locationModal" tabindex="-1" aria-labelledby="sortModalLabel" aria-hidden="true">
+            <div class="modal-dialog fixed-bottom">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="sortModalLabel">위치 선택
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="sort-box" onclick="setLocation()" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-location-crosshairs" style="font-size: 12px"></i>
+                            현재 내 위치
+                        </div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 강남구')" data-bs-dismiss="modal">서울특별시 강남구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 강동구')" data-bs-dismiss="modal">서울특별시 강동구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 강북구')" data-bs-dismiss="modal">서울특별시 강북구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 강서구')" data-bs-dismiss="modal">서울특별시 강서구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 관악구')" data-bs-dismiss="modal">서울특별시 관악구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 광진구')" data-bs-dismiss="modal">서울특별시 광진구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 구로구')" data-bs-dismiss="modal">서울특별시 구로구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 금천구')" data-bs-dismiss="modal">서울특별시 금천구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 노원구')" data-bs-dismiss="modal">서울특별시 노원구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 도봉구')" data-bs-dismiss="modal">서울특별시 도봉구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 동대문구')" data-bs-dismiss="modal">서울특별시 동대문구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 동작구')" data-bs-dismiss="modal">서울특별시 동작구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 마포구')" data-bs-dismiss="modal">서울특별시 마포구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 서대문구')" data-bs-dismiss="modal">서울특별시 서대문구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 서초구')" data-bs-dismiss="modal">서울특별시 서초구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 성동구')" data-bs-dismiss="modal">서울특별시 성동구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 성북구')" data-bs-dismiss="modal">서울특별시 성북구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 송파구')" data-bs-dismiss="modal">서울특별시 송파구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 양천구')" data-bs-dismiss="modal">서울특별시 양천구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 영등포구')" data-bs-dismiss="modal">서울특별시 영등포구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 용산구')" data-bs-dismiss="modal">서울특별시 용산구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 은평구')" data-bs-dismiss="modal">서울특별시 은평구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 종로구')" data-bs-dismiss="modal">서울특별시 종로구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 중구')" data-bs-dismiss="modal">서울특별시 중구</div>
+                        <div class="sort-box" onclick="setLocation('서울특별시 중랑구')" data-bs-dismiss="modal">서울특별시 중랑구</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+		<div class="map_wrap" style="display:none">
+		    <div id="map" style="width:100%;height:100%;position:relative;overflow:hidden;"></div>
+		    <div class="hAddr">
+		        <span class="title">지도중심기준 행정동 주소정보</span>
+		        <span id="centerAddr"></span>
+		    </div>
+		</div>		
+		<script type="text/javascript">
+        var map, locPosition;
+
+        // HTML5의 geolocation을 사용할 수 있는지 확인합니다
+        if (navigator.geolocation) {
+            // GeoLocation을 이용해서 접속 위치를 얻어옵니다
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude, // 위도
+                    lon = position.coords.longitude; // 경도
+
+                locPosition = new kakao.maps.LatLng(lat, lon);
+                createMap(locPosition);
+            }, function(error) {
+                // Geolocation API 사용에 실패한 경우
+                console.error("Geolocation failed:", error);
+                locPosition = new kakao.maps.LatLng(33.450701, 126.570667); // default location
+                createMap(locPosition);
+            });
+        } else {
+            // HTML5의 GeoLocation을 사용할 수 없을 때
+            locPosition = new kakao.maps.LatLng(33.450701, 126.570667); // default location
+            createMap(locPosition);
+        }
+
+        function createMap(centerPosition) {
+            var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+                mapOption = {
+                    center: centerPosition, // 지도의 중심좌표
+                    level: 3 // 지도의 확대 레벨
+                };
+
+            // 지도를 생성합니다
+            map = new kakao.maps.Map(mapContainer, mapOption);
+
+            // 주소-좌표 변환 객체를 생성합니다
+            var geocoder = new kakao.maps.services.Geocoder();
+
+            var marker = new kakao.maps.Marker(), // 클릭한 위치를 표시할 마커입니다
+                infowindow = new kakao.maps.InfoWindow({zindex:1}); // 클릭한 위치에 대한 주소를 표시할 인포윈도우입니다
+
+            // 현재 지도 중심좌표로 주소를 검색해서 지도 좌측 상단에 표시합니다
+            searchAddrFromCoords(map.getCenter(), displayCenterInfo);
+
+            // 지도를 클릭했을 때 클릭 위치 좌표에 대한 주소정보를 표시하도록 이벤트를 등록합니다
+            kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+                searchDetailAddrFromCoords(mouseEvent.latLng, function(result, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        var detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
+                        detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
+
+                        var content = '<div class="bAddr">' +
+                                      '<span class="title">법정동 주소정보</span>' +
+                                      detailAddr +
+                                      '</div>';
+
+                        // 마커를 클릭한 위치에 표시합니다
+                        marker.setPosition(mouseEvent.latLng);
+                        marker.setMap(map);
+
+                        // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
+                        infowindow.setContent(content);
+                        infowindow.open(map, marker);
+                    }
+                });
+            });
+
+            // 중심 좌표나 확대 수준이 변경됐을 때 지도 중심 좌표에 대한 주소 정보를 표시하도록 이벤트를 등록합니다
+            kakao.maps.event.addListener(map, 'idle', function() {
+                searchAddrFromCoords(map.getCenter(), displayCenterInfo);
+            });
+
+            function searchAddrFromCoords(coords, callback) {
+                // 좌표로 행정동 주소 정보를 요청합니다
+                geocoder.coord2RegionCode(coords.getLng(), coords.getLat(), callback);
+            }
+
+            function searchDetailAddrFromCoords(coords, callback) {
+                // 좌표로 법정동 상세 주소 정보를 요청합니다
+                geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+            }
+
+            // 지도 좌측상단에 지도 중심좌표에 대한 주소정보를 표출하는 함수입니다
+            function displayCenterInfo(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    var infoDiv = document.getElementById('centerAddr');
+
+                    for (var i = 0; i < result.length; i++) {
+                        // 행정동의 region_type 값은 'H' 이므로
+                        if (result[i].region_type === 'H') {
+                            infoDiv.innerHTML = result[i].address_name;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+	</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Dongle&display=swap" rel="stylesheet">
+	
+    <title>Custom Header Example</title>
+    <style>
+        @font-face {
+       font-family: 'GmarketSansMedium';
+       src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+       font-weight: normal;
+       font-style: normal;
+      }
+	  .dongle-regular {
+	    font-family: "Dongle", sans-serif;
+	    font-weight: 400;
+	    font-style: normal;
+	  }
+
+   </style>
+  </head>
+  <body>
+    <header th:fragment="header">
+      <div class="header-content">
+        <div class="logo">
+          <div style="font-size: 30px; font-weight: 600;">
+            <a class="font-face" th:href="@{/main-page}">토닥토닥</a>
+          </div>
+        </div>
+        <nav class="navigation">
+          <ul>
+            <li>
+              <a th:href="@{/select-clinic-page}">비대면 진료</a>
+            </li>
+            <li>
+              <a th:href="@{/clinic-contact-subject-page}">대면 진료</a>
+            </li>
+            <li>
+              <a th:href="@{/megazine-list-page}">건강매거진</a>
+            </li>
+			<li>
+			  <a th:href="@{/nutrients-list-page}">맞춤영양제</a>
+			</li>
+            <!-- <li sec:authorize="isAuthenticated()">
+              <a href="/profile" th:href="@{/profile}">Profile</a>
+            </li>-->
+            <li sec:authorize="hasAuthority('ROLE_ADMIN')">
+              <a href="/admin" th:href="@{/admin}">관리자페이지</a>
+            </li>
+          <li sec:authorize="hasAuthority('ROLE_MEDICAL')">
+              <a href="/medical" th:href="@{/medical-mypage}">마이페이지</a>
+            </li>
+           <li sec:authorize="hasAuthority('ROLE_USER')">
+              <a href="/user" th:href="@{/mypage-page}">마이페이지</a>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+            </li>
+            <!-- <li sec:authorize="hasAuthority('ROLE_ADMIN')">
+              <a href="/admin" th:href="@{/admin}">Admin</a>
+            </li> -->
+
+            
+            <li sec:authorize="isAuthenticated()">
+              <a href="/user" th:href="@{/logout}">로그아웃</a>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+              <a href="../login/login.html" th:href="@{/login-page}">로그인</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+  </body>
+</html>

@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layouts/layout}"
+>
+  <head>
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+      .container {
+        max-width: 768px;
+        margin: auto;
+      }
+      .agreement-group {
+        width: 80%;
+        margin: 0 auto;
+      }
+      .agreement {
+        background: #fff;
+        padding: 0px 4px;
+        border-radius: 5px;
+      }
+      .agreement label {
+        display: block;
+        margin-bottom: 2px;
+      }
+      .register-button {
+        width: 100%;
+        height: 40px;
+        border: none;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        display: block;
+      }
+      .agreement-box{
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .agreement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+      .agreement-label {
+        margin: 0;
+        color: #666;
+
+        span {
+            color: red;
+        }
+      }
+      .agreement-checkbox {
+        margin-right: 10px;
+      }
+      .detail-button {
+        padding: 5px 10px;
+        color: #007bff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .agreement-details {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+      .wide-span{
+        width: 130px;
+        font-weight: 500;
+      }
+      .short-span{
+        width: 100px;
+        font-weight: 500;
+      }
+
+      input::placeholder{
+        font-size: 13px;
+      }
+      .require-background{
+        width: 370px; 
+        gap:32px; 
+        border: 1px solid #dee2e6; 
+        border-radius: 4px;
+      }
+      .require-background-middle{
+        width: calc(100% - 128px);
+        gap:32px; 
+        border: 1px solid #dee2e6; 
+        border-radius: 4px;
+      }
+      .require-background-bottom{
+        width: calc(100% - 158px);
+        gap:32px; 
+        border: 1px solid #dee2e6; 
+        border-radius: 4px;
+      }
+      
+      #regC, #emailC {
+        width: 15%;
+        height: 40px;
+        background: #3296D7;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .diagnosis-subject{
+        border: 1px solid black; 
+        border-radius: 4px; 
+        padding: 8px; 
+        cursor: pointer; 
+        color: rgb(141, 146, 151);
+      }
+
+      .diagnosis-item{
+        border: 1px solid black; 
+        border-radius: 4px; 
+        padding: 8px; 
+        cursor: pointer; 
+        color: rgb(141, 146, 151);
+      }
+
+      .clicked-background{
+        color: #fff;
+        background-color: #007bff;
+      }
+
+      .timepicker{
+        font-size: 12px;
+        height: 20px;
+        width: 42px;
+      }
+
+      .ui-timepicker { font-size: 12px; width: 80px; }
+      .ui-corner-all, .ui-timepicker-standard{
+        padding: 0;
+      }
+      #clinic-time label{
+        margin-right: 8px;
+      }
+      #clinic-time input[type="checkbox"]{
+        margin-left: 8px;
+        margin-right: 4px;
+      }
+      #error, #typeError, #contactError, #institutionError, #emailError{
+     	 color:red;
+     	 font-size: 12px;
+      }
+
+      .d-flex2{
+    	justify-content: flex-end;
+	}
+	      #fileBtn1, #fileBtn2{
+      	visibility: hidden;
+      }
+    </style>
+  
+      
+     <script th:inline="javascript">
+     /*<![CDATA[*/
+     // 시간 배열 정의
+   
+     var times = [[${times}]]
+     var clinicDay = ["월", "화", "수", "목", "금", "토", "일", "공휴일"];
+	
+     
+     // 각 input 요소에 값을 설정하는 함수
+     function setValues() {
+       // input 요소들의 ID 배열
+       var inputIds = ["time1_start", "time1_end", "time2_start", "time2_end", "time3_start", "time3_end", "time4_start", "time4_end", "time5_start", "time5_end", "time6_start", "time6_end", "time7_start", "time7_end", "time8_start", "time8_end", "break1", "break2"];
+       // 체크박스들의 ID 배열
+       var checkboxIds = ["check1", "check2", "check3", "check4", "check5", "check6", "check7", "check8"];
+
+       // 각 input 요소에 값을 설정하는 루프
+       for (var i = 0; i < times.length; i++) {
+         var inputElement = document.getElementById(inputIds[i * 2]); // 시작 시간 input 요소 가져오기
+         var inputElementEnd = document.getElementById(inputIds[i * 2 + 1]); // 종료 시간 input 요소 가져오기
+         var checkboxElement = document.getElementById(checkboxIds[i]); // 체크박스 가져오기
+		 
+         
+         // 시간이 '휴무'인 경우
+         if (times[i] === "휴무") {
+           checkboxElement.checked = true; // 체크박스 체크
+           inputElement.disabled = true; // 비활성화
+           inputElementEnd.disabled = true; // 종료 시간 input 요소 비활성화
+         } else {
+           // 시간이 '휴무'가 아닌 경우
+           var timeSplit = times[i].split('-'); // 시작 시간과 종료 시간 분리
+           inputElement.value = timeSplit[0]; // 시작 시간 설정
+           inputElementEnd.value = timeSplit[1]; // 종료 시간 설정
+         }
+       }
+     }
+		
+     //페이지가 로드되면 함수 호출하여 값 설정
+     window.onload = setValues;
+     
+     
+      function onClickUpload(){ document.getElementById('fileBtn1').click();  event.preventDefault();}
+      
+      function onClickUpload2(){ document.getElementById('fileBtn2').click();  event.preventDefault();}
+      
+      function readURL(event)
+      {
+    	 var reader = new FileReader();
+    	 
+    	 reader.onload = function(event)
+    	 {
+    		 document.getElementById('preview').src = event.target.result;
+       	 };
+       	 reader.readAsDataURL(event.target.files[0]);
+      }
+      
+      function readURL2(event)
+      {
+    	 var reader = new FileReader();
+    	 
+    	 reader.onload = function(event)
+    	 {
+    		 document.getElementById('preview2').src = event.target.result;
+       	 };
+       	 reader.readAsDataURL(event.target.files[0]);
+      }
+      
+      function div_show(value) // 가입 유형에 따른 화면처리
+      {
+    	  if(value == '약국')
+    	  {
+    		  document.getElementById('weekendNight').style.display = "none";
+    		  document.getElementById('ssubject').style.display = "none";
+    		  document.getElementById('iitem').style.display = "none";
+    		  document.getElementById('clinicImage').style.display = "none";
+    		  document.getElementById('clinicStampImage').style.display = "none";
+    	  }
+    	  else
+    	  {
+    		  document.getElementById('weekendNight').style.display = "";
+    		  document.getElementById('ssubject').style.display = "";
+    		  document.getElementById('iitem').style.display = "";
+    		  document.getElementById('clinicImage').style.display = "";
+    		  document.getElementById('clinicStampImage').style.display = "";
+    	  }
+      }
+    	
+      $(document).ready(function(){
+    	  
+    	 $("#updateBtn").on("click", function(){
+       	  if(confirm('수정하시겠습니까?'))
+    	  {
+    		  var typeVar = document.querySelector('input[name="medicalType"]:checked').value;
+    		  document.getElementById('userType').value = typeVar;
+    		  document.getElementById('contactError').innerHTML = "";
+    		  document.getElementById('typeError').innerHTML = "";
+    		  
+        	  if($.trim($("#userType").val()).length <= 0)
+              {
+        		  document.getElementById('typeError').innerHTML = "가입유형을 선택하셔야합니다.";
+        		  $(window).scrollTop(0);
+        		  return;
+              }
+        	  if($("input[name='contact']").is(":checked"))
+        	  {
+        		  $("#contactType").val("C");
+        	  }
+        	  
+        	  if($("input[name='contact2']").is(":checked"))
+        	  {
+        		  $("#contactType").val("U");
+        	  }
+        	  
+        	  if($.trim($("#contactType").val()).length <= 0)
+              {
+        		  $(window).scrollTop(0);
+        		  document.getElementById('contactError').innerHTML = "진료방식을 선택하셔야합니다.";
+        		  return;
+              }
+        	  
+        	  if($.trim($("#institutionNum").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#institutionNum").focus(); }, 1 );
+        		  return;
+              }
+        	  if($.trim($("#institutionName").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#institutionName").focus(); }, 1 );       		  
+        		  return;
+              }
+        	  if($.trim($("#regNum").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#regNum").focus(); }, 1 );        		  
+        		  return;
+              }
+        	  if($.trim($("#userEmail").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#userEmail").focus(); }, 1 );        		  
+        		  return;
+              }
+        	  if($.trim($("#userPwd").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#userPwd").focus(); }, 1 );        		  
+        		  return;
+              }
+        	  
+        	  
+        	  if($("input[name='nightWeekend']").is(":checked"))
+        	  {
+        		  document.getElementById("night").value = "Y";
+        	  }
+        	  else
+        	  {
+        		  document.getElementById("night").value = "N";
+        	  }
+        	  
+        	  if($("input[name='nightWeekend2']").is(":checked"))
+        	  {
+        		  document.getElementById("weekend").value = "Y";
+        	  }
+        	  else
+        	  {
+        		  document.getElementById("weekend").value = "N";
+        	  }
+        	  
+        	  
+        	  document.getElementById('addr').value = document.getElementById('addr1').value +' '+ document.getElementById('addr2').value;
+        	  
+        	  if($.trim($("#addr").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#addr1").focus(); }, 1 );        		  
+        		  return;
+              }
+        	  
+        	  document.getElementById('breakTime').value = document.getElementById('break1').value +'-'+ document.getElementById('break2').value;
+        	  
+        	  if($.trim($("#addr").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#addr1").focus(); }, 1 );        		  
+        		  return;
+              }
+        	  
+        	  document.getElementById('userPhone').value = document.getElementById('phone1').value +'-'+ document.getElementById('phone2').value +'-'+ document.getElementById('phone3').value;
+
+        	  if($.trim($("#userPhone").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#phone1").focus(); }, 1 );        		  
+        		  return;
+              }
+        	  
+        	  var areaCode = document.querySelector('.form-select').value; // 지역번호 가져오기
+        	  var partOne = document.getElementById('fax2').value;
+       		  var partTwo = document.getElementById('fax3').value;
+        	  var fullFaxNumber = `${areaCode}-${partOne}-${partTwo}`;
+        	    
+        	  document.getElementById('faxNum').value = fullFaxNumber;
+ 
+              // 전체 팩스 번호를 형식에 맞게 결합
+      	      var fullFaxNumber = `${areaCode}-${partOne}-${partTwo}`;
+        	  document.getElementById('faxNum').value = fullFaxNumber;
+        	  
+        	  if($.trim($("#userName").val()).length <= 0)
+              {
+        		  setTimeout( function(){ $("#userName").focus(); }, 1 );        		  
+        		  return;
+              }
+        	    
+        	  if($("#agree2").is(':checked') == false)
+        	  {
+        		  alert("개인정보 수집 및 이용 동의는 필수 동의항목입니다.");
+        		  return;
+        	  }
+        	  
+        	  
+              document.getElementById('updateForm').submit();
+    	  }
+    	 });
+      });
+      
+		
+   // 진료시간, 일자, 휴일 구하긔
+      document.addEventListener('DOMContentLoaded', function() {
+		  function updateClinicData() {
+		    let clinicTimes = '';
+		    let clinicDays = '';
+		    let offDays = '';
+		
+		    for (let i = 1; i <= 8; i++) {
+		      const timeInputStart = document.getElementById(`time${i}_start`);
+		      const timeInputEnd = document.getElementById(`time${i}_end`);
+		      const checkInput = document.getElementById(`check${i}`);
+		      console.log("timeInputStart" + timeInputStart[2]);
+		      console.log("timeInputEnd" + timeInputEnd[1]);
+		      console.log("checkInput" + checkInput[0]);
+		
+		      if (timeInputStart && timeInputEnd && checkInput) {
+		        const isOff = checkInput.checked;
+		        const dayName = ['월', '화', '수', '목', '금', '토', '일', '공휴일'][i - 1];
+		
+		        if (isOff) {
+		          clinicTimes += '휴무,';
+		          clinicDays += '휴무,';
+		          offDays += dayName + ',';
+		        } else {
+		          clinicTimes += `${timeInputStart.value}-${timeInputEnd.value},`;
+		          clinicDays += dayName + ',';
+		        }
+		      }
+		    }
+		
+		    clinicTimes = clinicTimes.slice(0, -1);
+		    clinicDays = clinicDays.slice(0, -1);
+		    offDays = offDays.slice(0, -1);
+		
+		    document.getElementById('dayOn').value = clinicDays;
+		    document.getElementById('dayTime').value = clinicTimes;
+		    document.getElementById('dayOff').value = offDays;
+		    
+		  }
+		
+		  for (let i = 1; i <= 8; i++) {
+			    const timeInputStart = document.getElementById(`time${i}_start`);
+			    const timeInputEnd = document.getElementById(`time${i}_end`);
+			    const checkInput = document.getElementById(`check${i}`);
+			
+			    if (timeInputStart && timeInputEnd && checkInput) {
+			      timeInputStart.addEventListener('input', updateClinicData);
+			      timeInputEnd.addEventListener('input', updateClinicData);
+			      checkInput.addEventListener('change', updateClinicData);
+		    	}
+			   
+		  }
+		});
+
+	  
+        // 진료일, 진료시간, 휴무일
+        function toggleTextBox(checkbox)
+        {
+        	const textbox = document.getElementById(checkbox);
+        	
+        	// 체크박스 선택 여부에 따라서 텍스트박스 활성화, 비활성화
+        	textbox.disabled = checkboc.checkd ? true : false;
+        }
+    
+        // 진료과목
+        $(document).ready(function() {
+        	$('.diagnosis-subject').click(function() {
+        		$(this).toggleClass('clicked-background');
+		        
+		        var subjectInput = document.getElementById('subject');
+		        var subjects = subjectInput.value.split(',').filter(Boolean);
+		        var subjectValue = $(this).attr("value");
+
+		        if ($(this).hasClass('clicked-background')) {
+		            subjects.push(subjectValue);
+		        } else {
+		            subjects = subjects.filter(function(item) {
+		                return item !== subjectValue;
+		            });
+		        }
+
+		        subjectInput.value = subjects.join(',');
+            });
+        	 function getSelectedValues() {
+ 		        var selectedValues = [];
+ 		        $('.diagnosis-subject.clicked-background').each(function() {
+ 		            selectedValues.push($(this).attr('value'));
+ 		        });
+ 		        return selectedValues;
+ 		    }
+        	 
+        	 console.log(getSelectedValues());
+ 		    document.getElementById('subject').value = getSelectedValues()
+        });
+       
+        // 증상
+        $(document).ready(function() {
+    		  document.getElementById('fileBtn1').style.display = "none";
+    		  document.getElementById('fileBtn2').style.display = "none";
+    		  
+    		  $('.diagnosis-item').click(function() {
+    		        $(this).toggleClass('clicked-background');
+    		        
+    		        var subjectInput = document.getElementById('symptop');
+    		        var subjects = subjectInput.value.split(',').filter(Boolean);
+    		        var subjectValue = $(this).attr("value");
+
+    		        if ($(this).hasClass('clicked-background')) {
+    		            subjects.push(subjectValue);
+    		        } else {
+    		            subjects = subjects.filter(function(item) {
+    		                return item !== subjectValue;
+    		            });
+    		        }
+
+    		        subjectInput.value = subjects.join(',');
+    		    });
+    		    
+    		    function getSelectedValues2() {
+    		        var selectedValues = [];
+    		        $('.diagnosis-item.clicked-background').each(function() {
+    		            selectedValues.push($(this).attr('value'));
+    		        });
+    		        return selectedValues;
+    		    }
+    		    
+    		    console.log(getSelectedValues2());
+    		    document.getElementById('symptop').value = getSelectedValues2()
+        });
+        
+        // 가입되어있는 요양기관인지 확인
+        function checkInstitution()
+        {
+            $.ajax({
+                url: '/medicalSign/checkInstitution',
+                type: 'GET',
+                data: {
+             	   institutionNum:$("#institutionNum").val()
+                },
+                success: function(data) 
+                {
+                	$("#institutionNum").val(data.institutionNum);
+                	$("#institutionName").val(data.institutionName);
+                	$("#userType").val(data.institutionFlag);
+                	$("#zipcode").val(data.zipcode);
+                	$("#addr1").val(data.addr);
+                },
+                error: function(xhr, status, error)
+                {
+                    console.error('Error occurred:', xhr.responseText);
+                }
+              });
+        }
+        
+        
+          // 휴무 선택하면 input 인식 안되게
+          function toggleTextbox(checkbox) 
+          {
+			    var day = checkbox.id.replace('check', ''); // 'check1'에서 '1'을 추출
+			    var startInputId = 'time' + day + '_start'; // 'time1_start'
+			    var endInputId = 'time' + day + '_end'; // 'time1_end'
+			
+			    var startInput = document.getElementById(startInputId);
+			    var endInput = document.getElementById(endInputId);
+			
+			    // 체크박스 선택여부에 따라 입력 필드를 활성화 혹은 비활성화
+			    startInput.disabled = checkbox.checked;
+			    endInput.disabled = checkbox.checked;
+			}
+  /*]]>*/
+  </script>
+  </head>
+  <body>
+  
+    <div layout:fragment="content" class="container mt-5">
+    <form enctype="multipart/form-data" id="updateForm" name="updateForm" th:action="@{/mypage/medicalUpdate}" th:object="${MedicalUpdate}" method="post" >
+      <div class="row d-flex2 flex-end">
+  		
+  		<!-- 의사사진 -->
+  		 <div class="col-md-6" id="clinicImage" style="width: 150px; padding:15px;" th:if="${clinicFile != null}">
+          <img id="preview"
+            th:src="@{'/image/' + ${clinicFile.fileOrgName}}"
+            class="img-thumbnail"
+            alt="Profile Image"
+            style="width:160px; height:160px;"
+          />
+          <div class="spacing-height-16"></div>
+          <div class="d-flex justify-content-center">
+          	<input type="file" id="fileBtn1" name="clinicFile"  onchange="readURL(event);" />
+            <button class="btn btn-primary" style="width: 1600px;" onclick="onClickUpload()">사진 수정</button>
+          </div>
+        </div>
+        
+         <div class="col-md-6" id="clinicImage" style="width: 150px; padding:15px;" th:if="${clinicFile == null }">
+          <img id="preview"
+            src="image/free-icon-profile.png"
+            class="img-thumbnail"
+            alt="Profile Image"
+            style="width:160px; height:160px;"
+          />
+          <div class="spacing-height-16"></div>
+          <div class="d-flex justify-content-center">
+          	<input type="file" id="fileBtn1" name="clinicFile"  onchange="readURL(event);" />
+            <button class="btn btn-primary" style="width: 1600px;" onclick="onClickUpload()">사진 수정</button>
+          </div>
+        </div>
+        
+        
+        <!-- 인감 -->
+        <div class="col-md-6" id="clinicStampImage" style="width: 150px; padding:15px;" th:if="${stampFile != null}" >
+          <img id="preview2"
+            th:src="@{'/image/' + ${stampFile.fileOrgName}}"
+            class="img-thumbnail"
+            alt="Stamp Image"
+            style="width:160px; height:160px;"
+          />
+          
+          <div class="spacing-height-16"></div>
+          <div class="d-flex justify-content-center">
+            <input type="file" id="fileBtn2" name="stampFile" onchange="readURL2(event);" />
+            <button class="btn btn-primary" style="width: 1600px;" onclick="onClickUpload2()">인감 수정</button>
+          </div>
+        </div>
+		
+		
+		<div class="col-md-6" id="clinicStampImage" style="width: 150px; padding:15px;" th:if="${stampFile == null}" >
+          <img id="preview2"
+            src="image/stamp.jpg"
+            class="img-thumbnail"
+            alt="Stamp Image"
+            style="width:160px; height:160px;"
+          />
+          
+          <div class="spacing-height-16"></div>
+          <div class="d-flex justify-content-center">
+            <input type="file" id="fileBtn2" name="stampFile" onchange="readURL2(event);" />
+            <button class="btn btn-primary" style="width: 1600px;" onclick="onClickUpload2()">인감 수정</button>
+          </div>
+        </div>
+<br><br>        
+</div>
+		
+		
+		
+		
+		
+		
+		
+		<div class="row d-flex justify-content-between">
+		<div class="col-md-12" style="flex: 0 0 auto;">
+        <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>가입유형</span>
+            <div class="form-control">
+              <div class="form-check">
+                <input name="medicalType" class="form-check-input" type="radio" value="병의원" onclick="div_show(this.value)" checked>
+                <label class="form-check-label" for="hospitalCheck">
+                  병의원
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="medicalType" class="form-check-input" type="radio" onclick="div_show(this.value)" value="약국">
+                <label class="form-check-label" for="pharmacyCheck">
+                  약국
+                </label>
+              </div> 
+            </div>
+          </div>
+          <input type="hidden"  th:field="*{userType}" class="form-control"/>
+          <p id="typeError"></p>
+          
+          <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>진료방식</span>
+            <div class="form-control">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="contact" value="대면" th:checked="${clinic.clinicContactFlag == 'C'}">
+                <label class="form-check-label" for="visitCheck" >
+                  대면
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="contact2" value="비대면" th:checked="${clinic.clinicContactFlag == 'U'}">
+                <label class="form-check-label" for="contactCheck">
+                  비대면
+                </label>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" th:field="*{contactType}" value="" class="form-control" />
+      	  <p id="contactError"></p>
+      	  
+      	  <div class="input-group" id="weekendNight">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;"></span> 추가 진료여부</span>
+            <div class="form-control">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="nightWeekend" id="weekendCheck" th:checked="${clinic.clinicWeekend == 'Y'}">
+                <label class="form-check-label" for="visitCheck">
+                  주말진료
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="nightWeekend2" id="nightCheck" th:checked="${clinic.clinicNight == 'Y'}">
+                <label class="form-check-label" for="contactCheck">
+                  야간진료
+                </label>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" th:field="*{night}" value="" class="form-control" />
+          <input type="hidden" th:field="*{weekend}" value="" class="form-control" />
+      
+          <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>요양기관번호</span>
+            <input
+              type="text"
+              placeholder=""
+               class="form-control"
+              th:value="${clinic.clinicInstinum}" id="institutionNum" name="institutionNum"
+            />
+            <span class="input-group-text" style="background-color: #fff; border-left: none;"><button id="regC" type="button" style="width: 84px; font-size: 12px; border-radius: 4px;" onclick="checkInstitution()">가입여부 확인</button></span>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>요양기관명</span>
+            <input
+              type="text"
+              placeholder=""
+              class="form-control"
+              th:value="${clinic.clinicName}" id="institutionName" name="institutionName"
+            />
+          </div>
+          <p th:if="${#fields.hasErrors('institutionNum')}" th:errors="*{institutionNum}" id="error"></p>
+          <p th:if="${#fields.hasErrors('institutionName')}" th:errors="*{institutionName}" id="error"></p>
+          <p id="institutionError"></p>
+          
+          <div class="input-group">
+            <span class="input-group-text short-span" 
+              ><span style="color: red; margin-right: 4px;">*</span>사업자등록번호</span
+            >
+            <input
+              type="text"
+              placeholder="예) 8270101524(단, 보건소/보건지소는 0000000000)"
+              class="form-control"
+              th:value="${clinic.clinicRegnum}" id="regNum" name="regNum"
+            />
+          </div>
+          <p th:if="${#fields.hasErrors('regNum')}" th:errors="*{regNum}" id="error">Incorrect date</p>
+          
+          <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>이메일</span>
+                <input type="text" id="userEmail" class="form-control" placeholder="" th:value="${clinic.userEmail}" name="userEmail">
+          </div>
+          
+          <p th:if="${#fields.hasErrors('userEmail')}" th:errors="*{userEmail}" id="error">Incorrect date</p>
+          <p id="emailError"></p>
+          
+           <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>비밀번호</span>
+            <input
+              type="text"
+              placeholder=""
+              value="비밀번호 재설정"
+              style="text-align:center; cursor:pointer; color:royalblue; font-weight:700;"
+              id="userPwd" 
+              th:onclick="|location.href='@{/login/findPwd'}|"
+              class="form-control"
+              name="userPwd"
+            />
+          </div>
+      </div>
+      </div>
+        
+      <div class="row d-flex justify-content-between">
+        <div class="col-md-12">
+          <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>주소</span>
+            <div class="require-background-middle">
+              <div style="padding: 16px;">
+                <div class="mb-2 row">
+                  <label for="inputPassword" class="col-form-label" style="width: 60px;">우편번호</label>
+                  <div class="col-sm-3">
+                    <input type="text"  class="form-control" th:value="${clinic.clinicZipcode}" id="zipcode" name="zipcode">
+                  </div>
+                  <p th:if="${#fields.hasErrors('zipcode')}" th:errors="*{zipcode}" id="error">Incorrect date</p>
+                </div>
+                <div class="mb-2 row">
+                  <label for="inputPassword" class="col-form-label" style="width: 60px;">주소</label>
+                  <div class="col-sm-9">
+                    <input type="text" id="addr1" class="form-control" th:value="${clinic.clinicAddr}" name="addr1">
+                  </div>
+                </div>
+                <div class="mb-2 row">
+                  <label for="inputPassword" class="col-form-label" style="width: 60px;">상세주소</label>
+                  <div class="col-sm-9">
+                    <input type="text" id="addr2" class="form-control" name="addr2">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" th:field="*{addr}" class="form-control" />
+          <p th:if="${#fields.hasErrors('addr')}" th:errors="*{addr}" id="error">Incorrect date</p>
+		
+          <div class="input-group">
+            <span class="input-group-text short-span" >소개</span>
+            <div class="d-flex justify-content-center align-items-center  require-background-middle">
+              <div style="width: 90%; padding: 10px 24px 10px 0px;">
+                <textarea class="form-control" span="40" style="resize: none;" th:text="${clinic.clinicDetail}" id="detail" name="detail"></textarea>
+              </div>  
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <span class="input-group-text short-span" >경력사항</span>
+            <div class="d-flex justify-content-center align-items-center  require-background-middle">
+              <div style="width: 90%; padding: 10px 24px 10px 0px;">
+                <textarea class="form-control" span="40" style="resize: none;" th:text="${clinic.clinicCareer}" id="career" name="career"></textarea>
+              </div>  
+            </div>
+          </div>
+          
+          
+          <div class="input-group" id="clinic-time"   >
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>진료시간</span>
+            <div class="d-flex justify-content-center align-items-center  require-background-middle">
+            
+              <div class="d-flex" style="padding: 8px; flex-wrap: wrap; gap: 8px;">
+                <div class="d-flex align-items-left">
+                <label for="time1">월요일</label>
+                <input type="text" name="time1" id="time1_start"  placeholder="" class="timepicker" required size="5" maxlength="5" 
+                >    
+                <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time1" id="time1_end"  placeholder="" class="timepicker" required size="5" maxlength="5" >
+                <input type="checkbox" onclick='toggleTextbox(this)' id="check1"/>휴무
+              </div>
+              
+              <div class="d-flex align-items-center">
+                <label for="time2">화요일</label>
+                <input type="text" name="time2" id="time2_start"  placeholder="" class="timepicker" required size="5" maxlength="5">    <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time2" value="" id="time2_end" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <input type="checkbox" onclick='toggleTextbox(this)' id="check2"/>휴무
+              </div>
+              
+              <div class="d-flex align-items-center">
+                <label for="time3">수요일</label>
+                <input type="text" name="time3" value="" id="time3_start" placeholder="" class="timepicker" required size="5" maxlength="5">    <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time3" value="" id="time3_end" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <input type="checkbox" onclick='toggleTextbox(this)' id="check3"/>휴무
+              </div>
+              
+              <div class="d-flex align-items-center">
+                <label for="time4">목요일</label>
+                <input type="text" name="time4" value="" id="time4_start" placeholder="" class="timepicker" required size="5" maxlength="5">    <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time4" value="" id="time4_end" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <input type="checkbox" onclick='toggleTextbox(this)' id="check4"/>휴무
+              </div>
+              
+              <div class="d-flex align-items-center">
+                <label for="time5">금요일</label>
+                <input type="text" name="time5" value="" id="time5_start" placeholder="" class="timepicker" required size="5" maxlength="5">    <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time5" value="" id="time5_end" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <input type="checkbox" onclick='toggleTextbox(this)' id="check5"/>휴무
+              </div>
+              
+              <div class="d-flex align-items-center">
+                <label for="time6">토요일</label>
+                <input type="text" name="time6" value="" id="time6_start" placeholder="" class="timepicker" required size="5" maxlength="5">    <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time6" value="" id="time6_end" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <input type="checkbox" onclick='toggleTextbox(this)' id="check6"/>휴무
+              </div>
+              
+              <div class="d-flex align-items-left">
+                <label for="time7">일요일</label>
+                <input type="text" name="time7" value="" id="time7_start" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time7" value="" id="time7_end" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <input type="checkbox" onclick='toggleTextbox(this)' id="check7"/>휴무
+              </div>
+              
+              <div class="d-flex align-items-center">
+                <label for="time8">공휴일</label>
+                <input type="text" name="time8" value="" id="time8_start" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time8" value="" id="time8_end" placeholder="" class="timepicker" required size="5" maxlength="5">
+                <input type="checkbox" onclick='toggleTextbox(this)' id="check8" />휴무
+              </div>
+              
+              <div class="d-flex align-items-center" >
+                <label for="time9">점심시간</label>
+                <input type="text" name="time9" id="break1" value="" placeholder="" class="timepicker" required size="5" maxlength="5" th:value="${breakTimes[0]}">
+                <div class="d-flex justify-content-center align-items-center" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" name="time9" value="" id="break2" placeholder="" class="timepicker" required size="5" maxlength="5" th:value="${breakTimes[1]}">
+              </div>
+              </div>
+            
+              
+            </div>
+          </div>
+          
+          
+          
+          
+          <input type="hidden" th:field="*{dayOn}" class="form-control" />
+          <input type="hidden" th:field="*{dayTime}" class="form-control" />
+          <input type="hidden" th:field="*{dayOff}" class="form-control" />
+          <input type="hidden" th:field="*{breakTime}" class="form-control" />
+          <p th:if="${#fields.hasErrors('dayOn')}" th:errors="*{dayOn}" id="error">Incorrect date</p>
+          <p th:if="${#fields.hasErrors('dayTime')}" th:errors="*{dayTime}" id="error">Incorrect date</p>
+          <p th:if="${#fields.hasErrors('dayOff')}" th:errors="*{dayOff}" id="error">Incorrect date</p>
+
+          <div class="input-group" id="ssubject">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>진료과목</span>
+            <div class="d-flex align-items-center  require-background-middle">
+              <div class="d-flex" style="padding: 8px; flex-wrap: wrap; gap: 8px;">
+                <div class="diagnosis-subject" th:value="가정의학과"  th:classappend="${clinic.clinicSubject.contains('가정의학과')} ? 'clicked-background'">가정의학과</div>
+                <div class="diagnosis-subject" th:value="내과" th:classappend="${clinic.clinicSubject.contains('내과')} ? 'clicked-background'">내과</div>
+                <div class="diagnosis-subject" th:value="마취통증의학과" th:classappend="${clinic.clinicSubject.contains('마취통증의학과')} ? 'clicked-background'">마취통증의학과</div>
+                <div class="diagnosis-subject" th:value="비뇨기과" th:classappend="${clinic.clinicSubject.contains('비뇨기과')} ? 'clicked-background'">비뇨기과</div>
+                <div class="diagnosis-subject" th:value="산부인과" th:classappend="${clinic.clinicSubject.contains('산부인과')} ? 'clicked-background'">산부인과</div>
+                <div class="diagnosis-subject" th:value="성형외과" th:classappend="${clinic.clinicSubject.contains('성형외과')} ? 'clicked-background'">성형외과</div>
+                <div class="diagnosis-subject" th:value="소아청소년과" th:classappend="${clinic.clinicSubject.contains('소아청소년과')} ? 'clicked-background'">소아청소년과</div>
+                <div class="diagnosis-subject" th:value="신경과" th:classappend="${clinic.clinicSubject.contains('신경과')} ? 'clicked-background'">신경과</div>
+                <div class="diagnosis-subject" th:value="신경외과" th:classappend="${clinic.clinicSubject.contains('신경외과')} ? 'clicked-background'">신경외과</div>
+                <div class="diagnosis-subject" th:value="안과" th:classappend="${clinic.clinicSubject.contains('안과')} ? 'clicked-background'">안과</div>
+                <div class="diagnosis-subject" th:value="영상의학과" th:classappend="${clinic.clinicSubject.contains('영상의학과')} ? 'clicked-background'">영상의학과</div>
+                <div class="diagnosis-subject" th:value="외과" th:classappend="${clinic.clinicSubject.contains('외과')} ? 'clicked-background'">외과</div>
+                <div class="diagnosis-subject" th:value="응급의학과" th:classappend="${clinic.clinicSubject.contains('응급의학과')} ? 'clicked-background'">응급의학과</div>
+                <div class="diagnosis-subject" th:value="이비인후과" th:classappend="${clinic.clinicSubject.contains('이비인후과')} ? 'clicked-background'">이비인후과</div>
+                <div class="diagnosis-subject" th:value="재활의학과" th:classappend="${clinic.clinicSubject.contains('재활의학과')} ? 'clicked-background'">재활의학과</div>
+                <div class="diagnosis-subject" th:value="정신건강의학과" th:classappend="${clinic.clinicSubject.contains('정신건강의학과')} ? 'clicked-background'">정신건강의학과</div>
+                <div class="diagnosis-subject" th:value="정형외과" th:classappend="${clinic.clinicSubject.contains('정형외과')} ? 'clicked-background'">정형외과</div>
+                <div class="diagnosis-subject" th:value="치과" th:classappend="${clinic.clinicSubject.contains('치과')} ? 'clicked-background'">치과</div>
+                <div class="diagnosis-subject" th:value="피부과" th:classappend="${clinic.clinicSubject.contains('피부과')} ? 'clicked-background'">피부과</div>
+                <div class="diagnosis-subject" th:value="한의학과" th:classappend="${clinic.clinicSubject.contains('한의학과')} ? 'clicked-background'">한의학과</div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" th:field="*{subject}" class="form-control" />
+          <p th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" id="error">Incorrect date</p>
+          
+          <div class="input-group" id="iitem">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>진료항목</span>
+            <div class="d-flex justify-content-center align-items-center  require-background-middle">
+              <div class="d-flex" style="padding: 8px; flex-wrap: wrap; gap: 8px;">
+                <div class="diagnosis-item" th:value="'감기/몸살'" th:classappend="${clinic.clinicSymptom.contains('감기/몸살')} ? 'clicked-background'">감기/몸살</div>
+                <div class="diagnosis-item" th:value="소화불량" th:classappend="${clinic.clinicSymptom.contains('소화불량')} ? 'clicked-background'">소화불량</div>
+                <div class="diagnosis-item" th:value="소아과" th:classappend="${clinic.clinicSymptom.contains('소아과')} ? 'clicked-background'">소아과</div>
+                <div class="diagnosis-item" th:value="비염" th:classappend="${clinic.clinicSymptom.contains('비염')} ? 'clicked-background'">비염</div>
+                <div class="diagnosis-item" th:value="여드름" th:classappend="${clinic.clinicSymptom.contains('여드름')} ? 'clicked-background'">여드름</div>
+                <div class="diagnosis-item" th:value="탈모" th:classappend="${clinic.clinicSymptom.contains('탈모')} ? 'clicked-background'">탈모</div>
+                <div class="diagnosis-item" th:value="다이어트" th:classappend="${clinic.clinicSymptom.contains('다이어트')} ? 'clicked-background'">다이어트</div>
+                <div class="diagnosis-item" th:value="인공눈물" th:classappend="${clinic.clinicSymptom.contains('인공눈물')} ? 'clicked-background'">인공눈물</div>
+                <div class="diagnosis-item" th:value="위염" th:classappend="${clinic.clinicSymptom.contains('위염')} ? 'clicked-background'">위염</div>
+                <div class="diagnosis-item" th:value="장염" th:classappend="${clinic.clinicSymptom.contains('장염')} ? 'clicked-background'">장염</div>
+                <div class="diagnosis-item" th:value="당뇨" th:classappend="${clinic.clinicSymptom.contains('당뇨')} ? 'clicked-background'">당뇨</div>
+                <div class="diagnosis-item" th:value="고혈압" th:classappend="${clinic.clinicSymptom.contains('고혈압')} ? 'clicked-background'">고혈압</div>
+                <div class="diagnosis-item" th:value="여성질환" th:classappend="${clinic.clinicSymptom.contains('여성질환')} ? 'clicked-background'">여성질환</div>
+                <div class="diagnosis-item" th:value="만성질환" th:classappend="${clinic.clinicSymptom.contains('만성질환')} ? 'clicked-background'">만성질환</div>
+                <div class="diagnosis-item" th:value="복통" th:classappend="${clinic.clinicSymptom.contains('복통')} ? 'clicked-background'">복통</div>
+                <div class="diagnosis-item" th:value="두통" th:classappend="${clinic.clinicSymptom.contains('두통')} ? 'clicked-background'">두통</div>
+                <div class="diagnosis-item" th:value="주의력저하" th:classappend="${clinic.clinicSymptom.contains('주의력저하')} ? 'clicked-background'">주의력저하</div>
+                <div class="diagnosis-item" th:value="우울증" th:classappend="${clinic.clinicSymptom.contains('우울증')} ? 'clicked-background'">우울증</div>
+                <div class="diagnosis-item" th:value="치아" th:classappend="${clinic.clinicSymptom.contains('치아')} ? 'clicked-background'">치아</div>
+                <div class="diagnosis-item" th:value="기력저하" th:classappend="${clinic.clinicSymptom.contains('기력저하')} ? 'clicked-background'">기력저하</div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" th:field="*{symptop}" class="form-control" />
+          <p th:if="${#fields.hasErrors('symptop')}" th:errors="*{symptop}" id="error">Incorrect date</p>
+          
+          <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>전화번호</span>
+            <div class="d-flex justify-content-left align-items-left require-background-middle">
+              <div class="input-group" style="padding: 8px; width: 50%;">
+                <input type="text" class="form-control"    id="phone1" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" th:value="${phone[0]}">
+                <div class="d-flex justify-content-left align-items-left" style="padding: 4px;">
+                  -
+                </div>
+                <input type="text" class="form-control" id="phone2" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" th:value="${phone[1]}" >
+                <div class="d-flex justify-content-left align-items-left" style="padding: 4px;" pattern="\d{4}" size=4 maxlength=4 >
+                  -
+                </div>
+                <input type="text" class="form-control" id="phone3" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" pattern="\d{4}" size=4 maxlength=4
+                th:value="${phone[2]}">
+              </div>
+            </div>
+          </div>
+          <input type="hidden" class="form-control" th:field="*{userPhone}" />
+          <p th:if="${#fields.hasErrors('userPhone')}" th:errors="*{userPhone}" id="error">Incorrect date</p>
+         
+         
+          <th:block th:if="${fax.length > 1}">
+          <div class="input-group">
+            <span class="input-group-text short-span" >팩스번호</span>
+            <div class="d-flex justify-content-left align-items-left require-background-middle">
+              <div class="input-group" style="padding: 8px; width: 50%;">
+                <select class="form-select" aria-label="Default select example">
+                  <option selected>선택</option>
+                  <option value="02"  th:selected="${fax[0]} == 02">02</option>
+                  <option value="031" th:selected="${fax[0]} == 031">031</option>
+                  <option value="032" th:selected="${fax[0]} == 032">032</option>
+                  <option value="042" th:selected="${fax[0]} == 042">042</option>
+                  <option value="051" th:selected="${fax[0]} == 051">051</option>
+                  <option value="052" th:selected="${fax[0]} == 052">052</option>
+                  <option value="053" th:selected="${fax[0]} == 053">053</option>
+                  <option value="062" th:selected="${fax[0]} == 062">062</option>
+                  <option value="070" th:selected="${fax[0]} == 070">070</option>
+                </select>
+                <div class="d-flex justify-content-left align-items-left" id="fax1" style="padding: 4px;">
+                  -
+                </div>
+                
+                <input type="text" class="form-control" id="fax2" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+                pattern="\d{4}" size=4 maxlength=4 th:value="${fax[1]}">
+                
+                <div class="d-flex justify-content-left align-items-left" style="padding: 4px;">
+                  -
+                </div>
+                
+                <input type="text" class="form-control" id="fax3" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+                pattern="\d{4}" size=4 maxlength=4 th:value="${fax[2]}">
+                
+                <input type="text" class="form-control" id="fax3" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+                pattern="\d{4}" size=4 maxlength=4 th:value="${fax[2]}">
+                
+              </div>
+            </div>
+          </div>
+           </th:block>
+           
+           <th:block th:if="${fax.length <= 1}">
+          <div class="input-group">
+            <span class="input-group-text short-span" >팩스번호</span>
+            <div class="d-flex justify-content-left align-items-left require-background-middle">
+              <div class="input-group" style="padding: 8px; width: 50%;">
+                <select class="form-select" aria-label="Default select example">
+                  <option selected>선택</option>
+                  <option value="02"  th:selected="${fax[0]} == 02">02</option>
+                  <option value="031" th:selected="${fax[0]} == 031">031</option>
+                  <option value="032" th:selected="${fax[0]} == 032">032</option>
+                  <option value="042" th:selected="${fax[0]} == 042">042</option>
+                  <option value="051" th:selected="${fax[0]} == 051">051</option>
+                  <option value="052" th:selected="${fax[0]} == 052">052</option>
+                  <option value="053" th:selected="${fax[0]} == 053">053</option>
+                  <option value="062" th:selected="${fax[0]} == 062">062</option>
+                  <option value="070" th:selected="${fax[0]} == 070">070</option>
+                </select>
+                <div class="d-flex justify-content-left align-items-left" id="fax1" style="padding: 4px;">
+                  -
+                </div>
+                
+                <input type="text" class="form-control" id="fax2" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+                pattern="\d{4}" size=4 maxlength=4 value="">
+                
+                <div class="d-flex justify-content-left align-items-left" style="padding: 4px;">
+                  -
+                </div>
+                
+                <input type="text" class="form-control" id="fax3" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+                pattern="\d{4}" size=4 maxlength=4 value="">
+                
+                
+              </div>
+            </div>
+          </div>
+           </th:block>
+           
+           
+           
+           
+         <input type="hidden" class="form-control" th:field="*{faxNum}" />
+         
+         
+         
+          <div class="input-group">
+            <span class="input-group-text short-span" ><span style="color: red; margin-right: 4px;">*</span>가입자 성명</span>
+            <div class="d-flex justify-content-left align-items-left  require-background-middle">
+              <div style="padding: 8px;">
+                <input
+                type="text"
+                class="form-control"
+                placeholder=""
+                style="width: 240px;"
+                id="userName"
+                name="userName"
+				th:value="${clinic.clinicDoctor}"                
+              />
+              </div>
+             <p th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" id="error">Incorrect date</p>
+          
+            </div>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text  short-span" 
+              >홈페이지 주소</span
+            >
+
+            <div class="d-flex justify-content-left align-items-left require-background-middle">
+              <div style="padding: 8px;">
+                <input
+                type="text"
+                class="form-control"
+                placeholder=""
+                style="width: 240px;"
+                th:field="*{homePageAdd}"
+              />
+              </div>
+            </div>
+          </div><br/><br/>
+          
+      <div class="input-group">
+          <hr/>
+          <div class="agreement">
+            <div class="agreement-box">
+            <div class="agreement-header">
+                <div> <label class="agreement-label"> <span>[필수]</span>  개인정보 수집 및 이용 동의 </label></div>
+              <div class="detail-button" onclick="toggleDetails(this)">
+                내용보기 <i class="fa-solid fa-chevron-down"></i>
+              </div>
+            </div>
+            <input type="checkbox" id="agree2" class="agreement-checkbox" />
+        </div>
+            <div class="agreement-details">
+            <p>[개인정보 수집 동의]</p><br/><br/>
+			<p>(주)todoc은 아래의 목적으로 개인정보를 수집 및 이용하며, 회원의 개인정보를 안전하게 취급하는데 최선을 다합니다.</p><br/>
+			<p>1. 개인정보의 수집 및 이용목적<br>
+			병원/약국 제휴 문의 응대</p>
+			
+			<p>2. 수집하는 개인정보의 항목<br>
+			제휴 문의시 : 상호, 성함, 연락처, 이메일, 주소</p>
+			
+			<p>3. 개인정보의 보유 및 이용기간<br>
+			문의사항 상담서비스를 위해 검토 완료 후 3개월 간 보관하며, 이후 해당 정보를 지체 없이 파기합니다.</p><br>
+			
+			<p>위 정보 수집에 대한 동의를 거부할 권리가 있으며, 동의 거부 시에는 문의 접수가 제한될 수 있습니다.</p>
+			<p>더 자세한 내용에 대해서는 [닥터나우 개인정보처리방침]을 참고하시기 바랍니다.</p>
+            </div>
+          </div>
+          <hr />
+        </div>
+        <br />
+        </div>        
+      </div>
+     </form>
+     
+     <button type="button" class="register-button" id="updateBtn">
+        수정하기
+     </button>
+     
+    <br><br></div>
+
+
+  </body>
+</html>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.todoc.web.dao.ContactLogDao">
+	<resultMap type="ContactLog" id="untactResultMap" >
+		<id column="UNTACT_SEQ" property="contactSeq" />
+		<result column="USER_EMAIL" property="userEmail" />
+		<result column="CLINIC_NAME" property="clinicName" />
+		<result column="STATUS" property="status" />
+		<result column="UNTACT_DATE" property="contactDate" />
+		<result column="CLINIC_INSTINUM" property="clinicInstinum" />
+		<result column="RESERVATION_SYMPTOM" property="reservationSymptom" />
+		<result column="ADVICE" property="advice" />
+		<result column="RESERVATION_SEQ" property="reservationSeq" />
+		<result column="RESERVATION_STATUS" property="reservationStatus" />
+	</resultMap>
+	
+	
+	<resultMap type="ReservationContact" id="ReservationContactMap">
+		<id property="reservationSeq" column="RESERVATION_SEQ" />
+		<result property="userEmail" column="USER_EMAIL" />
+		<result property="clinicInstinum" column="CLINIC_INSTINUM" />
+		<result property="reservationDate" column="RESERVATION_DATE" />
+		<result property="reservationTime" column="RESERVATION_TIME" />
+		<result property="reservationSymptom" column="RESERVATION_SYMPTOM" />
+		<result property="reservationFlag" column="RESERVATION_FLAG" />
+		<result property="regdate" column="REGDATE" />
+		<result property="reservationStatus" column="RESERVATION_STATUS" />
+	</resultMap>
+	
+	<!-- 진료내역 -->
+	<select id="contactList" parameterType="com.todoc.web.dto.ContactLog" resultMap="untactResultMap">
+		SELECT USER_EMAIL,
+			   UNTACT_SEQ,
+		       USER_NAME,
+		       CLINIC_NAME,
+		       STATUS,
+		       UNTACT_DATE,
+		       CLINIC_INSTINUM,
+		       RESERVATION_SYMPTOM,
+		       ADVICE,
+		       CLINIC_CONTACT_FLAG
+		  FROM ( SELECT ROWNUM RNUM,
+		  			   UNTACT_SEQ,
+		               USER_EMAIL,
+		               CLINIC_NAME,
+		               USER_NAME,
+		               STATUS,
+		               UNTACT_DATE,
+		               CLINIC_INSTINUM,
+		               RESERVATION_SYMPTOM,
+		               ADVICE,
+		               CLINIC_CONTACT_FLAG
+		          FROM( SELECT A.UNTACT_SEQ,
+		                       NVL(A.USER_EMAIL, '') USER_EMAIL,
+		                       NVL(C.CLINIC_NAME, '') CLINIC_NAME, 
+		                       NVL(B.USER_NAME, '') USER_NAME,
+		                       NVL(A.STATUS, '') STATUS,
+		                       NVL(TO_CHAR(A.UNTACT_DATE, 'YYYY.MM.DD HH24:MI'), '') UNTACT_DATE,
+		                       NVL(A.CLINIC_INSTINUM, 0) CLINIC_INSTINUM,
+		                       NVL(A.RESERVATION_SYMPTOM, '') RESERVATION_SYMPTOM,
+		                       NVL(A.ADVICE, '') ADVICE,
+		                       NVL(C.CLINIC_CONTACT_FLAG, '') CLINIC_CONTACT_FLAG
+		                  FROM TD_UNTACT_LOG A, TD_USER B, TD_CLINIC C
+		                 WHERE A.USER_EMAIL = B.USER_EMAIL
+		                   AND A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+		                   AND A.USER_EMAIL = #{userEmail}
+		                 ORDER BY UNTACT_SEQ DESC))
+		 WHERE RNUM <![CDATA[>=]]> #{startRow}
+		   AND RNUM <![CDATA[<=]]> #{endRow}
+	
+	</select>
+	
+	<!-- 대면 진료내역 -->
+	<select id="contactList2" parameterType="com.todoc.web.dto.ReservationContact" resultMap="ReservationContactMap">
+		 SELECT RESERVATION_SEQ,
+		        USER_EMAIL,
+		        USER_NAME,
+		        CLINIC_NAME,
+		        CLINIC_INSTINUM,
+		        RESERVATION_DATE,
+		        RESERVATION_TIME,
+		        RESERVATION_SYMPTOM,
+		        RESERVATION_FLAG,
+		        REGDATE,
+		        RESERVATION_STATUS
+		  FROM (SELECT ROWNUM RNUM,
+		                RESERVATION_SEQ,
+		                USER_EMAIL,
+		                USER_NAME,
+		                CLINIC_NAME,
+		                CLINIC_INSTINUM,
+		                RESERVATION_DATE,
+		                RESERVATION_TIME,
+		                RESERVATION_SYMPTOM,
+		                RESERVATION_FLAG,
+		                REGDATE,
+		                RESERVATION_STATUS
+		          FROM ( SELECT A.RESERVATION_SEQ RESERVATION_SEQ,
+		                        NVL(A.USER_EMAIL, '') USER_EMAIL,
+		                        NVL(B.USER_NAME, '') USER_NAME,
+		                        NVL(C.CLINIC_NAME, '') CLINIC_NAME,
+		                        NVL(A.CLINIC_INSTINUM, '') CLINIC_INSTINUM,
+		                        TO_CHAR(A.RESERVATION_DATE, 'YYYY.MM.DD') RESERVATION_DATE,
+		                        NVL(A.RESERVATION_TIME, '') RESERVATION_TIME,
+		                        NVL(A.RESERVATION_SYMPTOM, '') RESERVATION_SYMPTOM,
+		                        NVL(A.RESERVATION_FLAG, '') RESERVATION_FLAG,
+		                        NVL(A.REGDATE, '') REGDATE,
+		                        NVL(A.RESERVATION_STATUS, '') RESERVATION_STATUS
+		                   FROM TD_RESERVATION A, TD_USER B, TD_CLINIC C
+		                  WHERE A.CLINIC_INSTINUM = C.CLINIC_INSTINUM
+		                    AND A.USER_EMAIL = B.USER_EMAIL
+		                    AND A.RESERVATION_FLAG = 'C'
+		                    AND A.USER_EMAIL = #{userEmail}
+		                  ORDER BY RESERVATION_SEQ DESC))
+		 WHERE RNUM <![CDATA[>=]]> 1
+		   AND RNUM <![CDATA[<=]]> 5
+	</select>
+	
+
+	<!-- 상세 진료내역 : 민지 컬럼 추가-->
+	<select id="contactViewList" parameterType="long" resultMap="untactResultMap">
+		
+		
+				SELECT A.UNTACT_SEQ,
+				       NVL(A.USER_EMAIL, '') USER_EMAIL,
+				       NVL(B.CLINIC_DOCTOR, '') CLINIC_DOCTOR,
+				       NVL(B.CLINIC_NAME, '') CLINIC_NAME,
+				       NVL(A.STATUS, '') STATUS,
+				       NVL(TO_CHAR(A.UNTACT_DATE, 'YYYY.MM.DD HH24:MI'), '') UNTACT_DATE,
+				       NVL(A.CLINIC_INSTINUM, '') CLINIC_INSTINUM,
+				       NVL(A.RESERVATION_SYMPTOM, '') RESERVATION_SYMPTOM,
+				       NVL(A.ADVICE, '') ADVICE,
+				       NVL(A.RESERVATION_SEQ,0) RESERVATION_SEQ,
+                      			      C.RESERVATION_STATUS
+				  FROM TD_UNTACT_LOG A, TD_CLINIC B, TD_RESERVATION C
+				 WHERE A.CLINIC_INSTINUM = B.CLINIC_INSTINUM
+                			 AND A.RESERVATION_SEQ = C.RESERVATION_SEQ
+				   AND A.UNTACT_SEQ = #{value}
+	</select>
+
+	
+	
+	
+	<!-- 진료내역 토탈카운트 -->
+	<select id="contactLogTotal" parameterType="String" resultType="int">
+	
+				SELECT COUNT(USER_EMAIL)
+				  FROM TD_UNTACT_LOG
+				 WHERE USER_EMAIL = #{value}
+	</select>
+
+	
+	
+	<!-- 리뷰체크 -->
+	<select id="contactSeqCheck" parameterType="long" resultType="int">
+		
+			SELECT COUNT(REVIEW_SEQ)
+			  FROM TD_UNTACT_LOG A, TD_REVIEW B
+			 WHERE A.UNTACT_SEQ = B.UNTACT_SEQ
+			   AND B.REVIEW_DEL_FLAG = 'N'
+			   AND A.UNTACT_SEQ = #{value}
+	
+	</select>
+	
+	
+	<!-- 진료내역 값 넣어주기 -->
+	<insert id="contactLogInsert" parameterType="com.todoc.web.dto.ContactLog">
+		<selectKey resultType="long" keyProperty="contactSeq" order="BEFORE" >
+	  		SELECT SEQ_TD_UNTACTLOG.NEXTVAL FROM DUAL
+	  	</selectKey>
+		
+		INSERT INTO TD_UNTACT_LOG (
+			    UNTACT_SEQ,
+			    USER_EMAIL,
+			    STATUS,
+			    UNTACT_DATE,
+			    CLINIC_INSTINUM,
+			    ADVICE,
+			    RESERVATION_SYMPTOM,
+			    RESERVATION_SEQ
+			) VALUES (
+			    #{contactSeq},
+			    #{userEmail},
+			    'Y',
+			    SYSDATE,
+			    #{clinicInstinum},
+			    '충분한 휴식',
+			    #{reservationSymptom},
+			    #{reservationSeq}
+			)
+	
+	</insert>
+
+</mapper>
